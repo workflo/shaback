@@ -45,9 +45,5 @@ int main(int argc, char** argv)
     } else {
       shaback.repository.open();
     }
-
-//     Sha1 sha;
-//     sha.update("foo", 3);
-//     cout << sha.toString() << endl;
 }
 

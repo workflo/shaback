@@ -13,3 +13,10 @@ sudo port install lua
 sudo port install gdbm
 sudo port install openssl
 
+
+Build from source:
+------------------------------
+
+cd src
+cmake .
+make
