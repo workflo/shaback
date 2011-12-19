@@ -1,0 +1,12 @@
+
+
+Backup:
+
+- ZIP
+- LZO
+- Krypto
+- Cachefile
+- Exclude Patterns
+- Files splitten
+- Fehlerhandlung
+- Dateien/Bytes zaehlen

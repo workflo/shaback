@@ -1,0 +1,15 @@
+
+Debian:
+------------------------------
+
+sudo apt-get install cmake g++ libssl-dev libz-dev liblua5.1-dev
+
+
+MacOS X:
+------------------------------
+
+sudo port install cmake
+sudo port install lua
+sudo port install gdbm
+sudo port install openssl
+

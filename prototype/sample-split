@@ -1,0 +1,16 @@
+# VmWare
+*.log
+*.vmdk
+
+# Oracle
+*.dbf
+*/oradata/*.log
+
+# MySQL
+*.MYI
+*.MYD
+
+# CVS
+*,v
+
+

@@ -1,0 +1,8 @@
+*~
+*/MailDir/.Trash/*
+*/tmp/*
+
+# Thumbnails
+*/.thumbnails
+*/Thumbs.db
+*/.xvpics
