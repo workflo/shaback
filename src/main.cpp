@@ -6,7 +6,7 @@ extern "C" {
 #include "lualib.h"
 }
 
-#include "cshaback.h"
+#include "shaback.h"
 #include "RuntimeConfig.h"
 #include "Sha1.h"
 

@@ -1,4 +1,4 @@
-project(cshaback)
+project(shaback)
 set (SHABACK_VERSION_MAJOR 1)
 set (SHABACK_VERSION_MINOR 12)
 set (CMAKE_MODULE_PATH CMakeModules)
@@ -22,12 +22,12 @@ endif (CMAKE_VERSION VERSION_GREATER "2.8.4")
 #ADD_SUBDIRECTORY(src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
-set(cshaback_SRCS cshaback.cpp main.cpp RuntimeConfig.cpp Sha1.cpp File.cpp Repository.cpp BackupRun.cpp)
-add_executable(cshaback ${cshaback_SRCS})
-target_link_libraries(cshaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY})
+set(shaback_SRCS shaback.cpp main.cpp RuntimeConfig.cpp Sha1.cpp File.cpp Repository.cpp BackupRun.cpp)
+add_executable(shaback ${shaback_SRCS})
+target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY})
 
 install(DIRECTORY etc/shaback DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
-install(PROGRAMS cshaback DESTINATION bin)
+install(PROGRAMS shaback DESTINATION bin)
 
 #INCLUDE(CPack)
 
