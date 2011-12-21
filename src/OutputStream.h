@@ -8,7 +8,7 @@
 class OutputStream
 {
  public:
-  OutputStream(std::string compressionAlgorithm, std::string encryptionAlgorithm);
+  OutputStream(int compressionAlgorithm, int encryptionAlgorithm);
   ~OutputStream();
 
   void open(File& file);
@@ -19,15 +19,11 @@ class OutputStream
 
  private:
   int compressionAlgorithm;
-  std::string encryptionAlgorithm;
+  int encryptionAlgorithm;
   File file;
   gzFile gz;
   int fd;
   bool opened;
 };
-
-#define COMPRESSION_NONE    0
-#define COMPRESSION_GZ      1
-#define COMPRESSION_LZO     2
 
 #endif // SHABACK_OutputStream_H

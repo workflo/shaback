@@ -16,9 +16,29 @@ using namespace std;
 Repository::Repository(RuntimeConfig& config)
   :config(config), cache(config.localCacheFile)
 {
-  hashAlgorithm = "SHA1";
-  encryptionAlgorithm = "";
-  compressionAlgorithm = "";
+  string hashAlgorithm("SHA1");
+  string encryptionAlgorithm("");
+  string compressionAlgorithm("GZ");
+
+  if (compressionAlgorithm == "GZ") {
+    this->compressionAlgorithm = COMPRESSION_GZ;
+  } else if (compressionAlgorithm == "LZO") {
+    this->compressionAlgorithm = COMPRESSION_LZO;
+  } else if (compressionAlgorithm.empty()) {
+    this->compressionAlgorithm = COMPRESSION_NONE;
+  } else {
+    throw UnsupportedCompressionAlgorithm(compressionAlgorithm);
+  }
+
+  if (encryptionAlgorithm == "AES") {
+    this->encryptionAlgorithm = ENCRYPTION_AES;
+  } else if (encryptionAlgorithm == "DES") {
+    this->encryptionAlgorithm = ENCRYPTION_DES;
+  } else if (encryptionAlgorithm.empty()) {
+    this->encryptionAlgorithm = ENCRYPTION_NONE;
+  } else {
+    throw UnsupportedEncryptionAlgorithm(encryptionAlgorithm);
+  }
   
   if (!config.localCacheFile.empty()) {
     cache.open();

@@ -1,26 +1,17 @@
 #include <iostream>
-//#include <stdlib.h>/
-//#include <stdio.h>
 #include <fcntl.h>
 
 #include "OutputStream.h"
 #include "Exception.h"
+#include "Repository.h"
 
 using namespace std;
 
 
-OutputStream::OutputStream(string compressionAlgorithm, string encryptionAlgorithm)
-  : opened(false)
+OutputStream::OutputStream(int compressionAlgorithm, int encryptionAlgorithm)
+  : opened(false), compressionAlgorithm(compressionAlgorithm),
+    encryptionAlgorithm(encryptionAlgorithm)
 {
-  if (compressionAlgorithm == "GZ") {
-    this->compressionAlgorithm = COMPRESSION_GZ;
-//   } else if (compressionAlgorithm == "LZO") {
-//     this->compressionAlgorithm = COMPRESSION_LZO;
-  } else if (compressionAlgorithm.empty()) {
-    this->compressionAlgorithm = COMPRESSION_NONE;
-  } else {
-    throw UnsupportedCompressionAlgorithm(compressionAlgorithm);
-  }
 }
 
 OutputStream::~OutputStream()

@@ -54,4 +54,8 @@ string FileNotFoundException::getFilename()
   return filename;
 }
 
+
 UnsupportedCompressionAlgorithm::UnsupportedCompressionAlgorithm(string algo) : Exception(string("Unsupported compression algorithm: ").append(algo)) {}
+
+
+UnsupportedEncryptionAlgorithm::UnsupportedEncryptionAlgorithm(string algo) : Exception(string("Unsupported encryption algorithm: ").append(algo)) {}

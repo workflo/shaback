@@ -44,5 +44,11 @@ class UnsupportedCompressionAlgorithm : public Exception
   UnsupportedCompressionAlgorithm(std::string algo);
 };
 
+class UnsupportedEncryptionAlgorithm : public Exception 
+{
+ public:
+  UnsupportedEncryptionAlgorithm(std::string algo);
+};
+
 
 #endif // Exception_H

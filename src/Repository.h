@@ -24,10 +24,22 @@ public:
 
  protected:
    RuntimeConfig config;
-   std::string hashAlgorithm;
-   std::string encryptionAlgorithm;
-   std::string compressionAlgorithm;
+   int hashAlgorithm;
+   int encryptionAlgorithm;
+   int compressionAlgorithm;
    Cache cache;
 };
+
+
+#define COMPRESSION_NONE    0
+#define COMPRESSION_GZ      1
+#define COMPRESSION_LZO     2
+
+#define ENCRYPTION_NONE     0
+#define ENCRYPTION_AES      1
+#define ENCRYPTION_DES      2
+
+#define DIGEST_SHA1         1
+#define DIGEST_SHA256       2
 
 #endif // Repository_H

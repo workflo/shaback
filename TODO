@@ -12,6 +12,8 @@ Backup:
 - Error handling
 - Count number of bytes/files written/inspected
 - Handle oneFileSystem option
+- Write to .tmp files first
+- lock/unlock
 
 General:
 -----------------------
