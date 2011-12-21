@@ -8,15 +8,21 @@ Backup:
 - LZO
 - Crypto
 - Cache file
-- Exclude patterns
-- Splity large files
+- Split large files
 - Error handling
 - Count number of bytes/files written/inspected
 - Handle oneFileSystem option
-- Sort dir entries by inode
+
+General:
+-----------------------
+- Allow different hashing algorithms (SHA-1, SHA-256)
 
 Restore:
 -----------------------
 
 Garbage collection:
 -----------------------
+
+Funny optimizations:
+-----------------------
+- Sort dir entries by inode

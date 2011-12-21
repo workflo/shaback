@@ -32,6 +32,8 @@ public:
     File indexDir;
     File locksDir;
     
+    bool excludeFile(File& file);
+    
     void finalize();
 
  protected:

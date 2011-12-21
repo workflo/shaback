@@ -56,8 +56,6 @@ int BackupRun::run()
 
 string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 {
-  // TODO: Excludes checken
-
   // TODO: check for oneFileSystem
 
   string treeFile;
@@ -73,6 +71,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
       
       File child(dir, dp->d_name);
       
+      if (config.excludeFile(child)) continue;
+	
       if (child.isSymlink()) {
 	treeFile.append(handleSymlink(child, false));
       } else if (child.isDir()) {
@@ -118,8 +118,6 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 
 string BackupRun::handleFile(File& file, bool absolutePaths)
 {
-  // TODO: Excludes checken
-
   string hashValue = repository.storeFile(file);
   
   string treeFileLine("F\t");
@@ -147,8 +145,6 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
 
 string BackupRun::handleSymlink(File& file, bool absolutePaths)
 {
-  // TODO: Excludes checken
-
   string treeFileLine("S\t*\t");
   if (absolutePaths) {
     treeFileLine.append(file.path);

@@ -269,3 +269,15 @@ void RuntimeConfig::finalize()
   this->indexDir = File(repo, "index");
   this->locksDir = File(repo, "locks");
 }
+
+
+bool RuntimeConfig::excludeFile(File& file)
+{
+  for (vector<string>::iterator it = excludePatterns.begin(); it < excludePatterns.end(); it++ ) {
+    string pattern(*it);
+    if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
+      return true;
+    }
+  }
+  return false;
+}

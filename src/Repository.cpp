@@ -13,11 +13,20 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config)
-  :config(config)
+  :config(config), cache(config.localCacheFile)
 {
   hashAlgorithm = "SHA1";
   cypherAlgorithm = "";
   compressionAlgorithm = "GZ";
+  
+  if (!config.localCacheFile.empty()) {
+    cache.open();
+  }
+}
+
+Repository::~Repository()
+{
+  cache.close();
 }
 
 
@@ -66,10 +75,9 @@ File Repository::hashValueToFile(string hashValue)
 }
 
 
-bool Repository::contains(File& file)
+bool Repository::contains(string& hashValue)
 {
-  // TODO: Cache fragen!
-  return file.isFile();
+  return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
 
@@ -78,22 +86,27 @@ string Repository::storeTreeFile(string& treeFile)
   Sha1 sha1;
   sha1.update(treeFile);
   sha1.finalize();
-
-  File file = hashValueToFile(sha1.toString());
-  if (!contains(file)) {
+  string hashValue = sha1.toString();
+  
+  if (!contains(hashValue)) {
+    File file = hashValueToFile(hashValue);
+    
     if (config.verbose) {
       cout << "T: " << file.path << endl;
     }
 
     // TODO: Erst in .tmp-File schreiben und dann umbenennen
-//     int fd = ::open(file.path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0777);
-//     if (fd == 0) {
-//       // TODO: Fehler
-//     }
-//     write(fd, treeFile.data(), treeFile.size());
-//     close(fd);
 
     // TODO: KLasse fuer Output-Abstraktion
+    
+/*
+    int fd = ::open(file.path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0777);
+    if (fd == 0) {
+      throw Exception::errnoToException(file.path);
+    }
+    write(fd, treeFile.data(), treeFile.size());
+    close(fd);
+*/
 
     gzFile fd = ::gzopen(file.path.c_str(), "wb");
     if (fd == 0) {
@@ -101,6 +114,8 @@ string Repository::storeTreeFile(string& treeFile)
     }
     gzwrite(fd, treeFile.data(), treeFile.size());
     gzclose(fd);
+
+    cache.put(hashValue);
   }
 
   return sha1.toString();
@@ -110,15 +125,18 @@ string Repository::storeTreeFile(string& treeFile)
 string Repository::storeFile(File& srcFile)
 {
   string hashValue = srcFile.getHashValue();
-  File destFile = hashValueToFile(hashValue);
 
-  if (!contains(destFile)) {
+  if (!contains(hashValue)) {
+    File destFile = hashValueToFile(hashValue);
+    
     if (config.verbose) {
       cout << "F: " << destFile.path << endl;
     }
 
     // TODO: Erst in .tmp-File schreiben und dann umbenennen
     srcFile.copyTo(destFile);
+
+    cache.put(hashValue);
   }
 
   return hashValue;

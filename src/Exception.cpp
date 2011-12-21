@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string.h>
+
 #include "Exception.h"
 
 using namespace std;
