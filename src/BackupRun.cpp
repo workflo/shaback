@@ -50,7 +50,10 @@ int BackupRun::run()
 
   string rootFileHashValue = repository.storeTreeFile(rootFile);
 
-  cout << "rootFile: " << rootFileHashValue << endl << rootFile << endl;
+  cout << "rootFile: " << rootFileHashValue << endl;
+  if (config.verbose) {
+    cout << rootFile << endl;
+  }
 }
 
 
@@ -91,7 +94,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 
   string treeFileHashValue = repository.storeTreeFile(treeFile);
   
-  cout << "treeFile: " << dir.path << endl << treeFile << endl;
+//   cout << "treeFile: " << dir.path << endl << treeFile << endl;
 
   string treeFileLine("D\t");
   treeFileLine.append(treeFileHashValue);

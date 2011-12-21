@@ -71,21 +71,21 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 	    break;
 
 	case 'v':
-            this->verbose = true;
+            verbose = true;
 	    break;
 
 	case 'f':
-            this->force = true;
+            force = true;
 	    break;
 
 	case 'c':
           // TODO
-	    this->loadConfigFile(optarg);
+	    loadConfigFile(optarg);
 	    break;
 
 	case 'r':
 	  // Chose another repository:
-	    this->repository = optarg;
+	    repository = optarg;
 	    break;
 
 	case 'd':

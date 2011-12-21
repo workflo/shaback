@@ -25,7 +25,7 @@ public:
  protected:
    RuntimeConfig config;
    std::string hashAlgorithm;
-   std::string cypherAlgorithm;
+   std::string encryptionAlgorithm;
    std::string compressionAlgorithm;
    Cache cache;
 };

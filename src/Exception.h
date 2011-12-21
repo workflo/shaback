@@ -38,5 +38,11 @@ class FileNotFoundException : public IOException
   std::string filename;
 };
 
+class UnsupportedCompressionAlgorithm : public Exception 
+{
+ public:
+  UnsupportedCompressionAlgorithm(std::string algo);
+};
+
 
 #endif // Exception_H

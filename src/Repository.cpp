@@ -9,6 +9,7 @@
 #include "BackupRun.h"
 #include "Sha1.h"
 #include "Exception.h"
+#include "OutputStream.h"
 
 using namespace std;
 
@@ -16,8 +17,8 @@ Repository::Repository(RuntimeConfig& config)
   :config(config), cache(config.localCacheFile)
 {
   hashAlgorithm = "SHA1";
-  cypherAlgorithm = "";
-  compressionAlgorithm = "GZ";
+  encryptionAlgorithm = "";
+  compressionAlgorithm = "";
   
   if (!config.localCacheFile.empty()) {
     cache.open();
@@ -87,7 +88,7 @@ string Repository::storeTreeFile(string& treeFile)
   sha1.update(treeFile);
   sha1.finalize();
   string hashValue = sha1.toString();
-  
+
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
     
@@ -97,23 +98,9 @@ string Repository::storeTreeFile(string& treeFile)
 
     // TODO: Erst in .tmp-File schreiben und dann umbenennen
 
-    // TODO: KLasse fuer Output-Abstraktion
-    
-/*
-    int fd = ::open(file.path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0777);
-    if (fd == 0) {
-      throw Exception::errnoToException(file.path);
-    }
-    write(fd, treeFile.data(), treeFile.size());
-    close(fd);
-*/
-
-    gzFile fd = ::gzopen(file.path.c_str(), "wb");
-    if (fd == 0) {
-      throw Exception::errnoToException(file.path);
-    }
-    gzwrite(fd, treeFile.data(), treeFile.size());
-    gzclose(fd);
+    OutputStream os(compressionAlgorithm, encryptionAlgorithm);
+    os.open(file);
+    os.write(treeFile);
 
     cache.put(hashValue);
   }
@@ -121,6 +108,9 @@ string Repository::storeTreeFile(string& treeFile)
   return sha1.toString();
 }
 
+
+#define READ_BUFFER_SIZE (1024 * 4)
+static char readBuffer[READ_BUFFER_SIZE];
 
 string Repository::storeFile(File& srcFile)
 {
@@ -134,11 +124,29 @@ string Repository::storeFile(File& srcFile)
     }
 
     // TODO: Erst in .tmp-File schreiben und dann umbenennen
-    srcFile.copyTo(destFile);
+
+    OutputStream os(compressionAlgorithm, encryptionAlgorithm);
+    os.open(destFile);
+
+    int fdIn = ::open(srcFile.path.c_str(), O_RDONLY);
+    if (fdIn == 0) {
+      throw Exception::errnoToException(srcFile.path);
+    }
+    
+    while (true) {
+      ssize_t bytesRead = read(fdIn, readBuffer, READ_BUFFER_SIZE);
+      if (bytesRead == -1) {
+	throw Exception::errnoToException(srcFile.path);
+      } else if (bytesRead == 0) {
+	break;
+      }
+      os.write(readBuffer, bytesRead);
+    }
+
+    close(fdIn);
 
     cache.put(hashValue);
   }
 
   return hashValue;
 }
-

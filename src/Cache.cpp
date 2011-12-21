@@ -40,7 +40,7 @@ void Cache::open()
 void Cache::close()
 {
   if (opened) {
-    cout << "Closing GDBM: " << file.path << endl;
+//     cout << "Closing GDBM: " << file.path << endl;
     gdbm_close(gdbmFile);
     opened = false;
   }
@@ -53,10 +53,9 @@ bool Cache::contains(string& key)
     datum k;
     k.dptr = (char*) key.data();
     k.dsize = key.length();
-//    if (gdbm_exists(gdbmFile, k)) {
-//      cout << "GDBM contains " << key << endl;
-//    }
-    return gdbm_exists(gdbmFile, k);
+    bool found = gdbm_exists(gdbmFile, k);
+    //    printf("GDBM %s: %d\n", key.c_str(), found);
+    return found;
   } else {
     return false;
   }
