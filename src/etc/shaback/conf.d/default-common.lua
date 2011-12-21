@@ -1,4 +1,4 @@
-repository('/media/nassi01/shaback')
+--repository('/media/nassi01/shaback')
 localCache('/var/spool/shaback/cache.gdbm')
 
 oneFileSystem(true)

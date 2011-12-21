@@ -8,6 +8,7 @@
 #include "Repository.h"
 #include "BackupRun.h"
 #include "Sha1.h"
+#include "Exception.h"
 
 using namespace std;
 
@@ -96,7 +97,7 @@ string Repository::storeTreeFile(string& treeFile)
 
     gzFile fd = ::gzopen(file.path.c_str(), "wb");
     if (fd == 0) {
-      // TODO: Fehler
+      throw Exception::errnoToException(file.path);
     }
     gzwrite(fd, treeFile.data(), treeFile.size());
     gzclose(fd);

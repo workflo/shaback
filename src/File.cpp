@@ -7,6 +7,7 @@
 
 #include "File.h"
 #include "Sha1.h"
+#include "Exception.h"
 
 using namespace std;
 
@@ -102,13 +103,12 @@ std::string File::getHashValue()
     Sha1 sha1;
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == 0) {
-      // TODO: Fehler!
+      throw Exception::errnoToException(path);
     }
     while (true) {
       ssize_t bytesRead = read(fd, readBuffer, READ_BUFFER_SIZE);
       if (bytesRead == -1) {
-	// TODO: Fehler!
-	break;
+	throw Exception::errnoToException(path);
       } else if (bytesRead == 0) {
 	break;
       }
@@ -128,25 +128,23 @@ void File::copyTo(File& destFile)
 {
   int fdIn = open(path.c_str(), O_RDONLY);
   if (fdIn == 0) {
-    // TODO: Fehler!
-    return;
+    throw Exception::errnoToException(path);
   }
 
   int fdOut = ::open(destFile.path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0777);
   if (fdOut == 0) {
-    // TODO: Fehler
-    return;
+    throw Exception::errnoToException(destFile.path);
   }
 
   while (true) {
     ssize_t bytesRead = read(fdIn, readBuffer, READ_BUFFER_SIZE);
     if (bytesRead == -1) {
-      // TODO: Fehler!
-      break;
+      throw Exception::errnoToException(path);
     } else if (bytesRead == 0) {
       break;
     }
     write(fdOut, readBuffer, bytesRead);
+    // TODO: Fehler?
   }
 
   close(fdOut);
@@ -160,8 +158,7 @@ string File::readlink()
   int len = ::readlink(path.c_str(), destBuf, MAX_PATH_LEN);
 
   if (len == -1) {
-    // TODO: Fehler
-    return "";
+    throw Exception::errnoToException(path);
   }
 
   return string(destBuf, len);
