@@ -1,5 +1,5 @@
-#ifndef SHABACK_GDBM_H
-#define SHABACK_GDBM_H
+#ifndef SHABACK_Cache_H
+#define SHABACK_Cache_H
 
 #include <string>
 #include "File.h"
@@ -27,4 +27,4 @@ class Cache
     bool opened;
 };
 
-#endif // SHABACK_GDBM_H
+#endif // SHABACK_Cache_H

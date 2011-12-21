@@ -4,6 +4,7 @@
 
 using namespace std;
 
+
 Sha1::Sha1()
 {
   ctx = (SHA_CTX*) malloc(sizeof(SHA_CTX));
@@ -35,7 +36,7 @@ void Sha1::update(std::string& data)
 }
 
 
-static char HEX_CHARS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+char Sha1::HEX_CHARS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 string Sha1::toString()
 {

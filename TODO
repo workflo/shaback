@@ -7,7 +7,7 @@ Backup:
 - ZIP
 - LZO
 - Crypto
-- Cache file
+- Cache file import/export
 - Split large files
 - Error handling
 - Count number of bytes/files written/inspected
