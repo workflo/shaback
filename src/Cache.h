@@ -8,11 +8,11 @@ extern "C" {
 #include <gdbm.h>
 }
 
-class GDBM
+class Cache
 {
   public:
-    GDBM(File file);
-    ~GDBM();
+    Cache(File file);
+    ~Cache();
     
     void open();
     void close();

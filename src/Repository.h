@@ -3,7 +3,7 @@
 
 #include <string>
 #include "RuntimeConfig.h"
-#include "GDBM.h"
+#include "Cache.h"
 
 class Repository
 {
@@ -27,7 +27,7 @@ public:
    std::string hashAlgorithm;
    std::string cypherAlgorithm;
    std::string compressionAlgorithm;
-   GDBM cache;
+   Cache cache;
 };
 
 #endif // Repository_H

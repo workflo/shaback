@@ -1,23 +1,23 @@
 #include <iostream>
 
-#include "GDBM.h"
+#include "Cache.h"
 #include "Exception.h"
 
 
 using namespace std;
 
-GDBM::GDBM(File file)
+Cache::Cache(File file)
 : file(file), opened(false)
 {
 }
 
-GDBM::~GDBM()
+Cache::~Cache()
 {
     close();
 }
 
 
-void GDBM::open()
+void Cache::open()
 {
   if (!opened) {
     //char path[MAX_PATH_LEN];
@@ -37,7 +37,7 @@ void GDBM::open()
 }
 
 
-void GDBM::close()
+void Cache::close()
 {
   if (opened) {
     cout << "Closing GDBM: " << file.path << endl;
@@ -47,7 +47,7 @@ void GDBM::close()
 }
 
 
-bool GDBM::contains(string& key)
+bool Cache::contains(string& key)
 {
   if (opened) {
     datum k;
@@ -63,7 +63,7 @@ bool GDBM::contains(string& key)
 }
 
 
-void GDBM::put(string& key, string& value)
+void Cache::put(string& key, string& value)
 {
   if (opened) {
     datum k;
@@ -77,7 +77,7 @@ void GDBM::put(string& key, string& value)
 }
 
 
-void GDBM::put(string& key)
+void Cache::put(string& key)
 {
   if (opened) {
     datum k;
@@ -91,7 +91,7 @@ void GDBM::put(string& key)
 }
 
 
-void GDBM::remove(string& key)
+void Cache::remove(string& key)
 {
   if (opened) {
     datum k;
