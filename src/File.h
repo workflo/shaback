@@ -37,6 +37,7 @@ public:
 
  private:
     bool initialized;
+    bool fileExists;
     std::string hashValue;
     
     void assertInitialized();

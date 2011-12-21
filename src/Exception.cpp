@@ -31,9 +31,11 @@ Exception Exception::errnoToException(int e, string filename)
 
   switch (e) {
   default:
-    char buf[100];
-    sprintf(buf, "Unexpected error code: %d", errno);
-    return Exception(string(buf));
+    if (filename.empty()) {
+      return Exception(string(strerror(e)));
+    } else {
+      return Exception(string(strerror(e)).append(": ").append(filename));
+    }
   }
 }
 
@@ -41,7 +43,9 @@ Exception Exception::errnoToException(int e, string filename)
 IOException::IOException(string msg) : Exception(msg) {}
 
 
-FileNotFoundException::FileNotFoundException(string msg, string filename) : IOException(msg), filename(filename) {}
+FileNotFoundException::FileNotFoundException(string filename) 
+  : IOException(string("File not found: ").append(filename)),
+    filename(filename) {}
 
 string FileNotFoundException::getFilename()
 {

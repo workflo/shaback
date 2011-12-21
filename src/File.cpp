@@ -54,7 +54,9 @@ void File::refresh()
   initialized = true;
  
   if (lstat(this->path.c_str(), &this->statBuffer) == -1) {
+    fileExists = false;
   } else {
+    fileExists = true;
   }
 }
 
@@ -69,21 +71,21 @@ bool File::isFile()
 bool File::isDir()
 {
   assertInitialized();
-  return S_ISDIR(this->statBuffer.st_mode);
+  return fileExists && S_ISDIR(this->statBuffer.st_mode);
 }
 
 
 bool File::isSymlink()
 {
   assertInitialized();
-  return S_ISLNK(this->statBuffer.st_mode);
+  return fileExists && S_ISLNK(this->statBuffer.st_mode);
 }
 
 
 bool File::exists()
 {
   assertInitialized();
-  return S_ISREG(this->statBuffer.st_mode) || S_ISDIR(this->statBuffer.st_mode) || S_ISLNK(this->statBuffer.st_mode);
+  return fileExists && (S_ISREG(this->statBuffer.st_mode) || S_ISDIR(this->statBuffer.st_mode) || S_ISLNK(this->statBuffer.st_mode));
 }
 
 

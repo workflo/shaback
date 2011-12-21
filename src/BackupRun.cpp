@@ -7,6 +7,7 @@
 
 #include "BackupRun.h"
 #include "Sha1.h"
+#include "Exception.h"
 
 using namespace std;
 
@@ -40,6 +41,8 @@ int BackupRun::run()
       rootFile.append(handleDirectory(file, true));
     } else if (file.isFile()) {
       rootFile.append(handleFile(file, true));
+    } else if (!file.exists()) {
+      throw FileNotFoundException(file.path);
     } else {
       // Ignore other types of files.
     }
@@ -81,7 +84,9 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
       }
 
     }
-      closedir(dirp);
+    closedir(dirp);
+  } else {
+    throw Exception::errnoToException(dir.path);
   }
 
   string treeFileHashValue = repository.storeTreeFile(treeFile);

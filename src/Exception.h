@@ -31,7 +31,7 @@ class IOException : public Exception
 class FileNotFoundException : public IOException 
 {
  public:
-  FileNotFoundException(std::string msg, std::string filename);
+  FileNotFoundException(std::string filename);
   virtual std::string getFilename();
 
  protected:

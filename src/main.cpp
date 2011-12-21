@@ -9,6 +9,7 @@ extern "C" {
 #include "shaback.h"
 #include "RuntimeConfig.h"
 #include "Sha1.h"
+#include "Exception.h"
 
 using namespace std;
 
@@ -21,14 +22,15 @@ void showUsage()
 
 int main(int argc, char** argv)
 {
+  try {
     RuntimeConfig config;
     config.load();
     config.parseCommandlineArgs(argc, argv);
     config.finalize();
     
     if (config.operation.empty()) {
-        showUsage();
-        return 1;
+      showUsage();
+      return 1;
     }
     
 //    cout << "Exclude patterns: ";
@@ -39,11 +41,16 @@ int main(int argc, char** argv)
     Shaback shaback(config);
     
     if (config.operation == "init") {
-	shaback.createRepository();
+      shaback.createRepository();
     } else if (config.operation == "backup") {
       return shaback.repository.backup();
     } else {
       shaback.repository.open();
     }
+  } catch (Exception& ex) {
+    cerr << ex.getMessage() << endl;
+    exit(10);
+  }
 }
+
 
