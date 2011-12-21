@@ -1,12 +1,22 @@
 
+Config:
+-----------------------
 
 Backup:
-
+-----------------------
 - ZIP
 - LZO
-- Krypto
-- Cachefile
-- Exclude Patterns
-- Files splitten
-- Fehlerhandlung
-- Dateien/Bytes zaehlen
+- Crypto
+- Cache file
+- Exclude patterns
+- Splity large files
+- Error handling
+- Count number of bytes/files written/inspected
+- Handle oneFileSystem option
+- Sort dir entries by inode
+
+Restore:
+-----------------------
+
+Garbage collection:
+-----------------------

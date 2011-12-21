@@ -16,6 +16,7 @@ class File
 {
 public:
     File();
+    File(const char* path);
     File(std::string& path);
     //File(File& parent, std::string& filename);
     File(File& parent, const char* filename);

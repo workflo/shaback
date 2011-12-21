@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <pwd.h>
 
 #include "File.h"
 #include "Sha1.h"
@@ -13,9 +14,20 @@ using namespace std;
 
 
 File::File()
-  :path(".")
+  :path("")
 {
   this->initialized = false;
+  struct passwd *pw = getpwuid(getuid());
+  if (pw) {
+    path = pw->pw_dir;
+  }
+}
+
+File::File(const char* path)
+  :path(path)
+{
+  this->initialized = false;
+  this->fname = this->path.substr(this->path.rfind("/") +1);
 }
 
 File::File(string& path)

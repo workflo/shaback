@@ -115,9 +115,15 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
 void RuntimeConfig::load()
 {
+  File home;
+
   //this->tryToLoadFrom(SYSCONFDIR "/shaback/conf.d");
-  this->tryToLoadFrom("etc/shaback/conf.d");
-  // TODO: ~/.shaback.lua laden
+  tryToLoadFrom("etc/shaback/conf.d");
+
+  File localConfig(home, ".shaback.lua");
+  if (localConfig.isFile()) {
+    loadConfigFile(localConfig.path);
+  }
 }
 
 void RuntimeConfig::tryToLoadFrom(string dir)
