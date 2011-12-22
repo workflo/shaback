@@ -44,6 +44,12 @@ void Shaback::createRepository()
       exit(3);
     }
   }
+  if (!config.cacheDir.isDir()) {
+    if (!config.cacheDir.mkdir()) {
+      cerr << "Cannot create directory: " << config.cacheDir.path.c_str() << endl;
+      exit(3);
+    }
+  }
   
   char dirname[20];
   for (int level0 = 0; level0 <= 0xff; level0++) {
