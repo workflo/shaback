@@ -1,15 +1,15 @@
-#ifndef SHABACK_OutputStream_H
-#define SHABACK_OutputStream_H
+#ifndef SHABACK_ShabackOutputStream_H
+#define SHABACK_ShabackOutputStream_H
 
 #include <string>
 #include <zlib.h>
 #include "File.h"
 
-class OutputStream
+class ShabackOutputStream
 {
  public:
-  OutputStream(int compressionAlgorithm, int encryptionAlgorithm);
-  ~OutputStream();
+  ShabackOutputStream(int compressionAlgorithm, int encryptionAlgorithm);
+  ~ShabackOutputStream();
 
   void open(File& file);
   void close();
@@ -26,4 +26,4 @@ class OutputStream
   bool opened;
 };
 
-#endif // SHABACK_OutputStream_H
+#endif // SHABACK_ShabackOutputStream_H

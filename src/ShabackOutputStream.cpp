@@ -1,26 +1,26 @@
 #include <iostream>
 #include <fcntl.h>
 
-#include "OutputStream.h"
+#include "ShabackOutputStream.h"
 #include "Exception.h"
 #include "Repository.h"
 
 using namespace std;
 
 
-OutputStream::OutputStream(int compressionAlgorithm, int encryptionAlgorithm)
+ShabackOutputStream::ShabackOutputStream(int compressionAlgorithm, int encryptionAlgorithm)
   : opened(false), compressionAlgorithm(compressionAlgorithm),
     encryptionAlgorithm(encryptionAlgorithm)
 {
 }
 
-OutputStream::~OutputStream()
+ShabackOutputStream::~ShabackOutputStream()
 {
   close();
 }
 
 
-void OutputStream::open(File& file)
+void ShabackOutputStream::open(File& file)
 {
   this->file = file;
 
@@ -47,7 +47,7 @@ void OutputStream::open(File& file)
 }
 
 
-void OutputStream::close()
+void ShabackOutputStream::close()
 {
   if (opened) {
     switch(compressionAlgorithm) {
@@ -68,13 +68,13 @@ void OutputStream::close()
 }
 
 
-void OutputStream::write(string& s)
+void ShabackOutputStream::write(string& s)
 {
   write(s.data(), s.size());
 }
 
 
-void OutputStream::write(const char* data, int numBytes)
+void ShabackOutputStream::write(const char* data, int numBytes)
 {
     switch(compressionAlgorithm) {
     

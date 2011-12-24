@@ -9,7 +9,7 @@
 #include "BackupRun.h"
 #include "Sha1.h"
 #include "Exception.h"
-#include "OutputStream.h"
+#include "ShabackOutputStream.h"
 
 using namespace std;
 
@@ -118,7 +118,7 @@ string Repository::storeTreeFile(string& treeFile)
 
     // TODO: Erst in .tmp-File schreiben und dann umbenennen
 
-    OutputStream os(compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(file);
     os.write(treeFile);
 
@@ -145,7 +145,7 @@ string Repository::storeFile(File& srcFile)
 
     // TODO: Erst in .tmp-File schreiben und dann umbenennen
 
-    OutputStream os(compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(destFile);
 
     int fdIn = ::open(srcFile.path.c_str(), O_RDONLY);
