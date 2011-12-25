@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void OutputStream::write(const char* b, int offset, int len)
+void OutputStream::write(const char* b, int len)
 {
 //   if (b == 0)
 //     throw new NullPointerException();
@@ -12,6 +12,6 @@ void OutputStream::write(const char* b, int offset, int len)
 //     return;
 
   for (int i = 0; i < len ; i++) 
-    write(b[offset + i]);
+    write(b[i]);
 }
 

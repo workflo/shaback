@@ -134,6 +134,7 @@ static char readBuffer[READ_BUFFER_SIZE];
 
 string Repository::storeFile(File& srcFile)
 {
+  // TODO: Mit einem InputStream auskommen!
   string hashValue = srcFile.getHashValue();
 
   if (!contains(hashValue)) {

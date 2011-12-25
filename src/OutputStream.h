@@ -29,10 +29,9 @@ public:
    * Writes a number of bytes to the output stream.
    *
    * @param b The byte array to be written.
-   * @param offset Offset in byte array \a b.
    * @param len Number of bytes to be written.
    */
-  virtual void write(const char* b, int offset, int len);
+  virtual void write(const char* b, int len);
 
   /**
    * Closes the output stream.
