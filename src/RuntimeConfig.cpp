@@ -268,6 +268,7 @@ void RuntimeConfig::finalize()
   this->filesDir = File(repo, "files");
   this->indexDir = File(repo, "index");
   this->locksDir = File(repo, "locks");
+  this->cacheDir = File(repo, "cache");
 }
 
 

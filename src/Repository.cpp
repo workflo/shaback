@@ -53,7 +53,7 @@ Repository::~Repository()
 
 void Repository::open()
 {
-  if (!config.filesDir.isDir() || !config.indexDir.isDir() || !config.locksDir.isDir()) {
+  if (!config.filesDir.isDir() || !config.indexDir.isDir() || !config.locksDir.isDir() || !config.cacheDir.isDir()) {
     cerr << "Does not look like a shaback repository: " << config.repository << endl;
     exit(4);
   }

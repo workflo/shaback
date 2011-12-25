@@ -31,6 +31,7 @@ public:
     File filesDir;
     File indexDir;
     File locksDir;
+    File cacheDir;
     
     bool excludeFile(File& file);
     
