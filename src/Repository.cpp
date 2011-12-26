@@ -9,6 +9,7 @@
 #include "BackupRun.h"
 #include "Sha1.h"
 #include "Exception.h"
+#include "FileInputStream.h"
 #include "ShabackOutputStream.h"
 
 using namespace std;
@@ -134,10 +135,20 @@ static char readBuffer[READ_BUFFER_SIZE];
 
 string Repository::storeFile(File& srcFile)
 {
-  // TODO: Mit einem InputStream auskommen!
-  string hashValue = srcFile.getHashValue();
+  Sha1 sha1;
+  FileInputStream in(srcFile);
+  while (true) {
+    int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+    if (bytesRead == -1) break;
+    sha1.update(readBuffer, bytesRead);
+  }
+  
+  sha1.finalize();
+  string hashValue = sha1.toString();
 
   if (!contains(hashValue)) {
+    in.reset();
+
     File destFile = hashValueToFile(hashValue);
     
     if (config.verbose) {
@@ -149,22 +160,11 @@ string Repository::storeFile(File& srcFile)
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(destFile);
 
-    int fdIn = ::open(srcFile.path.c_str(), O_RDONLY);
-    if (fdIn == 0) {
-      throw Exception::errnoToException(srcFile.path);
-    }
-    
     while (true) {
-      ssize_t bytesRead = read(fdIn, readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1) {
-	throw Exception::errnoToException(srcFile.path);
-      } else if (bytesRead == 0) {
-	break;
-      }
+      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      if (bytesRead == -1) break;
       os.write(readBuffer, bytesRead);
     }
-
-    close(fdIn);
 
     cache.put(hashValue);
   }

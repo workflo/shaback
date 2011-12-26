@@ -9,6 +9,7 @@
 #include "File.h"
 #include "Sha1.h"
 #include "Exception.h"
+#include "FileInputStream.h"
 
 using namespace std;
 
@@ -105,64 +106,6 @@ bool File::mkdir()
 {
   initialized = false;
   return (::mkdir(this->path.c_str(), 0777) == 0);
-}
-
-
-#define READ_BUFFER_SIZE (1024 * 4)
-static char readBuffer[READ_BUFFER_SIZE];
-
-std::string File::getHashValue()
-{
-  if (hashValue.empty()) {
-    Sha1 sha1;
-    int fd = open(path.c_str(), O_RDONLY);
-    if (fd == 0) {
-      throw Exception::errnoToException(path);
-    }
-    while (true) {
-      ssize_t bytesRead = read(fd, readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1) {
-	throw Exception::errnoToException(path);
-      } else if (bytesRead == 0) {
-	break;
-      }
-      sha1.update(readBuffer, bytesRead);
-    }
-  
-    close(fd);
-    sha1.finalize();
-    hashValue = sha1.toString();
-  }
-  
-  return hashValue;
-}
-
-
-void File::copyTo(File& destFile)
-{
-  int fdIn = open(path.c_str(), O_RDONLY);
-  if (fdIn == 0) {
-    throw Exception::errnoToException(path);
-  }
-
-  int fdOut = ::open(destFile.path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0777);
-  if (fdOut == 0) {
-    throw Exception::errnoToException(destFile.path);
-  }
-
-  while (true) {
-    ssize_t bytesRead = read(fdIn, readBuffer, READ_BUFFER_SIZE);
-    if (bytesRead == -1) {
-      throw Exception::errnoToException(path);
-    } else if (bytesRead == 0) {
-      break;
-    }
-    write(fdOut, readBuffer, bytesRead);
-    // TODO: Fehler?
-  }
-
-  close(fdOut);
-  close(fdIn);
 }
 
 

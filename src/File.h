@@ -27,9 +27,7 @@ public:
     bool isSymlink();
     bool exists();
     bool mkdir();
-    void copyTo(File& destFile);
     std::string readlink();
-    std::string getHashValue();
 
     std::string path;
     std::string fname;

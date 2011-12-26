@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <iostream>
 
 #include "FileInputStream.h"
 #include "Exception.h"
@@ -50,7 +51,7 @@ void FileInputStream::init(string& filename)
 
 // #else
 
-  handle = open(filename.c_str(), O_RDONLY);
+  handle = ::open(filename.c_str(), O_RDONLY);
    
   if (handle == -1) {
     throw Exception::errnoToException(filename);
@@ -103,13 +104,10 @@ int FileInputStream::read(char* b, int len)
 
 // #else
 
-  int r;
-
-  if ((r = ::read(handle, (char*) b, len)) < 0) {
+  int r = ::read(handle, (char*) b, len);
+  if (r < 0)
     throw Exception::errnoToException();
-  }
-
-  if (r == 0)
+  else if (r == 0)
     return -1;
   else
     return r;
