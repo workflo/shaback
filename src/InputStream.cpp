@@ -75,6 +75,7 @@ bool InputStream::markSupported()
 
 void InputStream::copyTo(OutputStream& destination, int maxBytes)
 {
+  // TODO: Make sure free() is called!
   char* buffer = (char*) malloc(8192);
   int bytesToRead = maxBytes;
 
