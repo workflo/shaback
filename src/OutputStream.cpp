@@ -2,6 +2,9 @@
 
 using namespace std;
 
+OutputStream::~OutputStream() {}
+
+
 void OutputStream::write(const char* b, int len)
 {
 //   if (b == 0)

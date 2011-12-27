@@ -5,6 +5,8 @@
 #include <zlib.h>
 #include "OutputStream.h"
 
+#define GZIP_CHUNK_SIZE (128 * 1024)
+
 /**
  * An OutputStream that performs GZip data compression.
  *
@@ -25,6 +27,9 @@ public:
 protected:
   OutputStream* out;
   z_stream zipStream;
+/*   unsigned char* inputBuffer; */
+  unsigned char outputBuffer[GZIP_CHUNK_SIZE];
+  int ret;
 }; 
 #endif// SHABACK_GzipOutputStream_H
 

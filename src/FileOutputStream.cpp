@@ -108,20 +108,20 @@ void FileOutputStream::write(const char* b, int len)
  *****************************************************************************/
 void FileOutputStream::close()
 {
-#if defined(JAKELIB_WIN32API)
+// #if defined(JAKELIB_WIN32API)
 
-  if (handle != INVALID_HANDLE_VALUE) {
-    CloseHandle(handle);
-    handle = INVALID_HANDLE_VALUE;
-  }
+//   if (handle != INVALID_HANDLE_VALUE) {
+//     CloseHandle(handle);
+//     handle = INVALID_HANDLE_VALUE;
+//   }
 
-#else
+// #else
 
   if (handle != -1) {
     ::close(handle);
     handle = -1;
   }
 
-#endif
+// #endif
 }
 

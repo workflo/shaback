@@ -16,6 +16,7 @@
 class OutputStream
 {
 public:
+  virtual ~OutputStream() = 0;
 
   /**
    * Writes the specified byte value to this output stream.

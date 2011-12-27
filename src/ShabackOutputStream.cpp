@@ -23,22 +23,25 @@ ShabackOutputStream::ShabackOutputStream(int compressionAlgorithm, int encryptio
 ShabackOutputStream::~ShabackOutputStream()
 {
   close();
+//   cout << "ShabackOutputStream:~"<<endl;
   if (compressionOutputStream) delete compressionOutputStream;
   if (encryptionOutputStream) delete encryptionOutputStream;
   if (fileOutputStream) delete fileOutputStream;
+//   cout << "ShabackOutputStream:~"<<endl;
 }
 
 
 void ShabackOutputStream::open(File& file)
 {
   this->file = file;
-  outputStream = fileOutputStream = new FileOutputStream(file);
+  fileOutputStream = new FileOutputStream(file);
+  outputStream = fileOutputStream;
 
   switch(compressionAlgorithm) {
     
   case COMPRESSION_GZ:
-    outputStream = compressionOutputStream = new GzipOutputStream(outputStream);
-    
+    compressionOutputStream = new GzipOutputStream(outputStream);
+    outputStream = compressionOutputStream;
     break;
 
   case COMPRESSION_NONE:
