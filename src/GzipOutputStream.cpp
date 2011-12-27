@@ -5,7 +5,7 @@
 using namespace std;
 
 
-GzipOutputStream::GzipOutputStream(OutputStream& out)
+GzipOutputStream::GzipOutputStream(OutputStream* out)
   : out(out)
 {
   zipStream.zalloc = 0;
@@ -84,6 +84,6 @@ void GzipOutputStream::finish()
 void GzipOutputStream::close()
 {
   finish();
-  out.close();
+  out->close();
 }
 

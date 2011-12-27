@@ -14,7 +14,7 @@
 class GzipOutputStream : public OutputStream
 {
 public:
-  GzipOutputStream(OutputStream& out); 
+  GzipOutputStream(OutputStream* out); 
   ~GzipOutputStream(); 
 
   void write(int b);
@@ -23,7 +23,7 @@ public:
   void close();
   
 protected:
-  OutputStream& out;
+  OutputStream* out;
   z_stream zipStream;
 }; 
 #endif// SHABACK_GzipOutputStream_H

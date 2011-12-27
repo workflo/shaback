@@ -9,7 +9,6 @@ find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
-find_package(LZO REQUIRED)
 
 # Erst ab cmake 2.8.5:
 if (CMAKE_VERSION VERSION_GREATER "2.8.4")
@@ -23,9 +22,9 @@ endif (CMAKE_VERSION VERSION_GREATER "2.8.4")
 #ADD_SUBDIRECTORY(src)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
-set(shaback_SRCS shaback.cpp main.cpp RuntimeConfig.cpp Sha1.cpp File.cpp Repository.cpp BackupRun.cpp Exception.cpp Cache.cpp ShabackOutputStream.cpp OutputStream.cpp FileOutputStream.cpp InputStream.cpp FileInputStream.cpp LzoOutputStream.cpp)
+set(shaback_SRCS shaback.cpp main.cpp RuntimeConfig.cpp Sha1.cpp File.cpp Repository.cpp BackupRun.cpp Exception.cpp Cache.cpp ShabackOutputStream.cpp OutputStream.cpp FileOutputStream.cpp InputStream.cpp FileInputStream.cpp GzipOutputStream.cpp)
 add_executable(shaback ${shaback_SRCS})
-target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} ${LZO_LIBRARIES})
+target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY})
 
 install(DIRECTORY etc/shaback DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
 install(PROGRAMS shaback DESTINATION bin)

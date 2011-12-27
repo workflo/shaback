@@ -2,8 +2,8 @@
 #include <fcntl.h>
 
 #include "ShabackOutputStream.h"
-#include "LzoOutputStream.h"
 #include "FileOutputStream.h"
+#include "GzipOutputStream.h"
 #include "Exception.h"
 #include "Repository.h"
 
@@ -36,8 +36,8 @@ void ShabackOutputStream::open(File& file)
 
   switch(compressionAlgorithm) {
     
-  case COMPRESSION_LZO:
-    outputStream = compressionOutputStream = new LzoOutputStream(outputStream);
+  case COMPRESSION_GZ:
+    outputStream = compressionOutputStream = new GzipOutputStream(outputStream);
     
     break;
 
