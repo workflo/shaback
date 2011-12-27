@@ -2,6 +2,8 @@
 #include <fcntl.h>
 
 #include "ShabackOutputStream.h"
+#include "LzoOutputStream.h"
+#include "FileOutputStream.h"
 #include "Exception.h"
 #include "Repository.h"
 
@@ -12,34 +14,34 @@ ShabackOutputStream::ShabackOutputStream(int compressionAlgorithm, int encryptio
   : opened(false), compressionAlgorithm(compressionAlgorithm),
     encryptionAlgorithm(encryptionAlgorithm)
 {
+  outputStream = 0;
+  compressionOutputStream = 0;
+  fileOutputStream = 0;
+  encryptionOutputStream = 0;
 }
 
 ShabackOutputStream::~ShabackOutputStream()
 {
   close();
+  if (compressionOutputStream) delete compressionOutputStream;
+  if (encryptionOutputStream) delete encryptionOutputStream;
+  if (fileOutputStream) delete fileOutputStream;
 }
 
 
 void ShabackOutputStream::open(File& file)
 {
   this->file = file;
+  outputStream = fileOutputStream = new FileOutputStream(file);
 
   switch(compressionAlgorithm) {
     
-  case COMPRESSION_GZ:
-    gz = ::gzopen(file.path.c_str(), "wb");
-    if (gz == 0) {
-      throw Exception::errnoToException(file.path);
-    }
-    opened = true;
+  case COMPRESSION_LZO:
+    outputStream = compressionOutputStream = new LzoOutputStream(outputStream);
+    
     break;
 
   case COMPRESSION_NONE:
-    fd = ::open(file.path.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0777);
-    if (fd == 0) {
-      throw Exception::errnoToException(file.path);
-    }
-    opened = true;
     break;
     
   }
@@ -49,22 +51,7 @@ void ShabackOutputStream::open(File& file)
 
 void ShabackOutputStream::close()
 {
-  if (opened) {
-    switch(compressionAlgorithm) {
-    
-    case COMPRESSION_GZ:
-      gzclose(gz);
-      break;
-
-    case COMPRESSION_NONE:
-      ::close(fd);
-      break;
-    }
-  
-    opened = false;
-
-///     cout << "close: " << file.path << endl;
-  }
+  outputStream->close();
 }
 
 
@@ -76,20 +63,5 @@ void ShabackOutputStream::write(string& s)
 
 void ShabackOutputStream::write(const char* data, int numBytes)
 {
-    switch(compressionAlgorithm) {
-    
-    case COMPRESSION_GZ:
-      if (gzwrite(gz, data, numBytes) != numBytes) {
-	throw Exception::errnoToException(file.path);
-      }
-      break;
-
-    case COMPRESSION_NONE:
-      if (::write(fd, data, numBytes) != numBytes) {
-	throw Exception::errnoToException(file.path);
-      }
-      break;
-    }
+  outputStream->write(data, numBytes);
 }
-
-////

@@ -19,11 +19,12 @@ Repository::Repository(RuntimeConfig& config)
 {
   string hashAlgorithm("SHA1");
   string encryptionAlgorithm("");
-  string compressionAlgorithm("GZ");
+  string compressionAlgorithm("LZO");
 
-  if (compressionAlgorithm == "GZ") {
-    this->compressionAlgorithm = COMPRESSION_GZ;
-  } else if (compressionAlgorithm == "LZO") {
+//   if (compressionAlgorithm == "GZ") {
+//     this->compressionAlgorithm = COMPRESSION_GZ;
+//   } else 
+  if (compressionAlgorithm == "LZO") {
     this->compressionAlgorithm = COMPRESSION_LZO;
   } else if (compressionAlgorithm.empty()) {
     this->compressionAlgorithm = COMPRESSION_NONE;

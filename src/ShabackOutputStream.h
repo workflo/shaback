@@ -4,6 +4,7 @@
 #include <string>
 #include <zlib.h>
 #include "File.h"
+#include "OutputStream.h"
 
 class ShabackOutputStream
 {
@@ -24,6 +25,10 @@ class ShabackOutputStream
   gzFile gz;
   int fd;
   bool opened;
+  OutputStream* compressionOutputStream;
+  OutputStream* outputStream;
+  OutputStream* fileOutputStream;
+  OutputStream* encryptionOutputStream;
 };
 
 #endif // SHABACK_ShabackOutputStream_H

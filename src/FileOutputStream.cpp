@@ -36,19 +36,19 @@ FileOutputStream::~FileOutputStream()
  *****************************************************************************/
 void FileOutputStream::init(string& filename)
 {
-#if defined(JAKELIB_WIN32API)
+// #if defined(JAKELIB_WIN32API)
 
-  // FIXME: append
-  handle = CreateFile(JAKELIB_LATIN1(filename), GENERIC_WRITE,
-                      0, NULL, CREATE_ALWAYS,
-                      FILE_ATTRIBUTE_NORMAL, NULL);
+//   // FIXME: append
+//   handle = CreateFile(JAKELIB_LATIN1(filename), GENERIC_WRITE,
+//                       0, NULL, CREATE_ALWAYS,
+//                       FILE_ATTRIBUTE_NORMAL, NULL);
   
-  if (handle == INVALID_HANDLE_VALUE) {
-    throw IOException(System::explainErrorCode(GetLastError())
-                      .. JAKELIB_AT2("jakelib.io.FileOutputStream.init"));
-  }
+//   if (handle == INVALID_HANDLE_VALUE) {
+//     throw IOException(System::explainErrorCode(GetLastError())
+//                       .. JAKELIB_AT2("jakelib.io.FileOutputStream.init"));
+//   }
   
-#else
+// #else
 
   handle = open(filename.c_str(), 
                 O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC),
@@ -58,7 +58,7 @@ void FileOutputStream::init(string& filename)
     throw Exception::errnoToException(filename);
   }
 
-#endif
+// #endif
 }
 
 
@@ -68,14 +68,14 @@ void FileOutputStream::init(string& filename)
 void FileOutputStream::write(int b)
 {
   char c = (char) b;
-  write(&c, 0, 1);
+  write(&c, 1);
 }
 
 
 /*****************************************************************************\
  * write                                                                      |
  *****************************************************************************/
-void FileOutputStream::write(const char* b, int offset, int len)
+void FileOutputStream::write(const char* b, int len)
 {
 //   if (b == 0)
 //     throw new NullPointerException();
@@ -84,22 +84,22 @@ void FileOutputStream::write(const char* b, int offset, int len)
 //   else if (len == 0)
 //     return;
   
-#if defined(JAKELIB_WIN32API)
+// #if defined(JAKELIB_WIN32API)
 
-  DWORD written;
+//   DWORD written;
 
-  if (!WriteFile(handle, &b[offset], len, &written, NULL)) {
-    throw new IOException(System::explainErrorCode(GetLastError())
-                      .. JAKELIB_AT2("jakelib.io.FileOutputStream.write"));
-  }
+//   if (!WriteFile(handle, &b[offset], len, &written, NULL)) {
+//     throw new IOException(System::explainErrorCode(GetLastError())
+//                       .. JAKELIB_AT2("jakelib.io.FileOutputStream.write"));
+//   }
 
-#else
+// #else
 
-  if (::write(handle, &b[offset], len) == -1) {
+  if (::write(handle, b, len) != len) {
     throw Exception::errnoToException();
   }
 
-#endif
+// #endif
 }
 
 
