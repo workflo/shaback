@@ -10,7 +10,8 @@ public:
     Shaback(RuntimeConfig& config);
     virtual ~Shaback();
     virtual void createRepository();
-    
+    static int deflate();
+
     Repository repository;
     
   protected:

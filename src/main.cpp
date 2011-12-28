@@ -44,6 +44,8 @@ int main(int argc, char** argv)
       shaback.createRepository();
     } else if (config.operation == "backup") {
       return shaback.repository.backup();
+    } else if (config.operation == "deflate") {
+      return shaback.deflate();
     } else {
       shaback.repository.open();
     }

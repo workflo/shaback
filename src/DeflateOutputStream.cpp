@@ -1,35 +1,35 @@
 #include <iostream>
 
-#include "GzipOutputStream.h"
+#include "DeflateOutputStream.h"
 #include "Exception.h"
 
 using namespace std;
 
 
-GzipOutputStream::GzipOutputStream(OutputStream* out)
+DeflateOutputStream::DeflateOutputStream(OutputStream* out)
   : out(out)
 {
   ret = 0;
   zipStream.zalloc = Z_NULL;
   zipStream.zfree = Z_NULL;
   zipStream.opaque = Z_NULL;
-  if (deflateInit(&zipStream, 5) != Z_OK) {
+  if (deflateInit(&zipStream, Z_DEFAULT_COMPRESSION) != Z_OK) {
     // TODO: Throw exception
-    cout << "GzipOutputStream error" << endl;
+    cout << "DeflateOutputStream error" << endl;
   }
 
-//   cout << "GzipOutputStream.init" << endl;
+//   cout << "DeflateOutputStream.init" << endl;
 }
 
-GzipOutputStream::~GzipOutputStream()
+DeflateOutputStream::~DeflateOutputStream()
 {
-//   cout << "GzipOutputStream.~" << endl;
+//   cout << "DeflateOutputStream.~" << endl;
   close();
 //   deflateEnd(&zipStream);
 }
 
 
-void GzipOutputStream::write(int b)
+void DeflateOutputStream::write(int b)
 {
   char c = (char) b;
   write(&c, 1);
@@ -57,61 +57,58 @@ void GzipOutputStream::write(int b)
 //     uLong   reserved;   /* reserved for future use */
 // } z_stream;
 
-void GzipOutputStream::write(const char* b, int len)
+void DeflateOutputStream::write(const char* b, int len)
 {
-  if (len <= 0) {
-    return;
-  } else if (len <= GZIP_CHUNK_SIZE) {
-    zipStream.avail_in = len;
-    zipStream.next_in = (unsigned char*) b;
+  if (len <= 0) return;
+
+  zipStream.avail_in = len;
+  zipStream.next_in = (unsigned char*) b;
     
-    do {
-      zipStream.avail_out = GZIP_CHUNK_SIZE;
-      zipStream.next_out = outputBuffer;
+  do {
+    zipStream.avail_out = DEFLATE_CHUNK_SIZE;
+    zipStream.next_out = outputBuffer;
 
-//       cout << "GzipOutputStream.write: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
+//       cout << "DeflateOutputStream.write: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
       
-      ret = deflate(&zipStream, Z_NO_FLUSH);
-//       cout << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (GZIP_CHUNK_SIZE - zipStream.avail_out) << "; ret=" << ret<<endl;
-      if (ret == Z_STREAM_ERROR) {
-	// TODO: Throw exception
-      }
-      out->write((const char*) outputBuffer, GZIP_CHUNK_SIZE - zipStream.avail_out);
-    } while (zipStream.avail_in > 0);
-
-  } else {
-    throw "Not yet implemented";
-  }
+    ret = deflate(&zipStream, Z_NO_FLUSH);
+//     cout << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (GZIP_CHUNK_SIZE - zipStream.avail_out) << "; ret=" << ret<<endl;
+    if (ret == Z_STREAM_ERROR) {
+      // TODO: Throw exception
+    }
+    out->write((const char*) outputBuffer, DEFLATE_CHUNK_SIZE - zipStream.avail_out);
+  } while (zipStream.avail_out == 0);
+  //  } while (zipStream.avail_in > 0);
 }
 
 
-void GzipOutputStream::finish()
+void DeflateOutputStream::finish()
 {
   unsigned char inBuf[10];
 
-//   cout << "GzipOutputStream.finish" << endl;
+//   cout << "DeflateOutputStream.finish" << endl;
   zipStream.avail_in = 0;
   zipStream.next_in = inBuf;
     
   do {
-    zipStream.avail_out = GZIP_CHUNK_SIZE;
+    zipStream.avail_out = DEFLATE_CHUNK_SIZE;
     zipStream.next_out = outputBuffer;
 
-//     cout << "GzipOutputStream.finish: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
+//     cout << "DeflateOutputStream.finish: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
       
     ret = deflate(&zipStream, Z_FINISH);
 //     cout << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (GZIP_CHUNK_SIZE - zipStream.avail_out) <<  "; ret=" << ret<<endl;
     if (ret == Z_STREAM_ERROR) {
       // TODO: Throw exception
     }
-    out->write((const char*) outputBuffer, GZIP_CHUNK_SIZE - zipStream.avail_out);
-  } while (ret != Z_STREAM_END);
+    out->write((const char*) outputBuffer, DEFLATE_CHUNK_SIZE - zipStream.avail_out);
+  } while (zipStream.avail_out == 0);
+  //  } while (ret != Z_STREAM_END);
 }
 
 
-void GzipOutputStream::close()
+void DeflateOutputStream::close()
 {
-//   cout << "GzipOutputStream.close" << endl;
+//   cout << "DeflateOutputStream.close" << endl;
   if (ret != Z_STREAM_END) {
     finish();
     out->close();

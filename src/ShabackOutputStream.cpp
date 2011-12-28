@@ -3,7 +3,7 @@
 
 #include "ShabackOutputStream.h"
 #include "FileOutputStream.h"
-#include "GzipOutputStream.h"
+#include "DeflateOutputStream.h"
 #include "Exception.h"
 #include "Repository.h"
 
@@ -39,8 +39,8 @@ void ShabackOutputStream::open(File& file)
 
   switch(compressionAlgorithm) {
     
-  case COMPRESSION_GZ:
-    compressionOutputStream = new GzipOutputStream(outputStream);
+  case COMPRESSION_DEFLATE:
+    compressionOutputStream = new DeflateOutputStream(outputStream);
     outputStream = compressionOutputStream;
     break;
 

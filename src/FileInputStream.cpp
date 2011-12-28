@@ -104,7 +104,7 @@ int FileInputStream::read(char* b, int len)
 
 // #else
 
-  int r = ::read(handle, (char*) b, len);
+  int r = ::read(handle, b, len);
   if (r < 0)
     throw Exception::errnoToException();
   else if (r == 0)

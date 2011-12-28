@@ -5,6 +5,8 @@
 
 #include "shaback.h"
 #include "RuntimeConfig.h"
+#include "DeflateOutputStream.h"
+#include "StandardOutputStream.h"
 
 using namespace std;
 
@@ -69,3 +71,17 @@ void Shaback::createRepository()
   cout << "Repository created: " << config.repository << endl;
 }
 
+
+int Shaback::deflate()
+{
+  FILE* source = stdin;
+  char buf[DEFLATE_CHUNK_SIZE];
+  StandardOutputStream os(stdout);
+  DeflateOutputStream def(&os);
+  int bytesRead, flush;
+
+  while (!feof(source)) {
+    bytesRead = fread(buf, 1, DEFLATE_CHUNK_SIZE, source);
+    def.write(buf, bytesRead);
+  }
+}
