@@ -11,6 +11,7 @@ public:
     virtual ~Shaback();
     virtual void createRepository();
     static int deflate();
+    static int inflate();
 
     Repository repository;
     

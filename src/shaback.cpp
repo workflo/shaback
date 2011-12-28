@@ -7,6 +7,8 @@
 #include "RuntimeConfig.h"
 #include "DeflateOutputStream.h"
 #include "StandardOutputStream.h"
+#include "DeflateInputStream.h"
+#include "StandardInputStream.h"
 
 using namespace std;
 
@@ -74,14 +76,33 @@ void Shaback::createRepository()
 
 int Shaback::deflate()
 {
-  FILE* source = stdin;
-  char buf[DEFLATE_CHUNK_SIZE];
-  StandardOutputStream os(stdout);
-  DeflateOutputStream def(&os);
-  int bytesRead, flush;
+  StandardInputStream in(stdin);
+  StandardOutputStream out(stdout);
 
-  while (!feof(source)) {
-    bytesRead = fread(buf, 1, DEFLATE_CHUNK_SIZE, source);
+  char buf[DEFLATE_CHUNK_SIZE];
+  DeflateOutputStream def(&out);
+  int bytesRead;
+
+  while (true) {
+    bytesRead = in.read(buf, DEFLATE_CHUNK_SIZE);
+    if (bytesRead == -1) break;
     def.write(buf, bytesRead);
   }
+}
+
+
+int Shaback::inflate()
+{
+  StandardInputStream in(stdin);
+  StandardOutputStream out(stdout);
+
+//   char buf[DEFLATE_CHUNK_SIZE];
+//   DeflateInputStream def(&in);
+//   int bytesRead;
+
+//   while (true) {
+//     bytesRead = def.read(buf, DEFLATE_CHUNK_SIZE);
+//     if (bytesRead == -1) break;
+//     out.write(buf, bytesRead);
+//   }
 }

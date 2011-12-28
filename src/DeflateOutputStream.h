@@ -27,7 +27,6 @@ public:
 protected:
   OutputStream* out;
   z_stream zipStream;
-/*   unsigned char* inputBuffer; */
   unsigned char outputBuffer[DEFLATE_CHUNK_SIZE];
   int ret;
 }; 
