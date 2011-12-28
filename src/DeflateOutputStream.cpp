@@ -9,7 +9,7 @@ using namespace std;
 DeflateOutputStream::DeflateOutputStream(OutputStream* out)
   : out(out)
 {
-  ret = 0;
+  ret = Z_OK;
   zipStream.zalloc = Z_NULL;
   zipStream.zfree = Z_NULL;
   zipStream.opaque = Z_NULL;
@@ -54,7 +54,9 @@ void DeflateOutputStream::write(const char* b, int len)
 
 void DeflateOutputStream::finish()
 {
-  unsigned char inBuf[10];
+  if (ret == Z_STREAM_END) return;
+
+  unsigned char inBuf[0];
 
   zipStream.avail_in = 0;
   zipStream.next_in = inBuf;
@@ -79,6 +81,7 @@ void DeflateOutputStream::close()
   if (ret != Z_STREAM_END) {
     finish();
     out->close();
+    ret = Z_STREAM_END;
   }
 }
 

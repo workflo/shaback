@@ -96,13 +96,13 @@ int Shaback::inflate()
   StandardInputStream in(stdin);
   StandardOutputStream out(stdout);
 
-//   char buf[DEFLATE_CHUNK_SIZE];
-//   DeflateInputStream def(&in);
-//   int bytesRead;
+  char buf[DEFLATE_CHUNK_SIZE];
+  DeflateInputStream def(&in);
+  int bytesRead;
 
-//   while (true) {
-//     bytesRead = def.read(buf, DEFLATE_CHUNK_SIZE);
-//     if (bytesRead == -1) break;
-//     out.write(buf, bytesRead);
-//   }
+  while (true) {
+    bytesRead = def.read(buf, DEFLATE_CHUNK_SIZE);
+    if (bytesRead == -1) break;
+    out.write(buf, bytesRead);
+  }
 }

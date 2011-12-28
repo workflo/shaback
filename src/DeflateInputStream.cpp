@@ -9,12 +9,10 @@ using namespace std;
 DeflateInputStream::DeflateInputStream(InputStream* in)
   : in(in)
 {
-  ret = 0;
+  ret = Z_OK;
   zipStream.zalloc = Z_NULL;
   zipStream.zfree = Z_NULL;
   zipStream.opaque = Z_NULL;
-  zipStream.avail_in = 0;
-  zipStream.next_in = Z_NULL;
 
   if (inflateInit(&zipStream) != Z_OK) {
     // TODO: Throw exception
@@ -26,21 +24,14 @@ DeflateInputStream::DeflateInputStream(InputStream* in)
 
 DeflateInputStream::~DeflateInputStream()
 {
-//   cout << "DeflateInputStream.~" << endl;
   close();
-//   deflateEnd(&zipStream);
 }
 
 
 int DeflateInputStream::read()
 {
-  char b;
-  long r;
-  r = read(&b, 1);
-  if (r == 1)
-    return b & 0xff;
-  else 
-    return -1;
+  // TODO: Throw UnsupportedOperationException
+  return -1;
 }
 
 
@@ -67,62 +58,35 @@ int DeflateInputStream::read()
 
 int DeflateInputStream::read(char* b, int len)
 {
-  if (len <= 0) return;
-
-  int bytesRead = in->read(inputBuffer, min(len, DEFLATE_CHUNK_SIZE));
+  int bytesRead = in->read((char*) inputBuffer, min(len, DEFLATE_CHUNK_SIZE));
+  if (bytesRead == -1) return -1;
 
   zipStream.avail_in = bytesRead;
   zipStream.next_in = inputBuffer;
     
-  do {
-    zipStream.avail_out = len;
-    zipStream.next_out = b;
+  zipStream.avail_out = len;
+  zipStream.next_out = (unsigned char*) b;
 
 //       cout << "DeflateInputStream.write: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
       
-    ret = inflate(&zipStream, Z_NO_FLUSH);
+  ret = inflate(&zipStream, Z_NO_FLUSH);
 //     cout << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (GZIP_CHUNK_SIZE - zipStream.avail_out) << "; ret=" << ret<<endl;
-    if (ret == Z_STREAM_ERROR) {
-      // TODO: Throw exception
-    }
-    out->write((const char*) outputBuffer, DEFLATE_CHUNK_SIZE - zipStream.avail_out);
-  } while (zipStream.avail_out == 0);
-  //  } while (zipStream.avail_in > 0);
-}
+  if (ret == Z_STREAM_ERROR) {
+    // TODO: Throw exception
+  }
 
+  // TODO: Keep remaining bytes for next call
 
-void DeflateInputStream::finish()
-{
-  unsigned char inBuf[10];
-
-//   cout << "DeflateInputStream.finish" << endl;
-  zipStream.avail_in = 0;
-  zipStream.next_in = inBuf;
-    
-  do {
-    zipStream.avail_out = DEFLATE_CHUNK_SIZE;
-    zipStream.next_out = outputBuffer;
-
-//     cout << "DeflateInputStream.finish: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
-      
-    ret = deflate(&zipStream, Z_FINISH);
-//     cout << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (GZIP_CHUNK_SIZE - zipStream.avail_out) <<  "; ret=" << ret<<endl;
-    if (ret == Z_STREAM_ERROR) {
-      // TODO: Throw exception
-    }
-    out->write((const char*) outputBuffer, DEFLATE_CHUNK_SIZE - zipStream.avail_out);
-  } while (zipStream.avail_out == 0);
-
-  inflateEnd(&zipStream);
+  return DEFLATE_CHUNK_SIZE - zipStream.avail_out;
 }
 
 
 void DeflateInputStream::close()
 {
-//   cout << "DeflateInputStream.close" << endl;
   if (ret != Z_STREAM_END) {
-    finish();
-    out->close();
+    inflateEnd(&zipStream);
+    in->close();
+    ret = Z_STREAM_END;
   }
 }
 
