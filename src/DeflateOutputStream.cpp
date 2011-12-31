@@ -56,7 +56,7 @@ void DeflateOutputStream::finish()
 {
   if (ret == Z_STREAM_END) return;
 
-  unsigned char inBuf[0];
+  unsigned char inBuf[1];
 
   zipStream.avail_in = 0;
   zipStream.next_in = inBuf;

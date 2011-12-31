@@ -37,19 +37,19 @@ FileInputStream::~FileInputStream()
  *****************************************************************************/
 void FileInputStream::init(string& filename)
 {
-// #if defined(JAKELIB_WIN32API)
+#if defined(WIN32)
 
-//   handle = CreateFile(JAKELIB_LATIN1(filename), GENERIC_READ,
-//                       FILE_SHARE_READ, NULL, OPEN_EXISTING,
-//                       FILE_ATTRIBUTE_NORMAL, NULL);
+	handle = CreateFileA(filename.c_str(), GENERIC_READ,
+                      FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                      FILE_ATTRIBUTE_NORMAL, NULL);
   
-//   if (handle == INVALID_HANDLE_VALUE) {
-//     throw new FileNotFoundException(System::explainErrorCode(GetLastError())
-//                                     .. JAKELIB_AT2("jakelib.io.FileInputStream.init"),
-//                                     filename);
-//   }
+  if (handle == INVALID_HANDLE_VALUE) {
+     throw new FileNotFoundException(System::explainErrorCode(GetLastError())
+                                    .. JAKELIB_AT2("jakelib.io.FileInputStream.init"),
+                                    filename);
+  }
 
-// #else
+#else
 
   handle = ::open(filename.c_str(), O_RDONLY);
    
@@ -57,7 +57,7 @@ void FileInputStream::init(string& filename)
     throw Exception::errnoToException(filename);
   }
 
-// #endif
+#endif
 }
 
 
@@ -88,21 +88,21 @@ int FileInputStream::read(char* b, int len)
 //   else if (len == 0)
 //     return 0;
   
-// #if defined(JAKELIB_WIN32API)
+#if defined(WIN32)
 
-//   DWORD r;
+  DWORD r;
   
-//   if (!ReadFile(handle, &b[offset], len, &r, NULL)) {
-//     throw new IOException(System::explainErrorCode(GetLastError())
-//                       .. JAKELIB_AT2("jakelib.io.FileInputStream.read"));
-//   }
+  if (!ReadFile(handle, b, len, &r, NULL)) {
+    throw new IOException(System::explainErrorCode(GetLastError())
+                      .. JAKELIB_AT2("jakelib.io.FileInputStream.read"));
+  }
 
-//   if (r == 0)
-//     return -1;
-//   else
-//     return r;
+  if (r == 0)
+    return -1;
+  else
+    return r;
 
-// #else
+#else
 
   int r = ::read(handle, b, len);
   if (r < 0)
@@ -112,7 +112,7 @@ int FileInputStream::read(char* b, int len)
   else
     return r;
 
-// #endif
+#endif
 }
 
 
@@ -121,21 +121,21 @@ int FileInputStream::read(char* b, int len)
  *****************************************************************************/
 void FileInputStream::close()
 {
-// #if defined(JAKELIB_WIN32API)
+#if defined(WIN32)
 
-//   if (handle != INVALID_HANDLE_VALUE) {
-//     CloseHandle(handle);
-//     handle = INVALID_HANDLE_VALUE;
-//   }
+  if (handle != INVALID_HANDLE_VALUE) {
+    CloseHandle(handle);
+    handle = INVALID_HANDLE_VALUE;
+  }
 
-// #else
+#else
 
   if (handle != -1) {
     ::close(handle);
     handle = -1;
   }
 
-// #endif
+#endif
 }
 
 
@@ -144,13 +144,15 @@ void FileInputStream::close()
  *****************************************************************************/
 void FileInputStream::reset()
 {
-// #if defined(JAKELIB_WIN32API)
-//   // FIXME
-// #else
+#if defined(WIN32)
+
+  LZSeek(handle, 0, 0);
+
+#else
 
   lseek(handle, 0, SEEK_SET);
 
-// #endif
+#endif
 }
 
 

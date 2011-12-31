@@ -2,6 +2,9 @@
 #define SHABACK_FileInputStream_H
 
 #include <string.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include "InputStream.h"
 #include "File.h"
 
@@ -48,10 +51,12 @@ public:
   void setBlocking(bool on) {};
   
 protected:
-
-//         HANDLE handle;
+#ifdef WIN32
+  HANDLE handle;
+#else
   int handle;
-  
+#endif
+
   void init(std::string& filename);
 
 };

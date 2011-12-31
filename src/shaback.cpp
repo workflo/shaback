@@ -1,5 +1,5 @@
 #include <iostream>
-#include <dirent.h>
+//#include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -88,6 +88,8 @@ int Shaback::deflate()
     if (bytesRead == -1) break;
     def.write(buf, bytesRead);
   }
+
+  return 0;
 }
 
 
@@ -105,4 +107,6 @@ int Shaback::inflate()
     if (bytesRead == -1) break;
     out.write(buf, bytesRead);
   }
+
+  return 0;
 }

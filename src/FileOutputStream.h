@@ -2,6 +2,9 @@
 #define SHABACK_FileOutputStream_H
 
 #include <string.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include "File.h"
 #include "OutputStream.h"
 
@@ -25,9 +28,11 @@ public:
   
 protected:
   bool append;
-  //HANDLE handle;
+#ifdef WIN32
+  HANDLE handle;
+#else
   int handle;
-
+#endif
   void init(std::string& filename);
 };
 #endif // SHABACK_FileOutputStream_H
