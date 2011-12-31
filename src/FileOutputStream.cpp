@@ -47,8 +47,7 @@ void FileOutputStream::init(string& filename)
                        FILE_ATTRIBUTE_NORMAL, NULL);
   
    if (handle == INVALID_HANDLE_VALUE) {
-     throw IOException(System::explainErrorCode(GetLastError())
-                       .. JAKELIB_AT2("jakelib.io.FileOutputStream.init"));
+     throw Exception::errnoToException(filename);
    }
   
 #else
@@ -92,8 +91,7 @@ void FileOutputStream::write(const char* b, int len)
   DWORD written;
 
   if (!WriteFile(handle, b, len, &written, NULL)) {
-    throw new IOException(System::explainErrorCode(GetLastError())
-                      .. JAKELIB_AT2("jakelib.io.FileOutputStream.write"));
+    throw Exception::errnoToException();
   }
 
 #else

@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string.h>
+#ifdef WIN32
+# include <windows.h>
+#endif
 
 #include "Exception.h"
 
@@ -17,14 +20,22 @@ string Exception::getMessage()
 
 Exception Exception::errnoToException()
 {
+#ifdef WIN32
+  return errnoToException(GetLastError(), "");
+#else
   int e = errno;
   return errnoToException(e, "");
+#endif
 }
 
 Exception Exception::errnoToException(string filename)
 {
+#ifdef WIN32
+  return errnoToException(GetLastError(), filename);
+#else
   int e = errno;
   return errnoToException(e, filename);
+#endif
 }
 
 Exception Exception::errnoToException(int e, string filename)
@@ -57,5 +68,6 @@ string FileNotFoundException::getFilename()
 
 UnsupportedCompressionAlgorithm::UnsupportedCompressionAlgorithm(string algo) : Exception(string("Unsupported compression algorithm: ").append(algo)) {}
 
-
 UnsupportedEncryptionAlgorithm::UnsupportedEncryptionAlgorithm(string algo) : Exception(string("Unsupported encryption algorithm: ").append(algo)) {}
+
+UnsupportedOperation::UnsupportedOperation(string op) : Exception(string("Unsupported operation: ").append(op)) {}

@@ -50,5 +50,10 @@ class UnsupportedEncryptionAlgorithm : public Exception
   UnsupportedEncryptionAlgorithm(std::string algo);
 };
 
+class UnsupportedOperation : public Exception 
+{
+ public:
+  UnsupportedOperation(std::string op);
+};
 
 #endif // Exception_H

@@ -44,9 +44,7 @@ void FileInputStream::init(string& filename)
                       FILE_ATTRIBUTE_NORMAL, NULL);
   
   if (handle == INVALID_HANDLE_VALUE) {
-     throw new FileNotFoundException(System::explainErrorCode(GetLastError())
-                                    .. JAKELIB_AT2("jakelib.io.FileInputStream.init"),
-                                    filename);
+    throw Exception::errnoToException(filename);
   }
 
 #else
@@ -93,8 +91,7 @@ int FileInputStream::read(char* b, int len)
   DWORD r;
   
   if (!ReadFile(handle, b, len, &r, NULL)) {
-    throw new IOException(System::explainErrorCode(GetLastError())
-                      .. JAKELIB_AT2("jakelib.io.FileInputStream.read"));
+    throw Exception::errnoToException();
   }
 
   if (r == 0)
@@ -145,8 +142,8 @@ void FileInputStream::close()
 void FileInputStream::reset()
 {
 #if defined(WIN32)
-
-  LZSeek(handle, 0, 0);
+	
+  throw UnsupportedOperation("reset");
 
 #else
 

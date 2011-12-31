@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <dirent.h>
-#include <fnmatch.h>
+//#include <dirent.h>
+//#include <fnmatch.h>
 
 #include "BackupRun.h"
 #include "Sha1.h"
@@ -63,33 +63,24 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 
   string treeFile;
   
-  DIR* dirp = opendir(dir.path.c_str());
-  struct dirent* dp;
+  vector<File> files = dir.listFiles();
 
   // TODO: Verzeichnis nach Inodes sortieren
 
-  if (dirp) {
-    while ((dp = readdir(dirp)) != NULL) {
-      if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) continue;
+  for (vector<File>::iterator it = files.begin(); it < files.end(); it++ ) {
+    File child(*it);
       
-      File child(dir, dp->d_name);
-      
-      if (config.excludeFile(child)) continue;
+    if (config.excludeFile(child)) continue;
 	
-      if (child.isSymlink()) {
+    if (child.isSymlink()) {
 	treeFile.append(handleSymlink(child, false));
-      } else if (child.isDir()) {
+    } else if (child.isDir()) {
 	treeFile.append(handleDirectory(child, false));
-      } else if (child.isFile()) {
+    } else if (child.isFile()) {
 	treeFile.append(handleFile(child, false));
-      } else {
+    } else {
 	// Ignore other types of files.
-      }
-
     }
-    closedir(dirp);
-  } else {
-    throw Exception::errnoToException(dir.path);
   }
 
   string treeFileHashValue = repository.storeTreeFile(treeFile);

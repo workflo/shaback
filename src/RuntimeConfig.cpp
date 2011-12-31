@@ -1,8 +1,12 @@
 #include <iostream>
-#include <unistd.h>
-#include <getopt.h>
-#include <dirent.h>
-#include <fnmatch.h>
+//#include <unistd.h>
+#ifdef WIN32
+# include <popt.h>
+#else
+# include <getopt.h>
+#endif
+//#include <dirent.h>
+//#include <fnmatch.h>
 #include <stdlib.h>
 
 extern "C" {
@@ -11,7 +15,7 @@ extern "C" {
 #include <lualib.h>
 }
 
-#include "ShabackConfig.h"
+//#include "ShabackConfig.h"
 #include "RuntimeConfig.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
@@ -30,8 +34,8 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 {
   int digit_optind = 0;
 
-    while (1) {
-	int this_option_optind = optind ? optind : 1;
+    while (true) {
+//	int this_option_optind = optind ? optind : 1;
 	int option_index = 0;
 	static struct option long_options[] = {
 	    {"add", 1, 0, 0},
