@@ -4,6 +4,7 @@
 # include "getopt.h"
 #else
 # include <getopt.h>
+# include <fnmatch.h>
 #endif
 #include <stdlib.h>
 
@@ -13,7 +14,6 @@ extern "C" {
 #include <lualib.h>
 }
 
-//#include "ShabackConfig.h"
 #include "RuntimeConfig.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"

@@ -20,3 +20,18 @@ Build from source:
 cd src
 cmake .
 make
+
+
+Windows:
+------------------------------
+- Visual Studio C++ (Express) 2010
+- git
+  http://code.google.com/p/msysgit/downloads/list?can=3&q=official+Git
+- Lua
+  http://code.google.com/p/luaforwindows/downloads/list
+- ZLib
+  http://gnuwin32.sourceforge.net/packages/zlib.htm
+- GDBM
+  http://gnuwin32.sourceforge.net/packages/gdbm.htm
+- openssl
+  http://www.slproweb.com/products/Win32OpenSSL.html
