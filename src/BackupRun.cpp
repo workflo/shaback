@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include <dirent.h>
-//#include <fnmatch.h>
 
 #include "BackupRun.h"
 #include "Sha1.h"
@@ -63,13 +61,13 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 
   string treeFile;
   
-  vector<File> files = dir.listFiles();
+  vector<File> files = dir.listFiles("*");
 
   // TODO: Verzeichnis nach Inodes sortieren
 
   for (vector<File>::iterator it = files.begin(); it < files.end(); it++ ) {
     File child(*it);
-      
+
     if (config.excludeFile(child)) continue;
 	
     if (child.isSymlink()) {
@@ -98,11 +96,11 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", 
-	  dir.statBuffer.st_mode, 
-	  dir.statBuffer.st_uid,
-	  dir.statBuffer.st_gid,
-	  (int)dir.statBuffer.st_mtime,
-	  (int)dir.statBuffer.st_ctime);
+	  dir.getPosixMode(), 
+	  dir.getPosixUid(),
+	  dir.getPosixGid(),
+	  dir.getPosixMtime(),
+	  dir.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
@@ -125,11 +123,11 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", 
-	  file.statBuffer.st_mode, 
-	  file.statBuffer.st_uid,
-	  file.statBuffer.st_gid,
-	  (int)file.statBuffer.st_mtime,
-	  (int)file.statBuffer.st_ctime);
+	  file.getPosixMode(), 
+	  file.getPosixUid(),
+	  file.getPosixGid(),
+	  file.getPosixMtime(),
+	  file.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
@@ -148,11 +146,11 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", 
-	  file.statBuffer.st_mode, 
-	  file.statBuffer.st_uid,
-	  file.statBuffer.st_gid,
-	  (int)file.statBuffer.st_mtime,
-	  (int)file.statBuffer.st_ctime);
+	  file.getPosixMode(), 
+	  file.getPosixUid(),
+	  file.getPosixGid(),
+	  file.getPosixMtime(),
+	  file.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append(file.readlink());
   treeFileLine.append("\n");

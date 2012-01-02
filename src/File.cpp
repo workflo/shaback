@@ -9,7 +9,9 @@
 # include <direct.h>
 # include <Shlobj.h>
 #else
+# include <dirent.h>
 # include <pwd.h>
+# include <fnmatch.h>
 #endif
 
 #include "File.h"
@@ -187,54 +189,47 @@ string File::readlink()
 #endif
 }
 
-vector<File> File::listFiles()
+vector<File> File::listFiles(string p)
 {
-  if (!isDir())
-    return vector<File>();
-
   vector<File> list;
 
+  if (!isDir()) return list;
+  
+#ifdef WIN32
   string pattern = path;
   if (path.size() > 0)
     pattern.append(separator);
-  pattern.append("*");
-   
-#ifdef WIN32
+  pattern.append(p);
 
   HANDLE dir;
   WIN32_FIND_DATAA dirent;
 
   if ((dir = FindFirstFileA(pattern.c_str(), &dirent)) != INVALID_HANDLE_VALUE) {
     do {
-	  if (strcmp(dirent.cFileName, ".") == 0 || strcmp(dirent.cFileName, "..") == 0) continue;
+      if (strcmp(dirent.cFileName, ".") == 0 || strcmp(dirent.cFileName, "..") == 0) continue;
       File f(*this, dirent.cFileName);
-
-      //if (filter == null || filter->accept(null, f))
+      
       list.push_back(f);
     }
     while(FindNextFileA(dir, &dirent));
 
     FindClose(dir);
   }
-
-  return list;
-
 #else
-  DIR* dir = opendir(pattern->latin1());
+  DIR* dir = opendir(path.c_str());
 
-  if (dir != null) {
+  if (dir) {
     struct dirent* entry;
 
-    while ((entry = readdir(dir)) != null) {
-      if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
-      File f(*this, dp->d_name);
-      //if (filter == null || filter->accept(null, f))
+    while ((entry = readdir(dir))) {
+      if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || fnmatch(p.c_str(), entry->d_name, 0)) continue;
+      File f(*this, entry->d_name);
       list.push_back(f);
     }
 
     closedir(dir);
   }
+#endif
 
   return list;
-#endif
 }

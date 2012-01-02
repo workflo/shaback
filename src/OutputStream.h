@@ -15,7 +15,7 @@
  */
 class OutputStream
 {
-public:
+ public:
   virtual ~OutputStream() = 0;
 
   /**

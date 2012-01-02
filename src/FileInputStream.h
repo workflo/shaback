@@ -3,7 +3,7 @@
 
 #include <string.h>
 #ifdef WIN32
-#include <windows.h>
+# include <windows.h>
 #endif
 #include "InputStream.h"
 #include "File.h"
@@ -17,7 +17,7 @@
  */
 class FileInputStream : public InputStream
 {
-public:
+ public:
 
   /**
    * Opens the specified file for reading.
@@ -50,7 +50,7 @@ public:
 
   void setBlocking(bool on) {};
   
-protected:
+ protected:
 #ifdef WIN32
   HANDLE handle;
 #else
@@ -61,4 +61,3 @@ protected:
 
 };
 #endif // SHABACK_FileInputStream_H
-

@@ -5,8 +5,12 @@
 #else
 # include <getopt.h>
 #endif
-//#include <dirent.h>
-//#include <fnmatch.h>
+
+
+#include <dirent.h>
+#include <fnmatch.h>
+
+
 #include <stdlib.h>
 
 extern "C" {
@@ -35,7 +39,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
   int digit_optind = 0;
 
     while (true) {
-//	int this_option_optind = optind ? optind : 1;
+	int this_option_optind = optind ? optind : 1;
 	int option_index = 0;
 	static struct option long_options[] = {
 	    {"add", 1, 0, 0},
@@ -132,18 +136,12 @@ void RuntimeConfig::load()
 
 void RuntimeConfig::tryToLoadFrom(string dir)
 {
-  DIR* dirp = opendir(dir.c_str());
-  struct dirent* dp;
+  vector<File> files = File(dir).listFiles("*.lua");
+  // TODO: Pattern
 
-  if (dirp) {
-    while ((dp = readdir(dirp)) != NULL) {
-      if (fnmatch("*.lua", dp->d_name, FNM_CASEFOLD) == 0) {
-        string path(dir);
-        path.append("/").append(dp->d_name);
-        this->loadConfigFile(path);
-      }
-    }
-    closedir(dirp);
+  for (vector<File>::iterator it = files.begin(); it < files.end(); it++ ) {
+    File f(*it);
+    loadConfigFile(f.path);
   }
 }
 
