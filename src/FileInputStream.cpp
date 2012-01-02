@@ -79,13 +79,6 @@ int FileInputStream::read()
  *****************************************************************************/
 int FileInputStream::read(char* b, int len)
 {
-//   if (b == null)
-//     throw new NullPointerException(JAKELIB_AT2("jakelib.io.FileInputStream.read"));
-//   else if (len < 0 || offset < 0)
-//     throw new IndexOutOfBoundsException(JAKELIB_AT2("jakelib.io.FileInputStream.read"));
-//   else if (len == 0)
-//     return 0;
-  
 #if defined(WIN32)
 
   DWORD r;
@@ -158,8 +151,8 @@ void FileInputStream::reset()
  *****************************************************************************/
 int FileInputStream::available()
 {
-  // FIXME
-  return 0;
+  // TODO: seek
+  throw UnsupportedOperation("available");
 }
 
 
@@ -168,7 +161,8 @@ int FileInputStream::available()
  *****************************************************************************/
 int FileInputStream::skip(int n)
 {
-  // FIXME
-  return 0;
+  // TODO: seek
+  throw UnsupportedOperation("skip");
+//  return 0;
 }
 

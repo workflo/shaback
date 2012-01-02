@@ -28,7 +28,10 @@ public:
 protected:
   InputStream* in;
   z_stream zipStream;
-  unsigned char inputBuffer[DEFLATE_CHUNK_SIZE];
+  unsigned char readBuffer[DEFLATE_CHUNK_SIZE];
+//  unsigned char* inputBuffer;
+//  int inputBufferCapacity;
+//  int inputBufferBytesAvailable;
   int ret;
 }; 
 #endif// SHABACK_DeflateInputStream_H

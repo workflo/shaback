@@ -14,24 +14,26 @@ DeflateInputStream::DeflateInputStream(InputStream* in)
   zipStream.zfree = Z_NULL;
   zipStream.opaque = Z_NULL;
 
+//  inputBufferCapacity = DEFLATE_CHUNK_SIZE * 2;
+//  inputBufferBytesAvailable = 0;
+//  inputBuffer = (unsigned char*) malloc(inputBufferCapacity);
+
   if (inflateInit(&zipStream) != Z_OK) {
     // TODO: Throw exception
     cout << "DeflateInputStream error" << endl;
   }
-
-//   cout << "DeflateInputStream.init" << endl;
 }
 
 DeflateInputStream::~DeflateInputStream()
 {
+//  free(inputBuffer);
   close();
 }
 
 
 int DeflateInputStream::read()
 {
-  // TODO: Throw UnsupportedOperationException
-  return -1;
+  throw UnsupportedOperation("read()");
 }
 
 
@@ -58,24 +60,34 @@ int DeflateInputStream::read()
 
 int DeflateInputStream::read(char* b, int len)
 {
-  int bytesRead = in->read((char*) inputBuffer, min(len, DEFLATE_CHUNK_SIZE));
-  if (bytesRead == -1) return -1;
+  if (zipStream.avail_in == 0) {
+    int bytesRead = in->read((char*) readBuffer, min(len, DEFLATE_CHUNK_SIZE));
 
-  zipStream.avail_in = bytesRead;
-  zipStream.next_in = inputBuffer;
+    zipStream.avail_in = bytesRead;
+    zipStream.next_in = readBuffer;
+
+    if (bytesRead == -1) return -1;
+  }
     
   zipStream.avail_out = len;
   zipStream.next_out = (unsigned char*) b;
 
-//       cout << "DeflateInputStream.write: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
+//  cerr << "DeflateInputStream.read: avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << endl;
       
   ret = inflate(&zipStream, Z_NO_FLUSH);
-//     cout << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (GZIP_CHUNK_SIZE - zipStream.avail_out) << "; ret=" << ret<<endl;
-  if (ret == Z_STREAM_ERROR) {
+//  cerr << "   -> avail_in=" << zipStream.avail_in << "; avail_out=" << zipStream.avail_out << "; written=" << (DEFLATE_CHUNK_SIZE - zipStream.avail_out) << "; ret=" << ret << endl;
+
+//  if (zipStream.avail_in > 0) {
+//	  cerr << "     more to read: " << zipStream.avail_in << endl;
+//  }
+
+  if (ret == Z_STREAM_END && zipStream.avail_out == len) {
+    return -1;
+  } else if (ret == Z_STREAM_ERROR) {
     // TODO: Throw exception
   }
 
-  // TODO: Keep remaining bytes for next call
+//  cerr << "Bytes returned: "<<(DEFLATE_CHUNK_SIZE - zipStream.avail_out) << endl;
 
   return DEFLATE_CHUNK_SIZE - zipStream.avail_out;
 }
