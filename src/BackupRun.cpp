@@ -52,6 +52,8 @@ int BackupRun::run()
   if (config.verbose) {
     cout << rootFile << endl;
   }
+
+  return 0;
 }
 
 

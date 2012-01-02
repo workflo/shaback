@@ -1,16 +1,10 @@
 #include <iostream>
 //#include <unistd.h>
 #ifdef WIN32
-# include <popt.h>
+# include "getopt.h"
 #else
 # include <getopt.h>
 #endif
-
-
-#include <dirent.h>
-#include <fnmatch.h>
-
-
 #include <stdlib.h>
 
 extern "C" {
@@ -175,7 +169,7 @@ static int l_repository (lua_State *L) {
 
 
 static int l_oneFileSystem (lua_State *L) {
-  bool b = lua_toboolean(L, 1);
+  bool b = (bool) lua_toboolean(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
   config->oneFileSystem = b;
@@ -185,7 +179,7 @@ static int l_oneFileSystem (lua_State *L) {
 
 
 static int l_verbose (lua_State *L) {
-  bool b = lua_toboolean(L, 1);
+  bool b = (bool) lua_toboolean(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
   config->verbose = b;
@@ -278,9 +272,13 @@ bool RuntimeConfig::excludeFile(File& file)
 {
   for (vector<string>::iterator it = excludePatterns.begin(); it < excludePatterns.end(); it++ ) {
     string pattern(*it);
+#ifdef WIN32
+
+#else
     if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
       return true;
     }
+#endif
   }
   return false;
 }
