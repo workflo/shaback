@@ -5,10 +5,10 @@ Config:
 Backup:
 -----------------------
 - Crypto
-- Split large files
-- Error handling
-- Handle oneFileSystem option
-- lock/unlock
+- Pinuts:
+  - lock/unlock
+  - Split large files
+  - ACL
 
 General:
 -----------------------

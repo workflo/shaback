@@ -34,8 +34,7 @@ int BackupRun::run()
 
   string rootFile;
 
-  for (vector<string>::iterator it = config.dirs.begin(); it
-      < config.dirs.end(); it++) {
+  for (vector<string>::iterator it = config.dirs.begin(); it < config.dirs.end(); it++) {
     File file(*it);
 
     try {
@@ -62,31 +61,34 @@ int BackupRun::run()
   return (numErrors == 0 ? 0 : 1);
 }
 
-string BackupRun::handleDirectory(File& dir, bool absolutePaths)
+string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren)
 {
-  // TODO: check for oneFileSystem
-
   string treeFile;
-  vector<File> files = dir.listFiles("*");
 
-  for (vector<File>::iterator it = files.begin(); it < files.end(); it++) {
-    File child(*it);
+  if (!skipChildren) {
+    vector<File> files = dir.listFiles("*");
 
-    if (config.excludeFile(child))
-      continue;
+    for (vector<File>::iterator it = files.begin(); it < files.end(); it++) {
+      File child(*it);
 
-    try {
-      if (child.isSymlink()) {
-        treeFile.append(handleSymlink(child, false));
-      } else if (child.isDir()) {
-        treeFile.append(handleDirectory(child, false));
-      } else if (child.isFile()) {
-        treeFile.append(handleFile(child, false));
-      } else {
-        // Ignore other types of files.
+      if (config.excludeFile(child))
+        continue;
+
+      try {
+        if (child.isSymlink()) {
+          treeFile.append(handleSymlink(child, false));
+        } else if (child.isDir()) {
+          treeFile.append(
+              handleDirectory(child, false,
+                  (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev() ? true : false)));
+        } else if (child.isFile()) {
+          treeFile.append(handleFile(child, false));
+        } else {
+          // Ignore other types of files.
+        }
+      } catch (Exception& ex) {
+        reportError(ex);
       }
-    } catch (Exception& ex) {
-      reportError(ex);
     }
   }
 
@@ -102,9 +104,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", dir.getPosixMode(),
-      dir.getPosixUid(), dir.getPosixGid(), dir.getPosixMtime(),
-      dir.getPosixCtime());
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
+      dir.getPosixMtime(), dir.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
@@ -125,9 +126,8 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(),
-      file.getPosixUid(), file.getPosixGid(), file.getPosixMtime(),
-      file.getPosixCtime());
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
+      file.getPosixMtime(), file.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
@@ -144,9 +144,8 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(),
-      file.getPosixUid(), file.getPosixGid(), file.getPosixMtime(),
-      file.getPosixCtime());
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
+      file.getPosixMtime(), file.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append(file.readlink());
   treeFileLine.append("\n");

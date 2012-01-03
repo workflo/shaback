@@ -23,7 +23,7 @@ Repository::Repository(RuntimeConfig& config) :
 {
   string hashAlgorithm("SHA1");
   string encryptionAlgorithm("");
-  string compressionAlgorithm("Deflate");
+  string compressionAlgorithm("");
 
   if (compressionAlgorithm == "Deflate") {
     this->compressionAlgorithm = COMPRESSION_DEFLATE;

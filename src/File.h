@@ -96,6 +96,15 @@ class File
 #endif
   }
 
+  inline dev_t getPosixDev() {
+    assertInitialized();
+#ifdef WIN32
+    return -1;
+#else
+    return statBuffer.st_dev;
+#endif
+  }
+
  private:
   bool initialized;
   bool fileExists;

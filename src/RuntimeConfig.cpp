@@ -1,5 +1,4 @@
 #include <iostream>
-//#include <unistd.h>
 #ifdef WIN32
 # include "getopt.h"
 #else
