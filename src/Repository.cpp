@@ -116,8 +116,6 @@ string Repository::storeTreeFile(string& treeFile)
       cout << "T: " << file.path << endl;
     }
 
-    // TODO: Erst in .tmp-File schreiben und dann umbenennen
-
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(file);
     os.write(treeFile);
@@ -153,8 +151,6 @@ string Repository::storeFile(File& srcFile)
     if (config.verbose) {
       cout << "F: " << destFile.path << endl;
     }
-
-    // TODO: Erst in .tmp-File schreiben und dann umbenennen
 
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(destFile);

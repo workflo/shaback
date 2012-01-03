@@ -22,6 +22,7 @@ class ShabackOutputStream
   int compressionAlgorithm;
   int encryptionAlgorithm;
   File file;
+  File tmpFile;
   gzFile gz;
   int fd;
   bool opened;

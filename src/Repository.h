@@ -34,8 +34,7 @@ public:
 
 
 #define COMPRESSION_NONE    0
-/* #define COMPRESSION_GZ      1 */
-#define COMPRESSION_DEFLATE 2
+#define COMPRESSION_DEFLATE 1
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_AES      1

@@ -5,12 +5,10 @@ Config:
 Backup:
 -----------------------
 - Crypto
-- Cache file import/export
 - Split large files
 - Error handling
 - Count number of bytes/files written/inspected
 - Handle oneFileSystem option
-- Write to .tmp files first
 - lock/unlock
 
 General:
@@ -25,4 +23,5 @@ Garbage collection:
 
 Funny optimizations:
 -----------------------
+- Use xattr to store SHA1 digests
 - Sort dir entries by inode

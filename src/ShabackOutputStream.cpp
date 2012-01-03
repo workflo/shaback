@@ -34,7 +34,12 @@ ShabackOutputStream::~ShabackOutputStream()
 void ShabackOutputStream::open(File& file)
 {
   this->file = file;
-  fileOutputStream = new FileOutputStream(file);
+
+  string tmpFilename(file.path);
+  tmpFilename.append(".tmp");
+  this->tmpFile = tmpFilename;
+
+  fileOutputStream = new FileOutputStream(tmpFile);
   outputStream = fileOutputStream;
 
   switch(compressionAlgorithm) {
@@ -55,6 +60,7 @@ void ShabackOutputStream::open(File& file)
 void ShabackOutputStream::close()
 {
   outputStream->close();
+  tmpFile.move(file);
 }
 
 

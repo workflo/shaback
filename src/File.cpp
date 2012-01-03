@@ -234,3 +234,8 @@ vector<File> File::listFiles(string p)
 
   return list;
 }
+
+bool File::move(File& destination)
+{
+  return (::rename(path.c_str(), destination.path.c_str()) == 0);
+}

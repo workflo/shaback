@@ -34,6 +34,7 @@ class File
   bool mkdir();
   std::string readlink();
   std::vector<File> listFiles(std::string pattern);
+  bool move(File& destination);
 
   std::string path;
   std::string fname;
