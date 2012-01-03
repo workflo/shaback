@@ -6,16 +6,8 @@ using namespace std;
 const long InputStream::SKIP_BUFFER_SIZE = 2048;
 char* InputStream::skipBuffer = 0;
 
-
 int InputStream::read(char* b, int len)
 {
-//   if (b == null)
-//     throw new NullPointerException();
-//   else if (offset < 0 || len < 0)
-//     throw new IndexOutOfBoundsException();
-//   else if (len == 0)
-//     return 0;
-
   int c = read();
   if (c == -1) {
     return -1;
@@ -24,54 +16,50 @@ int InputStream::read(char* b, int len)
 
   int r = 1;
   try {
-    for (; r < len ; r++) {
+    for (; r < len; r++) {
       c = read();
       if (c == -1)
-	break;
+        break;
       if (b != 0)
-	b[r] = (char) c;
+        b[r] = (char) c;
     }
-  } 
-  catch (IOException ee) {}
+  } catch (IOException ee) {
+  }
 
   return r;
 }
 
-
-int InputStream::skip(int n)
+bool InputStream::readLine(string& str)
 {
-  // FIXME
-  return 0;
+  int c;
+
+  c = read();
+  if (c < 0)
+    return false;
+
+  str.clear();
+
+  for (;;) {
+    if (c == '\n') {
+      return true;
+    } else if (c != '\r') {
+      str.append((char*) &c, 1);
+    }
+    c = read();
+
+    if (c < 0)
+      return true;
+  }
 }
-
-
-int InputStream::available()
-{
-  return 0;
-}
-
 
 void InputStream::close()
-{}
-
-
-void InputStream::mark(int readLimit)
 {
-  throw IOException("mark() not supported");
 }
-
 
 void InputStream::reset()
 {
   throw IOException("reset() not supported");
 }
-
-
-bool InputStream::markSupported()
-{
-  return false;
-}
-
 
 void InputStream::copyTo(OutputStream& destination, int maxBytes)
 {
@@ -81,11 +69,12 @@ void InputStream::copyTo(OutputStream& destination, int maxBytes)
 
   if (buffer == 0) {
     // TODO: Error handling
-//     throw new MemoryException(JAKELIB_AT2("jakelib.io.InputStream.copyTo"));
+    //     throw new MemoryException(JAKELIB_AT2("jakelib.io.InputStream.copyTo"));
   }
 
   for (;;) {
-    int bytesRead = read(buffer, maxBytes == -1 ? 8192 : min(8192, bytesToRead));
+    int bytesRead =
+        read(buffer, maxBytes == -1 ? 8192 : min(8192, bytesToRead));
     if (bytesRead <= 0)
       break;
     destination.write(buffer, bytesRead);

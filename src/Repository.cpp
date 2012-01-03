@@ -13,12 +13,13 @@
 #include "FileInputStream.h"
 #include "FileOutputStream.h"
 #include "BufferedWriter.h"
+#include "BufferedReader.h"
 #include "ShabackOutputStream.h"
 
 using namespace std;
 
-Repository::Repository(RuntimeConfig& config)
-  :config(config), cache(config.localCacheFile)
+Repository::Repository(RuntimeConfig& config) :
+  config(config), cache(config.localCacheFile)
 {
   string hashAlgorithm("SHA1");
   string encryptionAlgorithm("");
@@ -41,9 +42,10 @@ Repository::Repository(RuntimeConfig& config)
   } else {
     throw UnsupportedEncryptionAlgorithm(encryptionAlgorithm);
   }
-  
+
   if (!config.localCacheFile.empty()) {
     cache.open(GDBM_NEWDB);
+    importCacheFile();
   }
 }
 
@@ -53,17 +55,17 @@ Repository::~Repository()
   cache.close();
 }
 
-
 void Repository::open()
 {
-  if (!config.filesDir.isDir() || !config.indexDir.isDir() || !config.locksDir.isDir() || !config.cacheDir.isDir()) {
-    cerr << "Does not look like a shaback repository: " << config.repository << endl;
+  if (!config.filesDir.isDir() || !config.indexDir.isDir()
+      || !config.locksDir.isDir() || !config.cacheDir.isDir()) {
+    cerr << "Does not look like a shaback repository: " << config.repository
+        << endl;
     exit(4);
   }
-  
+
   // TODO: Repo-Konfig auslesen
 }
-
 
 void Repository::lock()
 {
@@ -71,13 +73,11 @@ void Repository::lock()
   // TBI
 }
 
-
 void Repository::unlock()
 {
   //cout << "unlock" << endl;
   // TBI	
 }
-
 
 int Repository::backup()
 {
@@ -85,7 +85,6 @@ int Repository::backup()
   BackupRun run(config, *this);
   return run.run();
 }
-
 
 File Repository::hashValueToFile(string hashValue)
 {
@@ -98,12 +97,10 @@ File Repository::hashValueToFile(string hashValue)
   return File(path);
 }
 
-
 bool Repository::contains(string& hashValue)
 {
   return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
 }
-
 
 string Repository::storeTreeFile(string& treeFile)
 {
@@ -114,7 +111,7 @@ string Repository::storeTreeFile(string& treeFile)
 
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
-    
+
     if (config.verbose) {
       cout << "T: " << file.path << endl;
     }
@@ -131,7 +128,6 @@ string Repository::storeTreeFile(string& treeFile)
   return sha1.toString();
 }
 
-
 #define READ_BUFFER_SIZE (1024 * 4)
 static char readBuffer[READ_BUFFER_SIZE];
 
@@ -141,10 +137,11 @@ string Repository::storeFile(File& srcFile)
   FileInputStream in(srcFile);
   while (true) {
     int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-    if (bytesRead == -1) break;
+    if (bytesRead == -1)
+      break;
     sha1.update(readBuffer, bytesRead);
   }
-  
+
   sha1.finalize();
   string hashValue = sha1.toString();
 
@@ -152,7 +149,7 @@ string Repository::storeFile(File& srcFile)
     in.reset();
 
     File destFile = hashValueToFile(hashValue);
-    
+
     if (config.verbose) {
       cout << "F: " << destFile.path << endl;
     }
@@ -164,7 +161,8 @@ string Repository::storeFile(File& srcFile)
 
     while (true) {
       int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1) break;
+      if (bytesRead == -1)
+        break;
       os.write(readBuffer, bytesRead);
     }
   }
@@ -174,22 +172,33 @@ string Repository::storeFile(File& srcFile)
   return hashValue;
 }
 
-
-#include "StandardOutputStream.h"
 void Repository::exportCacheFile()
 {
   time_t rawtime;
   struct tm * ptm;
-  time ( &rawtime );
-  ptm = gmtime ( &rawtime );
+  time(&rawtime);
+  ptm = gmtime(&rawtime);
 
   char filename[100];
-  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d.list",
-		  ptm->tm_year +1900, ptm->tm_mon +1, ptm->tm_mday,
-		  ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d.scache", ptm->tm_year + 1900,
+      ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
 
-  File cacheExportFile(config.cacheDir, filename);
-  FileOutputStream os(cacheExportFile);
+  File file(config.cacheDir, filename);
+  FileOutputStream os(file);
   BufferedWriter writer(&os);
   cache.exportCache(writer);
+}
+
+void Repository::importCacheFile()
+{
+  vector<File> files = config.cacheDir.listFiles("*.scache");
+
+  if (!files.empty()) {
+    File& file = files.back();
+    if (config.verbose)
+      cout << "Preloading cache from: " << file.path << endl;
+    FileInputStream is(file);
+    BufferedReader reader(&is);
+    cache.importCache(reader);
+  }
 }

@@ -112,3 +112,14 @@ void Cache::exportCache(OutputStream& out)
     }
   }
 }
+
+
+void Cache::importCache(InputStream& in)
+{
+  if (opened) {
+    string str;
+    while(in.readLine(str)) {
+      put(str);
+    }
+  }
+}

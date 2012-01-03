@@ -1,6 +1,8 @@
 #ifndef SHABACK_InputStream_H
 #define SHABACK_InputStream_H
 
+#include <string>
+
 #include "OutputStream.h"
 
 /**
@@ -42,6 +44,11 @@ class InputStream
   virtual int read(char* b, int len);
 
   /**
+   * Reads a full line of text. I.e. all characters up to the next newline.
+   */
+  virtual bool readLine(std::string& str);
+
+  /**
    * Closes this input stream.
    */
   virtual void close();
@@ -50,26 +57,6 @@ class InputStream
    * Reset the read cursor to next the most recent mark.
    */
   virtual void reset();
-
-  /**
-   * @todo To be implemented
-   */
-  virtual int available();
-
-  /**
-   * Skips the specified number of bytes.
-   */
-  virtual int skip(int n);
-  
-  /**
-   * @todo To be implemented
-   */
-  virtual void mark(int readLimit);
-
-  /**
-   * @todo To be implemented
-   */
-  virtual bool markSupported();
 
   /**
    * Copies this InputStream to the specified OutputStream.
@@ -83,11 +70,6 @@ class InputStream
    * Reads/Writes up to \a maxBytes number of bytes.
    */
   void copyTo(OutputStream& destination, int maxBytes);
-
-  /**
-   * @brief Sets the blocking mode. 
-   */
-  virtual void setBlocking(bool on) = 0;
 
   static const long SKIP_BUFFER_SIZE;
 

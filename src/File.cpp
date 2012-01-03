@@ -215,6 +215,7 @@ vector<File> File::listFiles(string p)
 
     FindClose(dir);
   }
+  // TODO: Order by filename
 #else
   DIR* dir = opendir(path.c_str());
 

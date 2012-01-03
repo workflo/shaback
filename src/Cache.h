@@ -4,9 +4,10 @@
 #include <string>
 #include "File.h"
 #include "OutputStream.h"
+#include "InputStream.h"
 
 extern "C" {
-#include <gdbm.h>
+# include <gdbm.h>
 }
 
 class Cache
@@ -14,7 +15,7 @@ class Cache
   public:
     Cache(File file);
     ~Cache();
-    
+
     void open(int openMode = GDBM_WRCREAT);
     void close();
     bool contains(std::string& key);
@@ -22,7 +23,8 @@ class Cache
     void put(std::string& key);
     void remove(std::string& key);
     void exportCache(OutputStream& out);
-    
+    void importCache(InputStream& in);
+
   private:
     File file;
     GDBM_FILE gdbmFile;
