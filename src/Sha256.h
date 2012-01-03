@@ -1,15 +1,15 @@
-#ifndef SHABACK_Sha1_H
-#define SHABACK_Sha1_H
+#ifndef SHABACK_Sha256_H
+#define SHABACK_Sha256_H
 
 #include <string>
 #include <openssl/sha.h>
 #include "Digest.h"
 
-class Sha1: public Digest
+class Sha256: public Digest
 {
   public:
-    Sha1();
-    ~Sha1();
+    Sha256();
+    ~Sha256();
 
     void reset();
 
@@ -22,8 +22,8 @@ class Sha1: public Digest
 
   private:
     std::string hexStr;
-    SHA_CTX *ctx;
-    unsigned char bytes[SHA_DIGEST_LENGTH];
+    SHA256_CTX *ctx;
+    unsigned char bytes[SHA256_DIGEST_LENGTH];
 };
 
-#endif // SHABACK_Sha1_H
+#endif // SHABACK_Sha256_H

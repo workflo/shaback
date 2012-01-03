@@ -1,6 +1,8 @@
 Backup:
 -----------------------
 - Crypto
+  - Blowfish
+  - AES
 - Pinuts:
   - lock/unlock
   - Split large files

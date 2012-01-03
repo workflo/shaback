@@ -27,5 +27,7 @@ class BlowfishOutputStream: public OutputStream
     unsigned char iv[BF_BLOCK];
     unsigned char key[16];
     int outlen;
+//    unsigned char remainder[EVP_MAX_BLOCK_LENGTH];
+//    int remainderLen;
 };
 #endif// SHABACK_BlowfishOutputStream_H

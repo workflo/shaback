@@ -36,7 +36,7 @@ void Sha1::update(std::string& data)
 }
 
 
-char Sha1::HEX_CHARS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+char Digest::HEX_CHARS[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 string Sha1::toString()
 {
@@ -44,9 +44,14 @@ string Sha1::toString()
 }
 
 
+const unsigned char* Sha1::toBytes()
+{
+  return bytes;
+}
+
+
 void Sha1::finalize()
 {
-  unsigned char bytes[SHA_DIGEST_LENGTH];
   char hexChars[SHA_DIGEST_LENGTH *2 +1];
 
   SHA1_Final(bytes, ctx);
