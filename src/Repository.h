@@ -5,6 +5,8 @@
 #include "RuntimeConfig.h"
 #include "Cache.h"
 
+class BackupRun;
+
 class Repository
 {
 public:
@@ -19,8 +21,8 @@ public:
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-    std::string storeTreeFile(std::string& treeFile);
-    std::string storeFile(File& srcFile);
+    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
+    std::string storeFile(BackupRun* run, File& srcFile);
     void importCacheFile();
     void exportCacheFile();
 

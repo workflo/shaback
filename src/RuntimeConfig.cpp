@@ -22,98 +22,96 @@ using namespace std;
 
 RuntimeConfig::RuntimeConfig()
 {
-  this->verbose = false;
-  this->oneFileSystem = false;
-  this->initLua();
+  verbose = false;
+  oneFileSystem = false;
+  showTotals = false;
+  initLua();
 }
-
 
 void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 {
   int digit_optind = 0;
 
-    while (true) {
-	int this_option_optind = optind ? optind : 1;
-	int option_index = 0;
-	static struct option long_options[] = {
-	    {"add", 1, 0, 0},
-	    {"append", 0, 0, 0},
-	    {"delete", 1, 0, 0},
-	    {"verbose", 0, 0, 'v'},
-	    {"config", 1, 0, 'c'},
-	    {"repository", 1, 0, 'r'},
-	    {"force", 0, 0, 'f'},
-	    {0, 0, 0, 0}
-	};
+  while (true) {
+    int this_option_optind = optind ? optind : 1;
+    int option_index = 0;
+    static struct option long_options[] = { { "add", 1, 0, 0 }, { "append", 0,
+        0, 0 }, { "delete", 1, 0, 0 }, { "verbose", 0, 0, 'v' }, { "totals", 0,
+        0, 't' }, { "config", 1, 0, 'c' }, { "repository", 1, 0, 'r' }, {
+        "force", 0, 0, 'f' }, { 0, 0, 0, 0 } };
 
-	int c = getopt_long(argc, argv, "abc:d:vr:f", long_options, &option_index);
-	if (c == -1)
-	    break;
+    int c = getopt_long(argc, argv, "abc:d:vtr:f", long_options, &option_index);
+    if (c == -1)
+      break;
 
-	switch (c) {
-	case 0:
-	    std::cout << "option " << long_options[option_index].name;
-	    if (optarg)
-		std::cout << " with arg " << optarg;
-	    std::cout << std::endl;
-	    break;
+    switch (c) {
+      case 0:
+        std::cout << "option " << long_options[option_index].name;
+        if (optarg)
+          std::cout << " with arg " << optarg;
+        std::cout << std::endl;
+        break;
 
-	case '0':
-	case '1':
-	case '2':
-	    if (digit_optind != 0 && digit_optind != this_option_optind)
-	      std::cout << "digits occur in two different argv-elements." << std::endl;
-	    digit_optind = this_option_optind;
-	    std::cout << "option " << c << std::endl;
-	    break;
+      case '0':
+      case '1':
+      case '2':
+        if (digit_optind != 0 && digit_optind != this_option_optind)
+          std::cout << "digits occur in two different argv-elements."
+              << std::endl;
+        digit_optind = this_option_optind;
+        std::cout << "option " << c << std::endl;
+        break;
 
+      case 'a':
+        std::cout << "option a" << std::endl;
+        break;
 
-	case 'a':
-	    std::cout << "option a" << std::endl;
-	    break;
+      case 'v':
+        verbose = true;
+        break;
 
-	case 'v':
-            verbose = true;
-	    break;
+      case 't':
+        showTotals = true;
+        break;
 
-	case 'f':
-            force = true;
-	    break;
+      case 'f':
+        force = true;
+        break;
 
-	case 'c':
-          // TODO
-	    loadConfigFile(optarg);
-	    break;
+      case 'c':
+        // TODO
+        loadConfigFile(optarg);
+        break;
 
-	case 'r':
-	  // Chose another repository:
-	    repository = optarg;
-	    break;
+      case 'r':
+        // Chose another repository:
+        repository = optarg;
+        break;
 
-	case 'd':
-	    std::cout << "option d with value '" << optarg << "'" << std::endl;
-	    break;
+      case 'd':
+        std::cout << "option d with value '" << optarg << "'" << std::endl;
+        break;
 
-	case '?':
-	    break;
+      case '?':
+        break;
 
-	default:
-	    std::cout << "?? getopt returned character code " << c << "??" << std::endl;
-	}
+      default:
+        std::cout << "?? getopt returned character code " << c << "??"
+            << std::endl;
     }
+  }
 
-    if (optind < argc) {
-	while (optind < argc) {
-          if (this->operation.empty()) {
-                // First argument is OPERATION:
-	        this->operation = argv[optind++];
-	    } else {
-		std::cout << "non-option ARGV-element: " << argv[optind++] << std::endl;
-	    }
-	}
+  if (optind < argc) {
+    while (optind < argc) {
+      if (this->operation.empty()) {
+        // First argument is OPERATION:
+        this->operation = argv[optind++];
+      } else {
+        std::cout << "non-option ARGV-element: " << argv[optind++] << std::endl;
+      }
     }
+  }
 }
-
 
 void RuntimeConfig::load()
 {
@@ -133,23 +131,21 @@ void RuntimeConfig::tryToLoadFrom(string dir)
   vector<File> files = File(dir).listFiles("*.lua");
   // TODO: Pattern
 
-  for (vector<File>::iterator it = files.begin(); it < files.end(); it++ ) {
+  for (vector<File>::iterator it = files.begin(); it < files.end(); it++) {
     File f(*it);
     loadConfigFile(f.path);
   }
 }
-
 
 void RuntimeConfig::loadConfigFile(std::string filename)
 {
   int error = luaL_dofile (this->luaState, filename.c_str());
   if (error) {
     std::cerr << lua_tostring(this->luaState, -1) << std::endl;
-    lua_pop(this->luaState, 1);  /* pop error message from the stack */
+    lua_pop(this->luaState, 1); /* pop error message from the stack */
     exit(2);
   }
 }
-
 
 static RuntimeConfig* getRuntimeConfig(lua_State *L, int stackPos)
 {
@@ -157,8 +153,8 @@ static RuntimeConfig* getRuntimeConfig(lua_State *L, int stackPos)
   return (RuntimeConfig*) lua_touserdata(L, stackPos);
 }
 
-
-static int l_repository (lua_State *L) {
+static int l_repository(lua_State *L)
+{
   const char* dir = lua_tostring(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
@@ -167,8 +163,8 @@ static int l_repository (lua_State *L) {
   return 0;
 }
 
-
-static int l_oneFileSystem (lua_State *L) {
+static int l_oneFileSystem(lua_State *L)
+{
   bool b = (bool) lua_toboolean(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
@@ -177,8 +173,8 @@ static int l_oneFileSystem (lua_State *L) {
   return 0;
 }
 
-
-static int l_verbose (lua_State *L) {
+static int l_verbose(lua_State *L)
+{
   bool b = (bool) lua_toboolean(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
@@ -187,8 +183,18 @@ static int l_verbose (lua_State *L) {
   return 0;
 }
 
+static int l_showTotals(lua_State *L)
+{
+  bool b = (bool) lua_toboolean(L, 1);
 
-static int l_localCache (lua_State *L) {
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->showTotals = b;
+
+  return 0;
+}
+
+static int l_localCache(lua_State *L)
+{
   const char* file = lua_tostring(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
@@ -197,8 +203,8 @@ static int l_localCache (lua_State *L) {
   return 0;
 }
 
-
-static int l_addDir (lua_State *L) {
+static int l_addDir(lua_State *L)
+{
   const char* dir = lua_tostring(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
@@ -207,18 +213,18 @@ static int l_addDir (lua_State *L) {
   return 0;
 }
 
-
-static int l_addExcludePattern (lua_State *L) {
+static int l_addExcludePattern(lua_State *L)
+{
   const char* pattern = lua_tostring(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
   config->excludePatterns.push_back(pattern);
-  
+
   return 0;
 }
 
-
-static int l_addSplitPattern (lua_State *L) {
+static int l_addSplitPattern(lua_State *L)
+{
   const char* pattern = lua_tostring(L, 1);
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
@@ -226,7 +232,6 @@ static int l_addSplitPattern (lua_State *L) {
 
   return 0;
 }
-
 
 void RuntimeConfig::initLua()
 {
@@ -244,6 +249,9 @@ void RuntimeConfig::initLua()
 
   lua_pushcfunction(this->luaState, l_verbose);
   lua_setglobal(this->luaState, "verbose");
+
+  lua_pushcfunction(this->luaState, l_showTotals);
+  lua_setglobal(this->luaState, "showTotals");
 
   lua_pushcfunction(this->luaState, l_addDir);
   lua_setglobal(this->luaState, "addDir");
@@ -267,10 +275,10 @@ void RuntimeConfig::finalize()
   this->cacheDir = File(repo, "cache");
 }
 
-
 bool RuntimeConfig::excludeFile(File& file)
 {
-  for (vector<string>::iterator it = excludePatterns.begin(); it < excludePatterns.end(); it++ ) {
+  for (vector<string>::iterator it = excludePatterns.begin(); it
+      < excludePatterns.end(); it++) {
     string pattern(*it);
 #ifdef WIN32
     // TODO: fnmatch Windows

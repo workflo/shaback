@@ -13,10 +13,17 @@ BackupRun::BackupRun(RuntimeConfig& config, Repository& repository)
   :repository(repository), config(config)
 {
   repository.lock();
+  numFilesRead = 0;
+  numFilesStored = 0;
+  numBytesRead = 0;
+  numBytesStored = 0;
 }
 
 BackupRun::~BackupRun()
 {
+  if (config.showTotals) {
+    showTotals();
+  }
   repository.unlock();
 }
 
@@ -46,7 +53,7 @@ int BackupRun::run()
     }
   }
 
-  string rootFileHashValue = repository.storeTreeFile(rootFile);
+  string rootFileHashValue = repository.storeTreeFile(this, rootFile);
 
   cout << "rootFile: " << rootFileHashValue << endl;
   if (config.verbose) {
@@ -83,7 +90,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
     }
   }
 
-  string treeFileHashValue = repository.storeTreeFile(treeFile);
+  string treeFileHashValue = repository.storeTreeFile(this, treeFile);
   
 //   cout << "treeFile: " << dir.path << endl << treeFile << endl;
 
@@ -112,7 +119,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths)
 
 string BackupRun::handleFile(File& file, bool absolutePaths)
 {
-  string hashValue = repository.storeFile(file);
+  string hashValue = repository.storeFile(this, file);
   
   string treeFileLine("F\t");
   treeFileLine.append(hashValue);
@@ -158,4 +165,12 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
   treeFileLine.append("\n");
 
   return treeFileLine;
+}
+
+void BackupRun::showTotals()
+{
+  printf("Files inspected:  %12d\n", numFilesRead);
+  printf("Bytes inspected:  %12jd\n", (intmax_t) numBytesRead);
+  printf("Files stored:     %12d\n", numFilesStored);
+  printf("Bytes stored:     %12jd\n", (intmax_t) numBytesStored);
 }

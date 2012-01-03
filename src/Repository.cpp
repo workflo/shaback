@@ -51,8 +51,10 @@ Repository::Repository(RuntimeConfig& config) :
 
 Repository::~Repository()
 {
-  exportCacheFile();
-  cache.close();
+  if (!config.localCacheFile.empty()) {
+    exportCacheFile();
+    cache.close();
+  }
 }
 
 void Repository::open()
@@ -102,7 +104,7 @@ bool Repository::contains(string& hashValue)
   return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
-string Repository::storeTreeFile(string& treeFile)
+string Repository::storeTreeFile(BackupRun* run, string& treeFile)
 {
   Sha1 sha1;
   sha1.update(treeFile);
@@ -119,6 +121,8 @@ string Repository::storeTreeFile(string& treeFile)
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(file);
     os.write(treeFile);
+
+    run->numBytesStored += treeFile.size();
   }
 
   cache.put(hashValue);
@@ -129,8 +133,11 @@ string Repository::storeTreeFile(string& treeFile)
 #define READ_BUFFER_SIZE (1024 * 4)
 static char readBuffer[READ_BUFFER_SIZE];
 
-string Repository::storeFile(File& srcFile)
+string Repository::storeFile(BackupRun* run, File& srcFile)
 {
+  run->numFilesRead ++;
+  run->numBytesRead += srcFile.getSize();
+
   Sha1 sha1;
   FileInputStream in(srcFile);
   while (true) {
@@ -161,6 +168,9 @@ string Repository::storeFile(File& srcFile)
         break;
       os.write(readBuffer, bytesRead);
     }
+
+    run->numFilesStored ++;
+    run->numBytesStored += srcFile.getSize();
   }
 
   cache.put(hashValue);

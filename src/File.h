@@ -43,6 +43,7 @@ class File
   static std::string separator;
 
   inline int getPosixMode() {
+    assertInitialized();
 #ifdef WIN32
     return -1;
 #else
@@ -51,6 +52,7 @@ class File
   }
 
   inline int getPosixUid() {
+    assertInitialized();
 #ifdef WIN32
     return -1;
 #else
@@ -59,6 +61,7 @@ class File
   }
 
   inline int getPosixGid() {
+    assertInitialized();
 #ifdef WIN32
     return -1;
 #else
@@ -67,6 +70,7 @@ class File
   }
 
   inline int getPosixMtime() {
+    assertInitialized();
 #ifdef WIN32
     return -1;
 #else
@@ -75,10 +79,20 @@ class File
   }
 
   inline int getPosixCtime() {
+    assertInitialized();
 #ifdef WIN32
     return -1;
 #else
     return (int) statBuffer.st_ctime;
+#endif
+  }
+
+  inline long long getSize() {
+    assertInitialized();
+#ifdef WIN32
+    return -1;
+#else
+    return statBuffer.st_size;
 #endif
   }
 

@@ -20,6 +20,8 @@ public:
     bool verbose;
     bool force;
     bool oneFileSystem;
+    bool showTotals;
+
     std::string operation;
     std::string repository;
     std::string localCacheFile;

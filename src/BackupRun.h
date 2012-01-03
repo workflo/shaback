@@ -7,20 +7,26 @@
 
 class BackupRun
 {
- public:
-  BackupRun(RuntimeConfig& config, Repository& Repository);
-  ~BackupRun();
-    
-  int run();    
+  public:
+    BackupRun(RuntimeConfig& config, Repository& Repository);
+    ~BackupRun();
 
- protected:
-  std::string handleDirectory(File& dir, bool absolutePaths);
-  std::string handleFile(File& dir, bool absolutePaths);
-  std::string handleSymlink(File& dir, bool absolutePaths);
-  void handleSymlink(File& dir);
-   
-  Repository& repository;
-  RuntimeConfig& config;
+    int run();
+    void showTotals();
+
+    off_t numBytesRead;
+    off_t numBytesStored;
+    int numFilesRead;
+    int numFilesStored;
+
+  protected:
+    std::string handleDirectory(File& dir, bool absolutePaths);
+    std::string handleFile(File& dir, bool absolutePaths);
+    std::string handleSymlink(File& dir, bool absolutePaths);
+    void handleSymlink(File& dir);
+
+    Repository& repository;
+    RuntimeConfig& config;
 };
 
 #endif // BackupRun_H
