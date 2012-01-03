@@ -6,6 +6,7 @@
 #include <openssl/blowfish.h>
 #include "OutputStream.h"
 
+#define SHABACK_IV "SHABACK2"
 #define BLOWFISH_CHUNK_SIZE (BF_BLOCK * 1024)
 
 class BlowfishOutputStream: public OutputStream

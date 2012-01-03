@@ -8,7 +8,7 @@ using namespace std;
 BlowfishOutputStream::BlowfishOutputStream(string& password, OutputStream* out) :
   out(out)
 {
-  strncpy((char*) iv, "SHABACK2", BF_BLOCK);
+  strncpy((char*) iv, SHABACK_IV, BF_BLOCK);
 
   memset(key, 0, 16);
   strncpy((char*) key, password.data(), min(16, (int) password.size()));
