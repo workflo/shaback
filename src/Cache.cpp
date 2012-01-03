@@ -17,18 +17,15 @@ Cache::~Cache()
 }
 
 
-void Cache::open()
+void Cache::open(int openMode)
 {
   if (!opened) {
-    //char path[MAX_PATH_LEN];
-    //file.path.copy(path, MAX_PATH_LEN);
-    //gdbmFile = gdbm_open(path, 4096, GDBM_WRCREAT, 0777, 0);
-    gdbmFile = gdbm_open((char*) file.path.c_str(), 4096, GDBM_WRCREAT, 0777, 0);
+    gdbmFile = gdbm_open((char*) file.path.c_str(), 4096, openMode, 0777, 0);
     if (gdbmFile == 0) {
       if (errno > 0) {
-	throw Exception::errnoToException(file.path);
+        throw Exception::errnoToException(file.path);
       } else {
-	// TODO: Fehler
+	    // TODO: Fehler
       }
     } else {
       opened = true;
@@ -40,7 +37,6 @@ void Cache::open()
 void Cache::close()
 {
   if (opened) {
-//     cout << "Closing GDBM: " << file.path << endl;
     gdbm_close(gdbmFile);
     opened = false;
   }
@@ -54,7 +50,6 @@ bool Cache::contains(string& key)
     k.dptr = (char*) key.data();
     k.dsize = key.length();
     bool found = gdbm_exists(gdbmFile, k);
-    //    printf("GDBM %s: %d\n", key.c_str(), found);
     return found;
   } else {
     return false;

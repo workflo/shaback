@@ -15,7 +15,7 @@ class Cache
     Cache(File file);
     ~Cache();
     
-    void open();
+    void open(int openMode = GDBM_WRCREAT);
     void close();
     bool contains(std::string& key);
     void put(std::string& key, std::string& value);

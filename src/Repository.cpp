@@ -43,7 +43,7 @@ Repository::Repository(RuntimeConfig& config)
   }
   
   if (!config.localCacheFile.empty()) {
-    cache.open();
+    cache.open(GDBM_NEWDB);
   }
 }
 
