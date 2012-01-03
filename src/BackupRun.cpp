@@ -80,7 +80,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
         } else if (child.isDir()) {
           treeFile.append(
               handleDirectory(child, false,
-                  (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev() ? true : false)));
+                  (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev())));
         } else if (child.isFile()) {
           treeFile.append(handleFile(child, false));
         } else {

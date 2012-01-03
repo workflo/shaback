@@ -63,14 +63,8 @@ void InputStream::reset()
 
 void InputStream::copyTo(OutputStream& destination, int maxBytes)
 {
-  // TODO: Make sure free() is called!
-  char* buffer = (char*) malloc(8192);
+  char buffer[8192];
   int bytesToRead = maxBytes;
-
-  if (buffer == 0) {
-    // TODO: Error handling
-    //     throw new MemoryException(JAKELIB_AT2("jakelib.io.InputStream.copyTo"));
-  }
 
   for (;;) {
     int bytesRead =
@@ -80,8 +74,6 @@ void InputStream::copyTo(OutputStream& destination, int maxBytes)
     destination.write(buffer, bytesRead);
     bytesToRead -= bytesRead;
   }
-
-  free(buffer);
 }
 
 void InputStream::copyTo(OutputStream& destination)

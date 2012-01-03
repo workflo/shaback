@@ -12,8 +12,6 @@
  * It also provides the \c readString() method that reads a full line
  * of text (until the next newline character).
  *
- * @todo skip / mark / reset
- *
  * @class BufferedReader
  * @version $Id: BufferedReader.h,v 1.24 2003-09-13 10:29:03 florian Exp $
  * @author Florian 'Overflo' Wolff (florian@donuz.de)

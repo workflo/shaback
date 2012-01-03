@@ -79,7 +79,6 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         break;
 
       case 'c':
-        // TODO
         loadConfigFile(optarg);
         break;
 
@@ -129,7 +128,6 @@ void RuntimeConfig::load()
 void RuntimeConfig::tryToLoadFrom(string dir)
 {
   vector<File> files = File(dir).listFiles("*.lua");
-  // TODO: Pattern
 
   for (vector<File>::iterator it = files.begin(); it < files.end(); it++) {
     File f(*it);

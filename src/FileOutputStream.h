@@ -14,25 +14,24 @@
  * @class FileOutputStream
  * @author Florian 'Overflo' Wolff (florian@donuz.de)
  */
-class FileOutputStream : public OutputStream
+class FileOutputStream: public OutputStream
 {
- public:
-  FileOutputStream(File& file, bool append = false);
-  FileOutputStream(const char* filename, bool append = false); 
-  FileOutputStream(std::string&, bool append = false); 
-  ~FileOutputStream(); 
-  
-  void write(int b);
-  void write(const char* b, int len);
-  void close();
-  
- protected:
-  bool append;
+  public:
+    FileOutputStream(File& file);
+    FileOutputStream(const char* filename);
+    FileOutputStream(std::string& filename);
+    ~FileOutputStream();
+
+    void write(int b);
+    void write(const char* b, int len);
+    void close();
+
+  protected:
 #ifdef WIN32
-  HANDLE handle;
+    HANDLE handle;
 #else
-  int handle;
+    int handle;
 #endif
-  void init(std::string& filename);
+    void init(std::string& filename);
 };
 #endif // SHABACK_FileOutputStream_H

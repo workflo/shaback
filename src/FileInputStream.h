@@ -43,12 +43,6 @@ class FileInputStream : public InputStream
   void close();
 
   void reset();
-
-  int skip(int n);
-
-  int available();
-
-  void setBlocking(bool on) {};
   
  protected:
 #ifdef WIN32

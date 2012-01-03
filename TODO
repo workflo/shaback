@@ -1,7 +1,3 @@
-
-Config:
------------------------
-
 Backup:
 -----------------------
 - Crypto
@@ -12,6 +8,7 @@ Backup:
 
 General:
 -----------------------
+- Write and read repository config
 - Allow different hashing algorithms (SHA-1, SHA-256)
 
 Restore:
@@ -24,3 +21,6 @@ Funny optimizations:
 -----------------------
 - Use xattr to store SHA1 digests
 - Sort dir entries by inode
+
+Config:
+-----------------------

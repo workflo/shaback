@@ -3,19 +3,17 @@
 #include "Cache.h"
 #include "Exception.h"
 
-
 using namespace std;
 
-Cache::Cache(File file)
-: file(file), opened(false)
+Cache::Cache(File file) :
+  file(file), opened(false)
 {
 }
 
 Cache::~Cache()
 {
-    close();
+  close();
 }
-
 
 void Cache::open(int openMode)
 {
@@ -25,14 +23,13 @@ void Cache::open(int openMode)
       if (errno > 0) {
         throw Exception::errnoToException(file.path);
       } else {
-	    // TODO: Fehler
+        // TODO: Fehler
       }
     } else {
       opened = true;
     }
   }
 }
-
 
 void Cache::close()
 {
@@ -41,7 +38,6 @@ void Cache::close()
     opened = false;
   }
 }
-
 
 bool Cache::contains(string& key)
 {
@@ -56,7 +52,6 @@ bool Cache::contains(string& key)
   }
 }
 
-
 void Cache::put(string& key, string& value)
 {
   if (opened) {
@@ -66,10 +61,9 @@ void Cache::put(string& key, string& value)
     datum v;
     v.dptr = (char*) value.data();
     v.dsize = value.length();
-    gdbm_store(gdbmFile, k, v, GDBM_REPLACE);  
-  }  
+    gdbm_store(gdbmFile, k, v, GDBM_REPLACE);
+  }
 }
-
 
 void Cache::put(string& key)
 {
@@ -83,9 +77,8 @@ void Cache::put(string& key)
     v.dptr = &empty;
     v.dsize = 0;
     gdbm_store(gdbmFile, k, v, GDBM_REPLACE);
-  }  
+  }
 }
-
 
 void Cache::remove(string& key)
 {
@@ -93,26 +86,24 @@ void Cache::remove(string& key)
     datum k;
     k.dptr = (char*) key.data();
     k.dsize = key.length();
-    gdbm_delete(gdbmFile, k);  
-  }  
+    gdbm_delete(gdbmFile, k);
+  }
 }
-
 
 void Cache::exportCache(OutputStream& out)
 {
   if (opened) {
-	datum key = gdbm_firstkey (gdbmFile);
-	while (key.dptr) {
-	  out.write(key.dptr, key.dsize);
-	  out.write("\n", 1);
+    datum key = gdbm_firstkey(gdbmFile);
+    while (key.dptr) {
+      out.write(key.dptr, key.dsize);
+      out.write("\n", 1);
 
-	  datum nextkey = gdbm_nextkey (gdbmFile, key);
-      free (key.dptr);
+      datum nextkey = gdbm_nextkey(gdbmFile, key);
+      free(key.dptr);
       key = nextkey;
     }
   }
 }
-
 
 int Cache::importCache(InputStream& in)
 {
@@ -120,9 +111,9 @@ int Cache::importCache(InputStream& in)
 
   if (opened) {
     string str;
-    while(in.readLine(str)) {
+    while (in.readLine(str)) {
       put(str);
-      count ++;
+      count++;
     }
   }
 
