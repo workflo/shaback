@@ -2,9 +2,11 @@
 #define SHABACK_BlowfishOutputStream_H
 
 #include <string.h>
+#include <openssl/evp.h>
+#include <openssl/blowfish.h>
 #include "OutputStream.h"
 
-#define Blowfish_CHUNK_SIZE (16 * 1024)
+#define BLOWFISH_CHUNK_SIZE (BF_BLOCK * 1024)
 
 class BlowfishOutputStream: public OutputStream
 {
@@ -19,6 +21,10 @@ class BlowfishOutputStream: public OutputStream
 
   protected:
     OutputStream* out;
-    unsigned char outputBuffer[Blowfish_CHUNK_SIZE];
+    unsigned char outputBuffer[BLOWFISH_CHUNK_SIZE + EVP_MAX_BLOCK_LENGTH];
+    EVP_CIPHER_CTX ctx;
+    unsigned char iv[BF_BLOCK];
+    unsigned char key[16];
+    int outlen;
 };
 #endif// SHABACK_BlowfishOutputStream_H
