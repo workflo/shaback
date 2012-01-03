@@ -30,6 +30,7 @@ public:
     std::vector<std::string> excludePatterns;
     std::vector<std::string> splitPatterns;
     std::vector<std::string> dirs;
+    std::string cryptoPassword;
     
     File filesDir;
     File indexDir;

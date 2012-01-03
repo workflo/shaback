@@ -88,3 +88,6 @@ UnsupportedOperation::UnsupportedOperation(string op) :
   Exception(string("Unsupported operation: ").append(op))
 {
 }
+
+MissingCryptoPassword::MissingCryptoPassword()
+: Exception("Missing crypto password") {}

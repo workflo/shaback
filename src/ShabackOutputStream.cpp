@@ -4,15 +4,14 @@
 #include "ShabackOutputStream.h"
 #include "FileOutputStream.h"
 #include "DeflateOutputStream.h"
+#include "AesOutputStream.h"
 #include "Exception.h"
 #include "Repository.h"
 
 using namespace std;
 
-
-ShabackOutputStream::ShabackOutputStream(int compressionAlgorithm, int encryptionAlgorithm)
-  : opened(false), compressionAlgorithm(compressionAlgorithm),
-    encryptionAlgorithm(encryptionAlgorithm)
+ShabackOutputStream::ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm) :
+  config(config), opened(false), compressionAlgorithm(compressionAlgorithm), encryptionAlgorithm(encryptionAlgorithm)
 {
   outputStream = 0;
   compressionOutputStream = 0;
@@ -23,13 +22,15 @@ ShabackOutputStream::ShabackOutputStream(int compressionAlgorithm, int encryptio
 ShabackOutputStream::~ShabackOutputStream()
 {
   close();
-//   cout << "ShabackOutputStream:~"<<endl;
-  if (compressionOutputStream) delete compressionOutputStream;
-  if (encryptionOutputStream) delete encryptionOutputStream;
-  if (fileOutputStream) delete fileOutputStream;
-//   cout << "ShabackOutputStream:~"<<endl;
+  //   cout << "ShabackOutputStream:~"<<endl;
+  if (compressionOutputStream)
+    delete compressionOutputStream;
+  if (encryptionOutputStream)
+    delete encryptionOutputStream;
+  if (fileOutputStream)
+    delete fileOutputStream;
+  //   cout << "ShabackOutputStream:~"<<endl;
 }
-
 
 void ShabackOutputStream::open(File& file)
 {
@@ -42,20 +43,28 @@ void ShabackOutputStream::open(File& file)
   fileOutputStream = new FileOutputStream(tmpFile);
   outputStream = fileOutputStream;
 
-  switch(compressionAlgorithm) {
-    
-  case COMPRESSION_DEFLATE:
-    compressionOutputStream = new DeflateOutputStream(outputStream);
-    outputStream = compressionOutputStream;
-    break;
+  switch (encryptionAlgorithm) {
+    case ENCRYPTION_AES:
+      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
+      outputStream = encryptionOutputStream;
+      break;
 
-  case COMPRESSION_NONE:
-    break;
-    
+    case ENCRYPTION_NONE:
+      break;
   }
-//   cout << "open: " << file.path << endl;
-}
 
+  switch (compressionAlgorithm) {
+    case COMPRESSION_DEFLATE:
+      compressionOutputStream = new DeflateOutputStream(outputStream);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_NONE:
+      break;
+  }
+
+  //   cout << "open: " << file.path << endl;
+}
 
 void ShabackOutputStream::close()
 {
@@ -63,12 +72,10 @@ void ShabackOutputStream::close()
   tmpFile.move(file);
 }
 
-
 void ShabackOutputStream::write(string& s)
 {
   write(s.data(), s.size());
 }
-
 
 void ShabackOutputStream::write(const char* data, int numBytes)
 {

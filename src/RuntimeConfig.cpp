@@ -30,42 +30,17 @@ RuntimeConfig::RuntimeConfig()
 
 void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 {
-  int digit_optind = 0;
-
   while (true) {
-    int this_option_optind = optind ? optind : 1;
     int option_index = 0;
-    static struct option long_options[] = { { "add", 1, 0, 0 }, { "append", 0,
-        0, 0 }, { "debug", 0, 0, 'd' }, { "verbose", 0, 0, 'v' }, { "totals", 0,
-        0, 't' }, { "config", 1, 0, 'c' }, { "repository", 1, 0, 'r' }, {
-        "force", 0, 0, 'f' }, { 0, 0, 0, 0 } };
+    static struct option long_options[] = { { "debug", no_argument, 0, 'd' }, { "verbose", no_argument, 0, 'v' }, {
+        "totals", no_argument, 0, 't' }, { "config", required_argument, 0, 'c' }, { "repository", required_argument, 0,
+        'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "abc:dvtr:f", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:", long_options, &option_index);
     if (c == -1)
       break;
 
     switch (c) {
-      case 0:
-        std::cout << "option " << long_options[option_index].name;
-        if (optarg)
-          std::cout << " with arg " << optarg;
-        std::cout << std::endl;
-        break;
-
-      case '0':
-      case '1':
-      case '2':
-        if (digit_optind != 0 && digit_optind != this_option_optind)
-          std::cout << "digits occur in two different argv-elements."
-              << std::endl;
-        digit_optind = this_option_optind;
-        std::cout << "option " << c << std::endl;
-        break;
-
-      case 'a':
-        std::cout << "option a" << std::endl;
-        break;
-
       case 'v':
         verbose = true;
         break;
@@ -83,7 +58,6 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         break;
 
       case 'r':
-        // Chose another repository:
         repository = optarg;
         break;
 
@@ -91,12 +65,12 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         debug = true;
         break;
 
-      case '?':
+      case 'p':
+        cryptoPassword = optarg;
         break;
 
       default:
-        std::cout << "?? getopt returned character code " << c << "??"
-            << std::endl;
+        cerr << "?? getopt returned character code " << c << "??" << std::endl;
     }
   }
 
@@ -231,6 +205,16 @@ static int l_addSplitPattern(lua_State *L)
   return 0;
 }
 
+static int l_cryptoPassword(lua_State *L)
+{
+  const char* pw = lua_tostring(L, 1);
+
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->cryptoPassword = pw;
+
+  return 0;
+}
+
 void RuntimeConfig::initLua()
 {
   this->luaState = luaL_newstate();
@@ -260,6 +244,9 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_addSplitPattern);
   lua_setglobal(this->luaState, "addSplitPattern");
 
+  lua_pushcfunction(this->luaState, l_cryptoPassword);
+  lua_setglobal(this->luaState, "cryptoPassword");
+
   lua_pushlightuserdata(this->luaState, this);
   lua_setglobal(this->luaState, LUA_RUNTIMECONFIG);
 }
@@ -275,8 +262,7 @@ void RuntimeConfig::finalize()
 
 bool RuntimeConfig::excludeFile(File& file)
 {
-  for (vector<string>::iterator it = excludePatterns.begin(); it
-      < excludePatterns.end(); it++) {
+  for (vector<string>::iterator it = excludePatterns.begin(); it < excludePatterns.end(); it++) {
     string pattern(*it);
 #ifdef WIN32
     // TODO: fnmatch Windows

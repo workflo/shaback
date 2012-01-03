@@ -22,7 +22,7 @@ Repository::Repository(RuntimeConfig& config) :
   config(config), cache(config.localCacheFile)
 {
   string hashAlgorithm("SHA1");
-  string encryptionAlgorithm("");
+  string encryptionAlgorithm("AES");
   string compressionAlgorithm("");
 
   if (compressionAlgorithm == "Deflate") {
@@ -41,6 +41,10 @@ Repository::Repository(RuntimeConfig& config) :
     this->encryptionAlgorithm = ENCRYPTION_NONE;
   } else {
     throw UnsupportedEncryptionAlgorithm(encryptionAlgorithm);
+  }
+
+  if (this->encryptionAlgorithm != ENCRYPTION_NONE) {
+    if (config.cryptoPassword.empty()) throw MissingCryptoPassword();
   }
 
   if (!config.localCacheFile.empty()) {
@@ -124,7 +128,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
       cout << "[t] " << file.path << endl;
     }
 
-    ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
     os.open(file);
     os.write(treeFile);
 
@@ -168,7 +172,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
       }
     }
 
-    ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
     os.open(destFile);
 
     while (true) {

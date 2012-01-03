@@ -5,31 +5,33 @@
 #include <zlib.h>
 #include "File.h"
 #include "OutputStream.h"
+#include "RuntimeConfig.h"
 
 class ShabackOutputStream
 {
- public:
-  ShabackOutputStream(int compressionAlgorithm, int encryptionAlgorithm);
-  ~ShabackOutputStream();
+  public:
+    ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm);
+    ~ShabackOutputStream();
 
-  void open(File& file);
-  void close();
+    void open(File& file);
+    void close();
 
-  void write(std::string& s);
-  void write(const char* data, int numBytes);
+    void write(std::string& s);
+    void write(const char* data, int numBytes);
 
- private:
-  int compressionAlgorithm;
-  int encryptionAlgorithm;
-  File file;
-  File tmpFile;
-  gzFile gz;
-  int fd;
-  bool opened;
-  OutputStream* compressionOutputStream;
-  OutputStream* outputStream;
-  OutputStream* fileOutputStream;
-  OutputStream* encryptionOutputStream;
+  private:
+    int compressionAlgorithm;
+    int encryptionAlgorithm;
+    File file;
+    File tmpFile;
+    gzFile gz;
+    int fd;
+    bool opened;
+    OutputStream* compressionOutputStream;
+    OutputStream* outputStream;
+    OutputStream* fileOutputStream;
+    OutputStream* encryptionOutputStream;
+    RuntimeConfig& config;
 };
 
 #endif // SHABACK_ShabackOutputStream_H
