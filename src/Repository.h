@@ -21,6 +21,7 @@ public:
     bool contains(std::string& hashValue);
     std::string storeTreeFile(std::string& treeFile);
     std::string storeFile(File& srcFile);
+    void exportCacheFile();
 
  protected:
    RuntimeConfig config;

@@ -4,8 +4,6 @@ Config:
 
 Backup:
 -----------------------
-- ZIP
-- LZO
 - Crypto
 - Cache file import/export
 - Split large files

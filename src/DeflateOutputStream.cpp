@@ -15,7 +15,7 @@ DeflateOutputStream::DeflateOutputStream(OutputStream* out)
   zipStream.opaque = Z_NULL;
   if (deflateInit(&zipStream, Z_DEFAULT_COMPRESSION) != Z_OK) {
     // TODO: Throw exception
-    cout << "DeflateOutputStream error" << endl;
+    cerr << "DeflateOutputStream error" << endl;
   }
 }
 

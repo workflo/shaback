@@ -1,5 +1,4 @@
 #include <iostream>
-//#include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
 

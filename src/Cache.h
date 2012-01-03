@@ -3,6 +3,7 @@
 
 #include <string>
 #include "File.h"
+#include "OutputStream.h"
 
 extern "C" {
 #include <gdbm.h>
@@ -20,6 +21,7 @@ class Cache
     void put(std::string& key, std::string& value);
     void put(std::string& key);
     void remove(std::string& key);
+    void exportCache(OutputStream& out);
     
   private:
     File file;

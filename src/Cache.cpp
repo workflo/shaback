@@ -78,14 +78,16 @@ void Cache::put(string& key, string& value)
 
 void Cache::put(string& key)
 {
+  char empty;
+
   if (opened) {
     datum k;
     k.dptr = (char*) key.data();
     k.dsize = key.length();
     datum v;
-    v.dptr = "";
+    v.dptr = &empty;
     v.dsize = 0;
-    gdbm_store(gdbmFile, k, v, GDBM_REPLACE);  
+    gdbm_store(gdbmFile, k, v, GDBM_REPLACE);
   }  
 }
 
@@ -98,4 +100,20 @@ void Cache::remove(string& key)
     k.dsize = key.length();
     gdbm_delete(gdbmFile, k);  
   }  
+}
+
+
+void Cache::exportCache(OutputStream& out)
+{
+  if (opened) {
+	datum key = gdbm_firstkey (gdbmFile);
+	while (key.dptr) {
+	  out.write(key.dptr, key.dsize);
+	  out.write("\n", 1);
+
+	  datum nextkey = gdbm_nextkey (gdbmFile, key);
+      free (key.dptr);
+      key = nextkey;
+    }
+  }
 }

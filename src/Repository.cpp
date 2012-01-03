@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include <zlib.h>
 
@@ -10,6 +11,8 @@
 #include "Sha1.h"
 #include "Exception.h"
 #include "FileInputStream.h"
+#include "FileOutputStream.h"
+#include "BufferedWriter.h"
 #include "ShabackOutputStream.h"
 
 using namespace std;
@@ -46,6 +49,7 @@ Repository::Repository(RuntimeConfig& config)
 
 Repository::~Repository()
 {
+  exportCacheFile();
   cache.close();
 }
 
@@ -120,9 +124,9 @@ string Repository::storeTreeFile(string& treeFile)
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
     os.open(file);
     os.write(treeFile);
-
-    cache.put(hashValue);
   }
+
+  cache.put(hashValue);
 
   return sha1.toString();
 }
@@ -163,9 +167,29 @@ string Repository::storeFile(File& srcFile)
       if (bytesRead == -1) break;
       os.write(readBuffer, bytesRead);
     }
-
-    cache.put(hashValue);
   }
 
+  cache.put(hashValue);
+
   return hashValue;
+}
+
+
+#include "StandardOutputStream.h"
+void Repository::exportCacheFile()
+{
+  time_t rawtime;
+  struct tm * ptm;
+  time ( &rawtime );
+  ptm = gmtime ( &rawtime );
+
+  char filename[100];
+  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d.list",
+		  ptm->tm_year +1900, ptm->tm_mon +1, ptm->tm_mday,
+		  ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+
+  File cacheExportFile(config.cacheDir, filename);
+  FileOutputStream os(cacheExportFile);
+  BufferedWriter writer(&os);
+  cache.exportCache(writer);
 }
