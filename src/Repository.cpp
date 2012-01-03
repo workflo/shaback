@@ -22,7 +22,7 @@ Repository::Repository(RuntimeConfig& config) :
   config(config), cache(config.localCacheFile)
 {
   string hashAlgorithm("SHA1");
-  string encryptionAlgorithm("AES");
+  string encryptionAlgorithm("Blowfish");
   string compressionAlgorithm("");
 
   if (compressionAlgorithm == "Deflate") {
@@ -33,7 +33,9 @@ Repository::Repository(RuntimeConfig& config) :
     throw UnsupportedCompressionAlgorithm(compressionAlgorithm);
   }
 
-  if (encryptionAlgorithm == "AES") {
+  if (encryptionAlgorithm == "Blowfish") {
+    this->encryptionAlgorithm = ENCRYPTION_BLOWFISH;
+  } else if (encryptionAlgorithm == "AES") {
     this->encryptionAlgorithm = ENCRYPTION_AES;
   } else if (encryptionAlgorithm == "DES") {
     this->encryptionAlgorithm = ENCRYPTION_DES;

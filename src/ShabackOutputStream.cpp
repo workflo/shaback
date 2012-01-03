@@ -4,6 +4,7 @@
 #include "ShabackOutputStream.h"
 #include "FileOutputStream.h"
 #include "DeflateOutputStream.h"
+#include "BlowfishOutputStream.h"
 #include "AesOutputStream.h"
 #include "Exception.h"
 #include "Repository.h"
@@ -44,10 +45,15 @@ void ShabackOutputStream::open(File& file)
   outputStream = fileOutputStream;
 
   switch (encryptionAlgorithm) {
-    case ENCRYPTION_AES:
-      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
+    case ENCRYPTION_BLOWFISH:
+      encryptionOutputStream = new BlowfishOutputStream(config.cryptoPassword, outputStream);
       outputStream = encryptionOutputStream;
       break;
+
+//    case ENCRYPTION_AES:
+//      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
+//      outputStream = encryptionOutputStream;
+//      break;
 
     case ENCRYPTION_NONE:
       break;

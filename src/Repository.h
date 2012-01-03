@@ -39,8 +39,9 @@ public:
 #define COMPRESSION_DEFLATE 1
 
 #define ENCRYPTION_NONE     0
-#define ENCRYPTION_AES      1
-#define ENCRYPTION_DES      2
+#define ENCRYPTION_BLOWFISH 1
+#define ENCRYPTION_AES      2
+#define ENCRYPTION_DES      3
 
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2
