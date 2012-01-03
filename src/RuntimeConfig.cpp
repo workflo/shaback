@@ -23,6 +23,7 @@ using namespace std;
 RuntimeConfig::RuntimeConfig()
 {
   verbose = false;
+  debug = false;
   oneFileSystem = false;
   showTotals = false;
   initLua();
@@ -36,11 +37,11 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = { { "add", 1, 0, 0 }, { "append", 0,
-        0, 0 }, { "delete", 1, 0, 0 }, { "verbose", 0, 0, 'v' }, { "totals", 0,
+        0, 0 }, { "debug", 0, 0, 'd' }, { "verbose", 0, 0, 'v' }, { "totals", 0,
         0, 't' }, { "config", 1, 0, 'c' }, { "repository", 1, 0, 'r' }, {
         "force", 0, 0, 'f' }, { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "abc:d:vtr:f", long_options, &option_index);
+    int c = getopt_long(argc, argv, "abc:dvtr:f", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -89,7 +90,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         break;
 
       case 'd':
-        std::cout << "option d with value '" << optarg << "'" << std::endl;
+        debug = true;
         break;
 
       case '?':

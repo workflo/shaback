@@ -114,12 +114,17 @@ void Cache::exportCache(OutputStream& out)
 }
 
 
-void Cache::importCache(InputStream& in)
+int Cache::importCache(InputStream& in)
 {
+  int count = 0;
+
   if (opened) {
     string str;
     while(in.readLine(str)) {
       put(str);
+      count ++;
     }
   }
+
+  return count;
 }

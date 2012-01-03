@@ -7,7 +7,6 @@ Backup:
 - Crypto
 - Split large files
 - Error handling
-- Count number of bytes/files written/inspected
 - Handle oneFileSystem option
 - lock/unlock
 

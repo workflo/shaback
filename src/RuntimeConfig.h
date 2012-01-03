@@ -18,6 +18,7 @@ public:
     virtual void loadConfigFile(std::string filename);
 
     bool verbose;
+    bool debug;
     bool force;
     bool oneFileSystem;
     bool showTotals;

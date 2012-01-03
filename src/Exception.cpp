@@ -8,10 +8,14 @@
 
 using namespace std;
 
+Exception::Exception()
+{
+}
 
-Exception::Exception() {}
-
-Exception::Exception(string msg) : msg(msg) {}
+Exception::Exception(string msg) :
+  msg(msg)
+{
+}
 
 string Exception::getMessage()
 {
@@ -43,31 +47,44 @@ Exception Exception::errnoToException(int e, string filename)
   string msg;
 
   switch (e) {
-  default:
-    if (filename.empty()) {
-      return Exception(string(strerror(e)));
-    } else {
-      return Exception(string(strerror(e)).append(": ").append(filename));
-    }
+    case ENOENT:
+      return FileNotFoundException(filename);
+
+    default:
+      if (filename.empty()) {
+        return IOException(string(strerror(e)));
+      } else {
+        return IOException(string(strerror(e)).append(": ").append(filename));
+      }
   }
 }
 
+IOException::IOException(string msg) :
+  Exception(msg)
+{
+}
 
-IOException::IOException(string msg) : Exception(msg) {}
-
-
-FileNotFoundException::FileNotFoundException(string filename) 
-  : IOException(string("File not found: ").append(filename)),
-    filename(filename) {}
+FileNotFoundException::FileNotFoundException(string filename) :
+  IOException(string("File not found: ").append(filename)), filename(filename)
+{
+}
 
 string FileNotFoundException::getFilename()
 {
   return filename;
 }
 
+UnsupportedCompressionAlgorithm::UnsupportedCompressionAlgorithm(string algo) :
+  Exception(string("Unsupported compression algorithm: ").append(algo))
+{
+}
 
-UnsupportedCompressionAlgorithm::UnsupportedCompressionAlgorithm(string algo) : Exception(string("Unsupported compression algorithm: ").append(algo)) {}
+UnsupportedEncryptionAlgorithm::UnsupportedEncryptionAlgorithm(string algo) :
+  Exception(string("Unsupported encryption algorithm: ").append(algo))
+{
+}
 
-UnsupportedEncryptionAlgorithm::UnsupportedEncryptionAlgorithm(string algo) : Exception(string("Unsupported encryption algorithm: ").append(algo)) {}
-
-UnsupportedOperation::UnsupportedOperation(string op) : Exception(string("Unsupported operation: ").append(op)) {}
+UnsupportedOperation::UnsupportedOperation(string op) :
+  Exception(string("Unsupported operation: ").append(op))
+{
+}

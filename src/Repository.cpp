@@ -85,7 +85,13 @@ int Repository::backup()
 {
   open();
   BackupRun run(config, *this);
-  return run.run();
+  int rc = run.run();
+
+  if (config.showTotals) {
+    run.showTotals();
+  }
+
+  return rc;
 }
 
 File Repository::hashValueToFile(string hashValue)
@@ -114,8 +120,8 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
 
-    if (config.verbose) {
-      cout << "T: " << file.path << endl;
+    if (config.debug) {
+      cout << "[t] " << file.path << endl;
     }
 
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
@@ -135,7 +141,7 @@ static char readBuffer[READ_BUFFER_SIZE];
 
 string Repository::storeFile(BackupRun* run, File& srcFile)
 {
-  run->numFilesRead ++;
+  run->numFilesRead++;
   run->numBytesRead += srcFile.getSize();
 
   Sha1 sha1;
@@ -155,8 +161,11 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 
     File destFile = hashValueToFile(hashValue);
 
-    if (config.verbose) {
-      cout << "F: " << destFile.path << endl;
+    if (config.verbose || config.debug) {
+      cout << "[m] " << srcFile.path << endl;
+      if (config.debug) {
+        cout << "[f] " << destFile.path << endl;
+      }
     }
 
     ShabackOutputStream os(compressionAlgorithm, encryptionAlgorithm);
@@ -169,8 +178,12 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
       os.write(readBuffer, bytesRead);
     }
 
-    run->numFilesStored ++;
+    run->numFilesStored++;
     run->numBytesStored += srcFile.getSize();
+  } else {
+    if (config.debug) {
+      cout << "[ ] " << srcFile.path << endl;
+    }
   }
 
   cache.put(hashValue);
@@ -205,6 +218,8 @@ void Repository::importCacheFile()
       cout << "Preloading cache from: " << file.path << endl;
     FileInputStream is(file);
     BufferedReader reader(&is);
-    cache.importCache(reader);
+    int count = cache.importCache(reader);
+    if (config.verbose)
+      cout << "Cache contains " << count << " entries." << endl;
   }
 }

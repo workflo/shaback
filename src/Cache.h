@@ -23,7 +23,7 @@ class Cache
     void put(std::string& key);
     void remove(std::string& key);
     void exportCache(OutputStream& out);
-    void importCache(InputStream& in);
+    int importCache(InputStream& in);
 
   private:
     File file;
