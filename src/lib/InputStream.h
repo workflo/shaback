@@ -48,6 +48,8 @@ class InputStream
    */
   virtual bool readLine(std::string& str);
 
+  virtual bool readAll(std::string& str);
+
   /**
    * Closes this input stream.
    */

@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "RestoreRun.h"
 #include "lib/Exception.h"
+
+#include "RestoreRun.h"
+#include "ShabackInputStream.h"
 
 using namespace std;
 
@@ -27,4 +29,6 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
   if (config.verbose)
     cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
 
+  string treeFileContent = repository.loadTreeFile(treeId);
+  cout << "Ausgabe: " << treeFileContent << endl;
 }

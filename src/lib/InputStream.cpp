@@ -1,3 +1,4 @@
+#include <iostream>
 #include "InputStream.h"
 #include "Exception.h"
 
@@ -52,6 +53,28 @@ bool InputStream::readLine(string& str)
   }
 }
 
+#define INPUTSTREAM_READ_BUFFER_LEN 4096
+
+bool InputStream::readAll(string& str)
+{
+  str.clear();
+  char buf[INPUTSTREAM_READ_BUFFER_LEN];
+
+  int bytesRead = read(buf, INPUTSTREAM_READ_BUFFER_LEN);
+  if (bytesRead == -1)
+    return -1;
+
+  while (true) {
+    cout << "Bytes Read: " << bytesRead << endl;
+    str.append(buf, bytesRead);
+    bytesRead = read(buf, INPUTSTREAM_READ_BUFFER_LEN);
+    if (bytesRead == -1)
+      break;
+  }
+
+  return str.size();
+}
+
 void InputStream::close()
 {
 }
@@ -67,8 +90,7 @@ void InputStream::copyTo(OutputStream& destination, int maxBytes)
   int bytesToRead = maxBytes;
 
   for (;;) {
-    int bytesRead =
-        read(buffer, maxBytes == -1 ? 8192 : min(8192, bytesToRead));
+    int bytesRead = read(buffer, maxBytes == -1 ? 8192 : min(8192, bytesToRead));
     if (bytesRead <= 0)
       break;
     destination.write(buffer, bytesRead);

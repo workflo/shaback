@@ -23,6 +23,7 @@ ShabackInputStream::ShabackInputStream(RuntimeConfig& config, int compressionAlg
 ShabackInputStream::~ShabackInputStream()
 {
   close();
+
   if (compressionInputStream)
     delete compressionInputStream;
   if (encryptionInputStream)
@@ -43,10 +44,10 @@ void ShabackInputStream::open(File& file)
       inputStream = encryptionInputStream;
       break;
 
-//    case ENCRYPTION_AES:
-//      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
-//      outputStream = encryptionOutputStream;
-//      break;
+      //    case ENCRYPTION_AES:
+      //      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
+      //      outputStream = encryptionOutputStream;
+      //      break;
 
     case ENCRYPTION_NONE:
       break;
@@ -61,11 +62,20 @@ void ShabackInputStream::open(File& file)
     case COMPRESSION_NONE:
       break;
   }
-
-  //   cout << "open: " << file.path << endl;
 }
 
 void ShabackInputStream::close()
 {
-  inputStream->close();
+  if (inputStream)
+    inputStream->close();
+}
+
+int ShabackInputStream::read()
+{
+  throw UnsupportedOperation("ShabackInputStream::read()");
+}
+
+int ShabackInputStream::read(char* b, int len)
+{
+  return inputStream->read(b, len);
 }

@@ -16,6 +16,7 @@
 #include "Repository.h"
 #include "BackupRun.h"
 #include "RestoreRun.h"
+#include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
 #include "ShabackException.h"
 
@@ -216,6 +217,19 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   cache.put(hashValue);
 
   return hashValue;
+}
+
+string Repository::loadTreeFile(string& treeId)
+{
+  File file = hashValueToFile(treeId);
+  ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
+  in.open(file);
+
+  string line;
+  in.readAll(line);
+//  cout << line << endl;
+
+  return file.path;
 }
 
 void Repository::exportCacheFile()

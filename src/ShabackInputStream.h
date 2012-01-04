@@ -7,7 +7,7 @@
 #include "lib/InputStream.h"
 #include "RuntimeConfig.h"
 
-class ShabackInputStream
+class ShabackInputStream : public InputStream
 {
   public:
     ShabackInputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm);
@@ -16,14 +16,13 @@ class ShabackInputStream
     void open(File& file);
     void close();
 
-//    void write(std::string& s);
-//    void write(const char* data, int numBytes);
+    int read(char* b, int len);
+    int read();
 
   private:
     int compressionAlgorithm;
     int encryptionAlgorithm;
     File file;
-//    int fd;
     bool opened;
     InputStream* compressionInputStream;
     InputStream* inputStream;

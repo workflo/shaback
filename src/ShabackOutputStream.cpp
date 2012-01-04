@@ -23,14 +23,13 @@ ShabackOutputStream::ShabackOutputStream(RuntimeConfig& config, int compressionA
 ShabackOutputStream::~ShabackOutputStream()
 {
   close();
-  //   cout << "ShabackOutputStream:~"<<endl;
+
   if (compressionOutputStream)
     delete compressionOutputStream;
   if (encryptionOutputStream)
     delete encryptionOutputStream;
   if (fileOutputStream)
     delete fileOutputStream;
-  //   cout << "ShabackOutputStream:~"<<endl;
 }
 
 void ShabackOutputStream::open(File& file)
@@ -50,10 +49,10 @@ void ShabackOutputStream::open(File& file)
       outputStream = encryptionOutputStream;
       break;
 
-//    case ENCRYPTION_AES:
-//      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
-//      outputStream = encryptionOutputStream;
-//      break;
+      //    case ENCRYPTION_AES:
+      //      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
+      //      outputStream = encryptionOutputStream;
+      //      break;
 
     case ENCRYPTION_NONE:
       break;
@@ -68,13 +67,12 @@ void ShabackOutputStream::open(File& file)
     case COMPRESSION_NONE:
       break;
   }
-
-  //   cout << "open: " << file.path << endl;
 }
 
 void ShabackOutputStream::close()
 {
-  outputStream->close();
+  if (outputStream)
+    outputStream->close();
   tmpFile.move(file);
 }
 

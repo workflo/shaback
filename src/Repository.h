@@ -28,6 +28,7 @@ class Repository
     void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
     void exportCacheFile();
+    std::string loadTreeFile(std::string& treeId);
 
   protected:
     RuntimeConfig config;

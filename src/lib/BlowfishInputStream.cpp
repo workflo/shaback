@@ -34,7 +34,7 @@ BlowfishInputStream::~BlowfishInputStream()
 
 int BlowfishInputStream::read()
 {
-  throw UnsupportedOperation("read()");
+  throw UnsupportedOperation("BlowfishInputStream::read()");
 }
 
 int BlowfishInputStream::read(char* b, int len)
