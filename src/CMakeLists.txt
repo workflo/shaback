@@ -19,12 +19,12 @@ endif (CMAKE_VERSION VERSION_GREATER "2.8.4")
 
 
 #ADD_SUBDIRECTORY(include)
-#ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
-set(shaback_SRCS shaback.cpp main.cpp RuntimeConfig.cpp Sha1.cpp Sha256.cpp File.cpp Repository.cpp BackupRun.cpp Exception.cpp Cache.cpp ShabackOutputStream.cpp OutputStream.cpp FileOutputStream.cpp InputStream.cpp FileInputStream.cpp DeflateOutputStream.cpp DeflateInputStream.cpp StandardOutputStream.cpp StandardInputStream.cpp BufferedWriter.cpp BufferedReader.cpp BlowfishOutputStream.cpp BlowfishInputStream.cpp Date.cpp)
+set(shaback_SRCS shaback.cpp main.cpp RuntimeConfig.cpp Repository.cpp BackupRun.cpp Cache.cpp ShabackOutputStream.cpp)
 add_executable(shaback ${shaback_SRCS})
-target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY})
+target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
 install(PROGRAMS shaback DESTINATION bin)

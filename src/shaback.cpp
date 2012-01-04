@@ -4,11 +4,11 @@
 
 #include "shaback.h"
 #include "RuntimeConfig.h"
-#include "DeflateOutputStream.h"
-#include "StandardOutputStream.h"
-#include "FileOutputStream.h"
-#include "DeflateInputStream.h"
-#include "StandardInputStream.h"
+#include "lib/DeflateOutputStream.h"
+#include "lib/StandardOutputStream.h"
+#include "lib/FileOutputStream.h"
+#include "lib/DeflateInputStream.h"
+#include "lib/StandardInputStream.h"
 
 using namespace std;
 

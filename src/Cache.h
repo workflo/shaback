@@ -2,9 +2,9 @@
 #define SHABACK_Cache_H
 
 #include <string>
-#include "File.h"
-#include "OutputStream.h"
-#include "InputStream.h"
+#include "lib/File.h"
+#include "lib/OutputStream.h"
+#include "lib/InputStream.h"
 
 extern "C" {
 # include <gdbm.h>

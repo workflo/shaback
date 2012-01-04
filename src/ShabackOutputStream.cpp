@@ -2,11 +2,11 @@
 #include <fcntl.h>
 
 #include "ShabackOutputStream.h"
-#include "FileOutputStream.h"
-#include "DeflateOutputStream.h"
-#include "BlowfishOutputStream.h"
-#include "AesOutputStream.h"
-#include "Exception.h"
+#include "lib/FileOutputStream.h"
+#include "lib/DeflateOutputStream.h"
+#include "lib/BlowfishOutputStream.h"
+#include "lib/AesOutputStream.h"
+#include "lib/Exception.h"
 #include "Repository.h"
 
 using namespace std;

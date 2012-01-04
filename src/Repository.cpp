@@ -8,14 +8,14 @@
 
 #include "Repository.h"
 #include "BackupRun.h"
-#include "Sha1.h"
-#include "Exception.h"
-#include "FileInputStream.h"
-#include "FileOutputStream.h"
-#include "BufferedWriter.h"
-#include "BufferedReader.h"
+#include "lib/Sha1.h"
+#include "lib/Exception.h"
+#include "lib/FileInputStream.h"
+#include "lib/FileOutputStream.h"
+#include "lib/BufferedWriter.h"
+#include "lib/BufferedReader.h"
 #include "ShabackOutputStream.h"
-#include "Date.h"
+#include "lib/Date.h"
 
 using namespace std;
 

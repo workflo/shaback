@@ -3,8 +3,8 @@
 
 #include <string>
 #include <zlib.h>
-#include "File.h"
-#include "OutputStream.h"
+#include "lib/File.h"
+#include "lib/OutputStream.h"
 #include "RuntimeConfig.h"
 
 class ShabackOutputStream

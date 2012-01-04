@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "Cache.h"
-#include "Exception.h"
+#include "lib/Exception.h"
 
 using namespace std;
 

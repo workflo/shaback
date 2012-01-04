@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "File.h"
+#include "lib/File.h"
 
 extern "C" {
 # include <lua.h>

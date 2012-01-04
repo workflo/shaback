@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include "BackupRun.h"
-#include "Sha1.h"
-#include "Exception.h"
+#include "lib/Sha1.h"
+#include "lib/Exception.h"
 
 using namespace std;
 
