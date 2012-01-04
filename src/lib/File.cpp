@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <fcntl.h>
+
 #ifdef WIN32
 # include <windows.h>
 # include <direct.h>
@@ -12,6 +13,7 @@
 # include <dirent.h>
 # include <pwd.h>
 # include <fnmatch.h>
+# include <sys/xattr.h>
 #endif
 
 #include "File.h"
@@ -29,21 +31,20 @@ char File::separatorChar = '/';
 string File::separator = "/";
 #endif
 
-
-File::File()
-  :path("")
+File::File() :
+  path("")
 {
   this->initialized = false;
 #ifdef WIN32
   char tmpbuf[MAX_PATH];
   DWORD size;
-  
+
   //if (GetCurrentDirectory(JAKELIB_MAX_PATH, tmpbuf) != 0)
   //  properties->setProperty(`"user.dir"`, `""` .. tmpbuf);
 
   size = MAX_PATH;
   if (SHGetSpecialFolderPathA(NULL, tmpbuf, CSIDL_PERSONAL, false))
-    path = tmpbuf;
+  path = tmpbuf;
 #else
   struct passwd *pw = getpwuid(getuid());
   if (pw) {
@@ -52,46 +53,45 @@ File::File()
 #endif
 }
 
-File::File(const char* path)
-  :path(path)
+File::File(const char* path) :
+  path(path)
 {
   this->initialized = false;
-  this->fname = this->path.substr(this->path.rfind("/") +1);
+  this->fname = this->path.substr(this->path.rfind("/") + 1);
 }
 
-File::File(string& path)
-  :path(path)
+File::File(string& path) :
+  path(path)
 {
   this->initialized = false;
-  this->fname = path.substr(path.rfind("/") +1);
+  this->fname = path.substr(path.rfind("/") + 1);
 }
 
 File::File(File& parent, string& filename)
 {
   this->path = parent.path;
-  if (parent.path.size() > 0 && parent.path.at(parent.path.size() -1) != '/') {
+  if (parent.path.size() > 0 && parent.path.at(parent.path.size() - 1) != '/') {
     this->path.append("/");
   }
   this->path.append(filename);
   this->initialized = false;
-  this->fname = path.substr(path.rfind("/") +1);
+  this->fname = path.substr(path.rfind("/") + 1);
 }
 
 File::File(File& parent, const char* filename)
 {
   this->path = parent.path;
-  if (parent.path.size() > 0 && parent.path.at(parent.path.size() -1) != '/') {
+  if (parent.path.size() > 0 && parent.path.at(parent.path.size() - 1) != '/') {
     this->path.append("/");
   }
   this->path.append(filename);
   this->initialized = false;
-  this->fname = path.substr(path.rfind("/") +1);
+  this->fname = path.substr(path.rfind("/") + 1);
 }
 
 File::~File()
 {
 }
-
 
 void File::assertInitialized()
 {
@@ -100,19 +100,18 @@ void File::assertInitialized()
   }
 }
 
-
 void File::refresh()
 {
   initialized = true;
 
 #ifdef WIN32
-    
+
   HANDLE hFind;
 
   hFind = FindFirstFileA(path.c_str(), &ffblk);
 
   if (hFind != INVALID_HANDLE_VALUE) {
-	  fileExists = true;
+    fileExists = true;
     //_isReadOnly = (ffblk.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? true : false;
     //_isHidden = (ffblk.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? true : false;
     //_isSystem = (ffblk.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM) ? true : false;
@@ -121,7 +120,7 @@ void File::refresh()
     //            ((jlong)ffblk.ftLastWriteTime.dwHighDateTime << 32)) / LL(10000) - LL(11644473600000);
     FindClose(hFind);
   } else {
-	  fileExists = false;
+    fileExists = false;
   }
 #else
   if (lstat(path.c_str(), &statBuffer) == -1) {
@@ -131,7 +130,6 @@ void File::refresh()
   }
 #endif
 }
-
 
 bool File::isFile()
 {
@@ -143,7 +141,6 @@ bool File::isFile()
 #endif
 }
 
-
 bool File::isDir()
 {
   assertInitialized();
@@ -154,24 +151,21 @@ bool File::isDir()
 #endif
 }
 
-
 bool File::isSymlink()
 {
 #ifdef WIN32
-	return false;
+  return false;
 #else
   assertInitialized();
   return fileExists && S_ISLNK(this->statBuffer.st_mode);
 #endif
 }
 
-
 bool File::exists()
 {
   assertInitialized();
   return fileExists && (isFile() || isDir() || isSymlink());
 }
-
 
 bool File::mkdir()
 {
@@ -183,11 +177,10 @@ bool File::mkdir()
 #endif
 }
 
-
 string File::readlink()
 {
 #ifdef WIN32
-	throw UnsupportedOperation("readlink");
+  throw UnsupportedOperation("readlink");
 #else
   char destBuf[MAX_PATH_LEN];
   int len = ::readlink(path.c_str(), destBuf, MAX_PATH_LEN);
@@ -204,12 +197,13 @@ vector<File> File::listFiles(string p)
 {
   vector<File> list;
 
-  if (!isDir()) return list;
-  
+  if (!isDir())
+    return list;
+
 #ifdef WIN32
   string pattern = path;
   if (path.size() > 0)
-    pattern.append(separator);
+  pattern.append(separator);
   pattern.append(p);
 
   HANDLE dir;
@@ -219,14 +213,14 @@ vector<File> File::listFiles(string p)
     do {
       if (strcmp(dirent.cFileName, ".") == 0 || strcmp(dirent.cFileName, "..") == 0) continue;
       File f(*this, dirent.cFileName);
-      
+
       list.push_back(f);
     }
     while(FindNextFileA(dir, &dirent));
 
     FindClose(dir);
   }
-  // TODO: Order by filename
+  // TODO: WIN32: Order by filename
 #else
   DIR* dir = opendir(path.c_str());
 
@@ -234,7 +228,8 @@ vector<File> File::listFiles(string p)
     struct dirent* entry;
 
     while ((entry = readdir(dir))) {
-      if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || fnmatch(p.c_str(), entry->d_name, 0)) continue;
+      if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0 || fnmatch(p.c_str(), entry->d_name, 0))
+        continue;
       File f(*this, entry->d_name);
       list.push_back(f);
     }
@@ -249,4 +244,35 @@ vector<File> File::listFiles(string p)
 bool File::move(File& destination)
 {
   return (::rename(path.c_str(), destination.path.c_str()) == 0);
+}
+
+bool File::setXAttr(string key, string value)
+{
+#ifdef WIN32
+  // Do nothing.
+  return false;
+#else
+  return (setxattr(path.c_str(), key.c_str(), value.data(), value.size(), 0, XATTR_NOFOLLOW) == 0);
+#endif
+}
+
+bool File::setXAttr(string key, int value)
+{
+#ifdef WIN32
+  // Do nothing.
+  return false;
+#else
+  char str[20];
+  sprintf(str, "%d", value);
+  return (setxattr(path.c_str(), key.c_str(), str, strlen(str), 0, XATTR_NOFOLLOW) == 0);
+#endif
+}
+
+std::string File::getXAttr(string& key)
+{
+#ifdef WIN32
+  return string();
+#else
+#endif
+
 }

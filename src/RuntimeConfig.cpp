@@ -292,8 +292,7 @@ bool RuntimeConfig::excludeFile(File& file)
   for (vector<string>::iterator it = excludePatterns.begin(); it < excludePatterns.end(); it++) {
     string pattern(*it);
 #ifdef WIN32
-    // TODO: fnmatch Windows
-    // TBI: fnmatch for Windows
+    // TODO: WIN32: fnmatch
 #else
     if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
       return true;

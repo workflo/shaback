@@ -77,8 +77,6 @@ void Repository::open()
     cerr << "Does not look like a shaback repository: " << config.repository << endl;
     exit(4);
   }
-
-  // TODO: Repo-Konfig auslesen
 }
 
 void Repository::lock()
@@ -167,6 +165,9 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 
   sha1.finalize();
   string hashValue = sha1.toString();
+
+  srcFile.setXAttr("user.shaback.sha1", sha1.toString());
+  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
 
   if (!contains(hashValue)) {
     in.reset();

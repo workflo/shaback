@@ -23,7 +23,7 @@ void Cache::open(int openMode)
       if (errno > 0) {
         throw Exception::errnoToException(file.path);
       } else {
-        // TODO: Fehler
+        // TODO: GDBM: handle error
       }
     } else {
       opened = true;
