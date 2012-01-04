@@ -34,27 +34,34 @@ void Shaback::createRepository()
     }
   }
 
+  if (!config.repoDir.isDir()) {
+    if (!config.repoDir.mkdir()) {
+      cerr << "Cannot create directory: " << config.repoDir.path << endl;
+      exit(3);
+    }
+  }
+
   if (!config.filesDir.isDir()) {
     if (!config.filesDir.mkdir()) {
-      cerr << "Cannot create directory: " << config.filesDir.path.c_str() << endl;
+      cerr << "Cannot create directory: " << config.filesDir.path << endl;
       exit(3);
     }
   }
   if (!config.indexDir.isDir()) {
     if (!config.indexDir.mkdir()) {
-      cerr << "Cannot create directory: " << config.indexDir.path.c_str() << endl;
+      cerr << "Cannot create directory: " << config.indexDir.path << endl;
       exit(3);
     }
   }
   if (!config.locksDir.isDir()) {
     if (!config.locksDir.mkdir()) {
-      cerr << "Cannot create directory: " << config.locksDir.path.c_str() << endl;
+      cerr << "Cannot create directory: " << config.locksDir.path << endl;
       exit(3);
     }
   }
   if (!config.cacheDir.isDir()) {
     if (!config.cacheDir.mkdir()) {
-      cerr << "Cannot create directory: " << config.cacheDir.path.c_str() << endl;
+      cerr << "Cannot create directory: " << config.cacheDir.path << endl;
       exit(3);
     }
   }
