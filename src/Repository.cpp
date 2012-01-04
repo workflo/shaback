@@ -47,7 +47,8 @@ Repository::Repository(RuntimeConfig& config) :
   }
 
   if (this->encryptionAlgorithm != ENCRYPTION_NONE) {
-    if (config.cryptoPassword.empty()) throw MissingCryptoPassword();
+    if (config.cryptoPassword.empty())
+      throw MissingCryptoPassword();
   }
 
   if (!config.localCacheFile.empty()) {
@@ -66,10 +67,9 @@ Repository::~Repository()
 
 void Repository::open()
 {
-  if (!config.filesDir.isDir() || !config.indexDir.isDir()
-      || !config.locksDir.isDir() || !config.cacheDir.isDir()) {
-    cerr << "Does not look like a shaback repository: " << config.repository
-        << endl;
+  if (!config.filesDir.isDir() || !config.indexDir.isDir() || !config.locksDir.isDir() || !config.cacheDir.isDir()
+      || !config.repoPropertiesFile.isFile()) {
+    cerr << "Does not look like a shaback repository: " << config.repository << endl;
     exit(4);
   }
 
@@ -224,7 +224,6 @@ void Repository::importCacheFile()
       cout << "Cache contains " << count << " entries." << endl;
   }
 }
-
 
 void Repository::storeRootTreeFile(string& rootHashValue)
 {

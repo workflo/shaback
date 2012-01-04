@@ -14,7 +14,7 @@ Backup:
 
 Repository:
 -----------------------
-- Write and read repository config
+- Read repo.properties
 
 Restore:
 -----------------------

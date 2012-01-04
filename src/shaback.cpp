@@ -75,9 +75,14 @@ void Shaback::createRepository()
   // Write default config:
   if (!config.repoPropertiesFile.isFile()) {
     string repoProperties = "# Don't modify this file after the first backup run! Otherwise loss of data is inevitable!\n\n"
-        "version = 2\n"
-        "compression = Deflate\n"
+        "version = 2\n\n"
+
+        "# compression = None\n"
+        "compression = Deflate\n\n"
+
         "encryption = None\n"
+        "# encryption = Blowfish\n\n"
+
         "digest = SHA1\n";
     FileOutputStream os(config.repoPropertiesFile);
     os.write(repoProperties.data(), repoProperties.size());
