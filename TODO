@@ -1,23 +1,24 @@
+Restore:
+-----------------------
+- Restore a whole backup set from the root index file
+- Restore a directory from a given SHA id
+- Search for different versions of a given file (by name)
+
 Library:
 -----------------------
 
 Backup:
 -----------------------
-- Crypto
-  - Blowfish
-  - AES
 - Pinuts:
   - lock/unlock
   - Split large files
   - ACL
+- Different cipher algorithms:
+  - Twofish
+  - AES
 
 Repository:
 -----------------------
-
-Restore:
------------------------
-- Restore a whole backup set from the root index file
-- Restore a directory from a given SHA id
 
 Garbage collection:
 -----------------------

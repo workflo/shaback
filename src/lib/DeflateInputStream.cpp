@@ -54,7 +54,7 @@ int DeflateInputStream::read(char* b, int len)
     // TODO: Throw exception
   }
 
-  return DEFLATE_CHUNK_SIZE - zipStream.avail_out;
+  return min(len, DEFLATE_CHUNK_SIZE) - zipStream.avail_out;
 }
 
 

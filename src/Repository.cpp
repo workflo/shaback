@@ -227,7 +227,7 @@ string Repository::loadTreeFile(string& treeId)
 
   string line;
   in.readAll(line);
-//  cout << line << endl;
+  cout << line << endl;
 
   return file.path;
 }

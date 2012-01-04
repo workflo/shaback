@@ -46,7 +46,7 @@ int BlowfishInputStream::read(char* b, int len)
   if (bytesRead == -1)
     return -1;
 
-  if (!EVP_DecryptUpdate(&ctx, (unsigned char*) b, &outlen, (const unsigned char*) inputBuffer, len)) {
+  if (!EVP_DecryptUpdate(&ctx, (unsigned char*) b, &outlen, (const unsigned char*) inputBuffer, bytesRead)) {
     throw IOException("EVP_DecryptUpdate failed");
   }
 

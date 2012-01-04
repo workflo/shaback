@@ -53,7 +53,7 @@ bool InputStream::readLine(string& str)
   }
 }
 
-#define INPUTSTREAM_READ_BUFFER_LEN 4096
+#define INPUTSTREAM_READ_BUFFER_LEN 8192
 
 bool InputStream::readAll(string& str)
 {
@@ -65,7 +65,6 @@ bool InputStream::readAll(string& str)
     return -1;
 
   while (true) {
-    cout << "Bytes Read: " << bytesRead << endl;
     str.append(buf, bytesRead);
     bytesRead = read(buf, INPUTSTREAM_READ_BUFFER_LEN);
     if (bytesRead == -1)
