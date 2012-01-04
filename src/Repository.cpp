@@ -3,25 +3,30 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
-
 #include <zlib.h>
 
-#include "Repository.h"
-#include "BackupRun.h"
-#include "lib/Sha1.h"
+#include "lib/BufferedWriter.h"
+#include "lib/BufferedReader.h"
+#include "lib/Date.h"
 #include "lib/Exception.h"
 #include "lib/FileInputStream.h"
 #include "lib/FileOutputStream.h"
-#include "lib/BufferedWriter.h"
-#include "lib/BufferedReader.h"
+#include "lib/Properties.h"
+#include "lib/Sha1.h"
+
+#include "Repository.h"
+#include "BackupRun.h"
 #include "ShabackOutputStream.h"
-#include "lib/Date.h"
 
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
   config(config), cache(config.localCacheFile)
 {
+  Properties props;
+
+  props.load(config.repoPropertiesFile);
+
   string hashAlgorithm("SHA1");
   string compressionAlgorithm("");
   string encryptionAlgorithm("Blowfish");

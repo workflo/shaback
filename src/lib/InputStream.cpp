@@ -33,11 +33,11 @@ bool InputStream::readLine(string& str)
 {
   int c;
 
+  str.clear();
+
   c = read();
   if (c < 0)
     return false;
-
-  str.clear();
 
   for (;;) {
     if (c == '\n') {

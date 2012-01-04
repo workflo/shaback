@@ -17,24 +17,22 @@ else (CMAKE_VERSION VERSION_GREATER "2.8.4")
   set (CMAKE_INSTALL_SYSCONFDIR "/etc")
 endif (CMAKE_VERSION VERSION_GREATER "2.8.4")
 
-
-#ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
-set(shaback_SRCS shaback.cpp main.cpp RuntimeConfig.cpp Repository.cpp BackupRun.cpp Cache.cpp ShabackOutputStream.cpp)
-add_executable(shaback ${shaback_SRCS})
+add_executable(shaback
+		shaback.cpp 
+		main.cpp 
+		RuntimeConfig.cpp 
+		Repository.cpp 
+		BackupRun.cpp 
+		Cache.cpp 
+		ShabackOutputStream.cpp)
+
 target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
 install(PROGRAMS shaback DESTINATION bin)
-
-#INCLUDE(CPack)
-
-# acl
-# xattr
-
-
 
 # configure a header file to pass some of the CMake settings
 # to the source code
