@@ -15,6 +15,7 @@
 #include "BufferedWriter.h"
 #include "BufferedReader.h"
 #include "ShabackOutputStream.h"
+#include "Date.h"
 
 using namespace std;
 
@@ -199,14 +200,11 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 
 void Repository::exportCacheFile()
 {
-  time_t rawtime;
-  struct tm * ptm;
-  time(&rawtime);
-  ptm = gmtime(&rawtime);
+  Date now;
 
   char filename[100];
-  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d.scache", ptm->tm_year + 1900,
-      ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d.scache", now.getYear(),
+      now.getMonth(), now.getDay(), now.getHour(), now.getMinute(), now.getSecond());
 
   File file(config.cacheDir, filename);
   FileOutputStream os(file);

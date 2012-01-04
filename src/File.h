@@ -1,5 +1,5 @@
-#ifndef File_H
-#define File_H
+#ifndef SHABACK_File_H
+#define SHABACK_File_H
 
 #include <string>
 #include <vector>
@@ -19,106 +19,112 @@
 
 class File
 {
- public:
-  File();
-  File(const char* path);
-  File(std::string& path);
-  //File(File& parent, std::string& filename);
-  File(File& parent, const char* filename);
-  ~File();
-  void refresh();
-  bool isFile();
-  bool isDir();
-  bool isSymlink();
-  bool exists();
-  bool mkdir();
-  std::string readlink();
-  std::vector<File> listFiles(std::string pattern);
-  bool move(File& destination);
+  public:
+    File();
+    File(const char* path);
+    File(std::string& path);
+    //File(File& parent, std::string& filename);
+    File(File& parent, const char* filename);
+    ~File();
+    void refresh();
+    bool isFile();
+    bool isDir();
+    bool isSymlink();
+    bool exists();
+    bool mkdir();
+    std::string readlink();
+    std::vector<File> listFiles(std::string pattern);
+    bool move(File& destination);
 
-  std::string path;
-  std::string fname;
+    std::string path;
+    std::string fname;
 
-  static char separatorChar;
-  static std::string separator;
+    static char separatorChar;
+    static std::string separator;
 
-  inline int getPosixMode() {
-    assertInitialized();
+    inline int getPosixMode()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return statBuffer.st_mode;
+      return statBuffer.st_mode;
 #endif
-  }
+    }
 
-  inline int getPosixUid() {
-    assertInitialized();
+    inline int getPosixUid()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return statBuffer.st_uid;
+      return statBuffer.st_uid;
 #endif
-  }
+    }
 
-  inline int getPosixGid() {
-    assertInitialized();
+    inline int getPosixGid()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return statBuffer.st_gid;
+      return statBuffer.st_gid;
 #endif
-  }
+    }
 
-  inline int getPosixMtime() {
-    assertInitialized();
+    inline int getPosixMtime()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return (int) statBuffer.st_mtime;
+      return (int) statBuffer.st_mtime;
 #endif
-  }
+    }
 
-  inline int getPosixCtime() {
-    assertInitialized();
+    inline int getPosixCtime()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return (int) statBuffer.st_ctime;
+      return (int) statBuffer.st_ctime;
 #endif
-  }
+    }
 
-  inline long long getSize() {
-    assertInitialized();
+    inline long long getSize()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return statBuffer.st_size;
+      return statBuffer.st_size;
 #endif
-  }
+    }
 
-  inline dev_t getPosixDev() {
-    assertInitialized();
+    inline dev_t getPosixDev()
+    {
+      assertInitialized();
 #ifdef WIN32
-    return -1;
+      return -1;
 #else
-    return statBuffer.st_dev;
+      return statBuffer.st_dev;
 #endif
-  }
+    }
 
- private:
-  bool initialized;
-  bool fileExists;
-  std::string hashValue;
-    
-  void assertInitialized();
+  private:
+    bool initialized;
+    bool fileExists;
+    std::string hashValue;
+
+    void assertInitialized();
 
 #ifdef WIN32
-  WIN32_FIND_DATAA ffblk;
+    WIN32_FIND_DATAA ffblk;
 #else
-  struct stat statBuffer;
+    struct stat statBuffer;
 #endif
 };
 
-#endif // File_H
-
+#endif // SHABACK_File_H
 
