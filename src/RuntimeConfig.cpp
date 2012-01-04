@@ -27,6 +27,7 @@ RuntimeConfig::RuntimeConfig()
   oneFileSystem = false;
   showTotals = false;
   help = false;
+  force = false;
   backupName = "noname";
   initLua();
 }
@@ -278,11 +279,12 @@ void RuntimeConfig::initLua()
 
 void RuntimeConfig::finalize()
 {
-  repoDir = File(this->repository);
+  repoDir = File(repository);
   filesDir = File(repoDir, "files");
   indexDir = File(repoDir, "index");
   locksDir = File(repoDir, "locks");
   cacheDir = File(repoDir, "cache");
+  repoPropertiesFile = File(repoDir, "repo.properties");
 }
 
 bool RuntimeConfig::excludeFile(File& file)

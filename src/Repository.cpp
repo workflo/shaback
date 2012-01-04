@@ -23,12 +23,12 @@ Repository::Repository(RuntimeConfig& config) :
   config(config), cache(config.localCacheFile)
 {
   string hashAlgorithm("SHA1");
-  string encryptionAlgorithm("Blowfish");
   string compressionAlgorithm("");
+  string encryptionAlgorithm("Blowfish");
 
   if (compressionAlgorithm == "Deflate") {
     this->compressionAlgorithm = COMPRESSION_DEFLATE;
-  } else if (compressionAlgorithm.empty()) {
+  } else if (compressionAlgorithm == "None" || compressionAlgorithm.empty()) {
     this->compressionAlgorithm = COMPRESSION_NONE;
   } else {
     throw UnsupportedCompressionAlgorithm(compressionAlgorithm);
@@ -40,7 +40,7 @@ Repository::Repository(RuntimeConfig& config) :
     this->encryptionAlgorithm = ENCRYPTION_AES;
   } else if (encryptionAlgorithm == "DES") {
     this->encryptionAlgorithm = ENCRYPTION_DES;
-  } else if (encryptionAlgorithm.empty()) {
+  } else if (encryptionAlgorithm == "None" || encryptionAlgorithm.empty()) {
     this->encryptionAlgorithm = ENCRYPTION_NONE;
   } else {
     throw UnsupportedEncryptionAlgorithm(encryptionAlgorithm);

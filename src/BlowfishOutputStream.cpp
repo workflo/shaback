@@ -41,17 +41,19 @@ void BlowfishOutputStream::write(int b)
 
 void BlowfishOutputStream::write(const char* b, int len)
 {
-  if (len <= 0)
-    return;
+  while (len > 0) {
+    if (!EVP_EncryptUpdate(&ctx, outputBuffer, &outlen, (const unsigned char*) b, min(len, BLOWFISH_CHUNK_SIZE))) {
+      throw IOException("EVP_EncryptUpdate failed");
+    }
+//    cout << "write: len=" << len << endl;
 
-  if (!EVP_EncryptUpdate(&ctx, outputBuffer, &outlen, (const unsigned char*) b, len)) {
-    throw IOException("EVP_EncryptUpdate failed");
+    out->write((const char*) outputBuffer, outlen);
+
+//    cout << "write: len=" << len << "; outlen=" << outlen << endl;
+
+    b += BLOWFISH_CHUNK_SIZE;
+    len -= BLOWFISH_CHUNK_SIZE;
   }
-
-  out->write((const char*) outputBuffer, outlen);
-
-  //  cout << "write: len=" << len << "; outlen=" << outlen << endl;
-
   //  remainderLen = (len % BF_BLOCK);
   //  if (remainderLen) {
   //    cout << "Padding: " << remainderLen << endl;

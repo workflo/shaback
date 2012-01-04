@@ -39,6 +39,7 @@ public:
     File locksDir;
     File cacheDir;
     File repoDir;
+    File repoPropertiesFile;
     
     bool excludeFile(File& file);
     

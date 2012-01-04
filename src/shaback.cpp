@@ -6,19 +6,20 @@
 #include "RuntimeConfig.h"
 #include "DeflateOutputStream.h"
 #include "StandardOutputStream.h"
+#include "FileOutputStream.h"
 #include "DeflateInputStream.h"
 #include "StandardInputStream.h"
 
 using namespace std;
 
-Shaback::Shaback(RuntimeConfig& config)
-  :config(config), repository(Repository(config))
+Shaback::Shaback(RuntimeConfig& config) :
+  config(config), repository(Repository(config))
 {
 }
 
 Shaback::~Shaback()
-{}
-
+{
+}
 
 void Shaback::createRepository()
 {
@@ -32,7 +33,7 @@ void Shaback::createRepository()
       exit(3);
     }
   }
-  
+
   if (!config.filesDir.isDir()) {
     if (!config.filesDir.mkdir()) {
       cerr << "Cannot create directory: " << config.filesDir.path.c_str() << endl;
@@ -57,7 +58,7 @@ void Shaback::createRepository()
       exit(3);
     }
   }
-  
+
   char dirname[20];
   for (int level0 = 0; level0 <= 0xff; level0++) {
     sprintf(dirname, "%02x", level0);
@@ -70,12 +71,20 @@ void Shaback::createRepository()
       dirLevel1.mkdir();
     }
   }
-  
-  // TODO: Repo-Konfig schreiben: Format-Version + Verschlüsselung + Kompressionsverfahren + Hashalgorithmus
-  
+
+  // Write default config:
+  if (!config.repoPropertiesFile.isFile()) {
+    string repoProperties = "# Don't modify this file after the first backup run! Otherwise loss of data is inevitable!\n\n"
+        "version = 2\n"
+        "compression = Deflate\n"
+        "encryption = None\n"
+        "digest = SHA1\n";
+    FileOutputStream os(config.repoPropertiesFile);
+    os.write(repoProperties.data(), repoProperties.size());
+  }
+
   cout << "Repository created: " << config.repository << endl;
 }
-
 
 int Shaback::deflate()
 {
@@ -88,13 +97,13 @@ int Shaback::deflate()
 
   while (true) {
     bytesRead = in.read(buf, DEFLATE_CHUNK_SIZE);
-    if (bytesRead == -1) break;
+    if (bytesRead == -1)
+      break;
     def.write(buf, bytesRead);
   }
 
   return 0;
 }
-
 
 int Shaback::inflate()
 {
@@ -107,7 +116,8 @@ int Shaback::inflate()
 
   while (true) {
     bytesRead = def.read(buf, DEFLATE_CHUNK_SIZE);
-    if (bytesRead == -1) break;
+    if (bytesRead == -1)
+      break;
     out.write(buf, bytesRead);
   }
 
