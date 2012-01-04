@@ -24,7 +24,6 @@ Garbage collection:
 
 Funny optimizations:
 -----------------------
-- Use xattr to store SHA1 digests
 - Sort dir entries by inode
 
 Config:

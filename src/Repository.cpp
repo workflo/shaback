@@ -154,24 +154,29 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   run->numFilesRead++;
   run->numBytesRead += srcFile.getSize();
 
-  // TODO: Read xattr, skip SHA1 computation
+  string hashValue = srcFile.getXAttr("user.shaback.sha1");
 
-  Sha1 sha1;
   FileInputStream in(srcFile);
-  while (true) {
-    int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-    if (bytesRead == -1)
-      break;
-    sha1.update(readBuffer, bytesRead);
+
+  if (hashValue.empty() || strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) != srcFile.getPosixMtime()) {
+//     if (!hashValue.empty()) {
+//      cout << "SHA1 set, but date differs: " << hashValue << endl;
+//    }
+    Sha1 sha1;
+    while (true) {
+      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      if (bytesRead == -1)
+        break;
+      sha1.update(readBuffer, bytesRead);
+    }
+
+    sha1.finalize();
+    hashValue = sha1.toString();
+
+    srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
+    srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
   }
-
-  sha1.finalize();
-  string hashValue = sha1.toString();
-
-//  cout << srcFile.path << ": " << srcFile.getXAttr("user.shaback.sha1") << " : " << srcFile.getXAttr("user.shaback.mtime") << endl;
-
-  srcFile.setXAttr("user.shaback.sha1", sha1.toString()); // TODO: Use dynamic digest name
-  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  //  cout << srcFile.path << ": " << srcFile.getXAttr("user.shaback.sha1") << " : " << srcFile.getXAttr("user.shaback.mtime") << endl;
 
   if (!contains(hashValue)) {
     in.reset();
