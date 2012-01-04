@@ -1,20 +1,21 @@
-#ifndef Repository_H
-#define Repository_H
+#ifndef SHABACK_Repository_H
+#define SHABACK_Repository_H
 
 #include <string>
 #include "RuntimeConfig.h"
 #include "Cache.h"
+#include "Date.h"
 
 class BackupRun;
 
 class Repository
 {
-public:
+  public:
     Repository(RuntimeConfig& config);
     ~Repository();
-    
+
     int backup();
-    
+
     void open();
     void lock();
     void unlock();
@@ -23,17 +24,18 @@ public:
     bool contains(std::string& hashValue);
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     std::string storeFile(BackupRun* run, File& srcFile);
+    void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
     void exportCacheFile();
 
- protected:
-   RuntimeConfig config;
-   int hashAlgorithm;
-   int encryptionAlgorithm;
-   int compressionAlgorithm;
-   Cache cache;
+  protected:
+    RuntimeConfig config;
+    int hashAlgorithm;
+    int encryptionAlgorithm;
+    int compressionAlgorithm;
+    Cache cache;
+    Date startDate;
 };
-
 
 #define COMPRESSION_NONE    0
 #define COMPRESSION_DEFLATE 1
@@ -46,4 +48,4 @@ public:
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2
 
-#endif // Repository_H
+#endif // SHABACK_Repository_H

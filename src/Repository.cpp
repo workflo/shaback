@@ -200,11 +200,8 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 
 void Repository::exportCacheFile()
 {
-  Date now;
-
-  char filename[100];
-  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d.scache", now.getYear(),
-      now.getMonth(), now.getDay(), now.getHour(), now.getMinute(), now.getSecond());
+  string filename = startDate.toFilename();
+  filename.append(".scache");
 
   File file(config.cacheDir, filename);
   FileOutputStream os(file);
@@ -226,4 +223,19 @@ void Repository::importCacheFile()
     if (config.verbose)
       cout << "Cache contains " << count << " entries." << endl;
   }
+}
+
+
+void Repository::storeRootTreeFile(string& rootHashValue)
+{
+  cout << "rootFile: " << rootHashValue << endl;
+  string filename = config.backupName;
+  filename.append("_").append(startDate.toFilename()).append(".sroot");
+
+  cout << "Index file: " << filename << endl;
+
+  File file(config.indexDir, filename);
+  FileOutputStream os(file);
+
+  os.write(rootHashValue.data(), rootHashValue.size());
 }

@@ -66,6 +66,17 @@ File::File(string& path)
   this->fname = path.substr(path.rfind("/") +1);
 }
 
+File::File(File& parent, string& filename)
+{
+  this->path = parent.path;
+  if (parent.path.size() > 0 && parent.path.at(parent.path.size() -1) != '/') {
+    this->path.append("/");
+  }
+  this->path.append(filename);
+  this->initialized = false;
+  this->fname = path.substr(path.rfind("/") +1);
+}
+
 File::File(File& parent, const char* filename)
 {
   this->path = parent.path;

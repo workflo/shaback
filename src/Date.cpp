@@ -17,3 +17,11 @@ Date::Date()
   minute = ptm->tm_min;
   second = ptm->tm_sec;
 }
+
+string Date::toFilename()
+{
+  char filename[100];
+  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d", getYear(), getMonth(), getDay(), getHour(), getMinute(), getSecond());
+
+  return filename;
+}

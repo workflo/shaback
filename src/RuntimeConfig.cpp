@@ -21,10 +21,13 @@ using namespace std;
 
 RuntimeConfig::RuntimeConfig()
 {
+  repository = ".";
   verbose = false;
   debug = false;
   oneFileSystem = false;
   showTotals = false;
+  help = false;
+  backupName = "noname";
   initLua();
 }
 
@@ -34,9 +37,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
     int option_index = 0;
     static struct option long_options[] = { { "debug", no_argument, 0, 'd' }, { "verbose", no_argument, 0, 'v' }, {
         "totals", no_argument, 0, 't' }, { "config", required_argument, 0, 'c' }, { "repository", required_argument, 0,
-        'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { 0, 0, 0, 0 } };
+        'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { "name",
+        required_argument, 0, 'n' }, { "help", no_argument, 0, 'h' }, { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:h", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -53,12 +57,20 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         force = true;
         break;
 
+      case 'h':
+        help = true;
+        break;
+
       case 'c':
         loadConfigFile(optarg);
         break;
 
       case 'r':
         repository = optarg;
+        break;
+
+      case 'n':
+        backupName = optarg;
         break;
 
       case 'd':
@@ -215,6 +227,16 @@ static int l_cryptoPassword(lua_State *L)
   return 0;
 }
 
+static int l_backupName(lua_State *L)
+{
+  const char* n = lua_tostring(L, 1);
+
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->backupName = n;
+
+  return 0;
+}
+
 void RuntimeConfig::initLua()
 {
   this->luaState = luaL_newstate();
@@ -247,17 +269,20 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_cryptoPassword);
   lua_setglobal(this->luaState, "cryptoPassword");
 
+  lua_pushcfunction(this->luaState, l_backupName);
+  lua_setglobal(this->luaState, "backupName");
+
   lua_pushlightuserdata(this->luaState, this);
   lua_setglobal(this->luaState, LUA_RUNTIMECONFIG);
 }
 
 void RuntimeConfig::finalize()
 {
-  File repo(this->repository);
-  this->filesDir = File(repo, "files");
-  this->indexDir = File(repo, "index");
-  this->locksDir = File(repo, "locks");
-  this->cacheDir = File(repo, "cache");
+  repoDir = File(this->repository);
+  filesDir = File(repoDir, "files");
+  indexDir = File(repoDir, "index");
+  locksDir = File(repoDir, "locks");
+  cacheDir = File(repoDir, "cache");
 }
 
 bool RuntimeConfig::excludeFile(File& file)
@@ -266,6 +291,7 @@ bool RuntimeConfig::excludeFile(File& file)
     string pattern(*it);
 #ifdef WIN32
     // TODO: fnmatch Windows
+    // TBI: fnmatch for Windows
 #else
     if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
       return true;

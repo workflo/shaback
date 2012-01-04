@@ -18,3 +18,7 @@ void OutputStream::write(const char* b, int len)
     write(b[i]);
 }
 
+void OutputStream::write(string& str)
+{
+  write(str.data(), str.size());
+}

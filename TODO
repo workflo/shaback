@@ -12,13 +12,14 @@ Backup:
   - Split large files
   - ACL
 
-General:
+Repository:
 -----------------------
 - Write and read repository config
-- Allow different hashing algorithms (SHA-1, SHA-256)
 
 Restore:
 -----------------------
+- Restore a whole backup set from the root index file
+- Restore a directory from a given SHA id
 
 Garbage collection:
 -----------------------
@@ -30,3 +31,4 @@ Funny optimizations:
 
 Config:
 -----------------------
+- Allow different hashing algorithms (SHA-1, SHA-256)

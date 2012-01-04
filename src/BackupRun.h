@@ -1,5 +1,5 @@
-#ifndef BackupRun_H
-#define BackupRun_H
+#ifndef SHABACK_BackupRun_H
+#define SHABACK_BackupRun_H
 
 #include <string>
 #include "Repository.h"
@@ -32,4 +32,4 @@ class BackupRun
     RuntimeConfig& config;
 };
 
-#endif // BackupRun_H
+#endif // SHABACK_BackupRun_H

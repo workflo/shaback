@@ -1,5 +1,5 @@
-#ifndef cshaback_H
-#define cshaback_H
+#ifndef SHABACK_H
+#define SHABACK_H
 
 #include "RuntimeConfig.h"
 #include "Repository.h"
@@ -19,4 +19,4 @@ public:
     RuntimeConfig& config;
 };
 
-#endif // cshaback_H
+#endif // SHABACK_H

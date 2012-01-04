@@ -27,6 +27,10 @@ void Shaback::createRepository()
       cerr << "Looks like a shaback repository already: " << config.repository << endl;
       exit(3);
     }
+    if (!config.repoDir.listFiles("*").empty()) {
+      cerr << "Destination directory is not empty: " << config.repository << endl;
+      exit(3);
+    }
   }
   
   if (!config.filesDir.isDir()) {

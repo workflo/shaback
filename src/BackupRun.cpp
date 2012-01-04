@@ -56,7 +56,7 @@ int BackupRun::run()
 
   string rootFileHashValue = repository.storeTreeFile(this, rootFile);
 
-  cout << "rootFile: " << rootFileHashValue << endl;
+  repository.storeRootTreeFile(rootFileHashValue);
 
   return (numErrors == 0 ? 0 : 1);
 }

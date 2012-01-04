@@ -1,5 +1,5 @@
-#ifndef Exception_H
-#define Exception_H
+#ifndef SHABACK_Exception_H
+#define SHABACK_Exception_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -61,4 +61,4 @@ class MissingCryptoPassword: public Exception
     MissingCryptoPassword();
 };
 
-#endif // Exception_H
+#endif // SHABACK_Exception_H

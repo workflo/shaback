@@ -1,12 +1,12 @@
-#ifndef RuntimeConfig_H
-#define RuntimeConfig_H
+#ifndef SHABACK_RuntimeConfig_H
+#define SHABACK_RuntimeConfig_H
 
 #include <string>
 #include <vector>
 #include "File.h"
 
 extern "C" {
-#include <lua.h>
+# include <lua.h>
 }
 
 class RuntimeConfig
@@ -22,10 +22,12 @@ public:
     bool force;
     bool oneFileSystem;
     bool showTotals;
+    bool help;
 
     std::string operation;
     std::string repository;
     std::string localCacheFile;
+    std::string backupName;
     lua_State* luaState;
     std::vector<std::string> excludePatterns;
     std::vector<std::string> splitPatterns;
@@ -36,6 +38,7 @@ public:
     File indexDir;
     File locksDir;
     File cacheDir;
+    File repoDir;
     
     bool excludeFile(File& file);
     
@@ -46,4 +49,4 @@ public:
     void tryToLoadFrom(std::string dir);
 };
 
-#endif // RuntimeConfig_H
+#endif // SHABACK_RuntimeConfig_H

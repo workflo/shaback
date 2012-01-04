@@ -1,6 +1,8 @@
 #ifndef SHABACK_OutputStream_H
 #define SHABACK_OutputStream_H
 
+#include <string>
+
 /**
  * This abstract class forms the base of the hierarchy of classes that 
  * write output as a stream of bytes.
@@ -15,28 +17,30 @@
  */
 class OutputStream
 {
- public:
-  virtual ~OutputStream() = 0;
+  public:
+    virtual ~OutputStream() = 0;
 
-  /**
-   * Writes the specified byte value to this output stream.
-   *
-   * @param b The byte value to be written. Only the lower 8 bits
-   *          are written, all remaining bits are ignored.
-   */
-  virtual void write(int b) = 0;
+    /**
+     * Writes the specified byte value to this output stream.
+     *
+     * @param b The byte value to be written. Only the lower 8 bits
+     *          are written, all remaining bits are ignored.
+     */
+    virtual void write(int b) = 0;
 
-  /**
-   * Writes a number of bytes to the output stream.
-   *
-   * @param b The byte array to be written.
-   * @param len Number of bytes to be written.
-   */
-  virtual void write(const char* b, int len);
+    /**
+     * Writes a number of bytes to the output stream.
+     *
+     * @param b The byte array to be written.
+     * @param len Number of bytes to be written.
+     */
+    virtual void write(const char* b, int len);
 
-  /**
-   * Closes the output stream.
-   */
-  virtual void close() = 0;
+    virtual void write(std::string& str);
+
+    /**
+     * Closes the output stream.
+     */
+    virtual void close() = 0;
 };
 #endif // SHABACK_OutputStream_H

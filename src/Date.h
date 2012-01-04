@@ -15,6 +15,8 @@ class Date
     inline int getMinute() { return minute; }
     inline int getSecond() { return second; }
 
+    std::string toFilename();
+
   private:
     time_t rawtime;
     int year, month, day, hour, minute, second;
