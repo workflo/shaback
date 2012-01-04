@@ -22,8 +22,9 @@ RestoreRun::~RestoreRun()
   repository.unlock();
 }
 
-void RestoreRun::run(string& treeId)
+void RestoreRun::restore(string& treeId, File& destinationDir)
 {
   if (config.verbose)
-    cout << "Restoring tree: " << treeId << endl;
+    cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
+
 }

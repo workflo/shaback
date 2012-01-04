@@ -271,17 +271,15 @@ void Repository::restore()
 
   string treeSpec = config.cliArgs.at(0);
 
-  //  cout << "Restoring " << treeSpec << endl;
-
   if (Digest::looksLikeDigest(treeSpec)) {
-    //    cout << "  Looks like a tree file ID." << endl;
     restoreByTreeId(treeSpec);
   } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-    //    cout << "  Looks like a root file." << endl;
     string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
     File rootFile(config.indexDir, fname);
 
     restoreByRootFile(rootFile);
+  } else {
+    throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
   }
 }
 
@@ -299,5 +297,6 @@ void Repository::restoreByRootFile(File& rootFile)
 void Repository::restoreByTreeId(string& treeId)
 {
   RestoreRun run(config, *this);
-  run.run(treeId);
+  File destinationDir(".");
+  run.restore(treeId, destinationDir);
 }

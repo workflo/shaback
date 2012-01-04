@@ -29,6 +29,7 @@ add_executable(shaback
 		RuntimeConfig.cpp 
 		shaback.cpp 
 		ShabackException.cpp
+		ShabackInputStream.cpp
 		ShabackOutputStream.cpp
 		)
 

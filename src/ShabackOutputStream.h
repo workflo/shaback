@@ -24,8 +24,8 @@ class ShabackOutputStream
     int encryptionAlgorithm;
     File file;
     File tmpFile;
-    gzFile gz;
-    int fd;
+//    gzFile gz;
+//    int fd;
     bool opened;
     OutputStream* compressionOutputStream;
     OutputStream* outputStream;
