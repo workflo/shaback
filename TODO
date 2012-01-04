@@ -1,6 +1,5 @@
 Library:
 -----------------------
-- Properties
 
 Backup:
 -----------------------
@@ -14,7 +13,6 @@ Backup:
 
 Repository:
 -----------------------
-- Read repo.properties
 
 Restore:
 -----------------------

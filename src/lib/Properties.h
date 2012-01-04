@@ -12,6 +12,8 @@ class Properties
     Properties();
     void load(InputStream& in);
     void load(File& f);
+    std::string getProperty(std::string& key);
+    std::string getProperty(const char* key);
 
     virtual ~Properties();
 

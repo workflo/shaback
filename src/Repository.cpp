@@ -27,9 +27,9 @@ Repository::Repository(RuntimeConfig& config) :
 
   props.load(config.repoPropertiesFile);
 
-  string hashAlgorithm("SHA1");
-  string compressionAlgorithm("");
-  string encryptionAlgorithm("Blowfish");
+  string hashAlgorithm = props.getProperty("digest");
+  string compressionAlgorithm = props.getProperty("compression");
+  string encryptionAlgorithm = props.getProperty("encryption");
 
   if (compressionAlgorithm == "Deflate") {
     this->compressionAlgorithm = COMPRESSION_DEFLATE;

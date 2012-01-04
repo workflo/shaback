@@ -8,12 +8,10 @@
 
 using namespace std;
 
-
 bool isWhitespace(char ch)
 {
   return (ch == ' ' || ch == '\t');
 }
-
 
 /*****************************************************************************\
  * Properties                                                                 |
@@ -74,13 +72,13 @@ void Properties::load(InputStream& in)
             case 'r':
               key.append("\r");
               break;
-//            case 'u':
-//              if (pos + 4 <= line.size()) {
-//                char uni = (char) Integer::parseInt(line->substring(pos, pos + 4), 16);
-//                key.append(uni);
-//                pos += 4;
-//              } // else throw exception?
-//              break;
+              //            case 'u':
+              //              if (pos + 4 <= line.size()) {
+              //                char uni = (char) Integer::parseInt(line->substring(pos, pos + 4), 16);
+              //                key.append(uni);
+              //                pos += 4;
+              //              } // else throw exception?
+              //              break;
             default:
               key.append(&c, 1);
               break;
@@ -107,7 +105,8 @@ void Properties::load(InputStream& in)
       if (c == '\\') {
         if (pos == line.size()) {
           // The line continues on the next line.
-          if (! in.readLine(line)) break;
+          if (!in.readLine(line))
+            break;
 
           pos = 0;
           while (pos < line.size() && ::isWhitespace(c = line.at(pos)))
@@ -124,13 +123,13 @@ void Properties::load(InputStream& in)
             case 'r':
               element.append("\r");
               break;
-//            case 'u':
-//              if (pos + 4 <= line.size()) {
-//                char uni = (char) Integer::parseInt(line->substring(pos, pos + 4), 16);
-//                element.append(uni);
-//                pos += 4;
-//              } // else throw exception?
-//              break;
+              //            case 'u':
+              //              if (pos + 4 <= line.size()) {
+              //                char uni = (char) Integer::parseInt(line->substring(pos, pos + 4), 16);
+              //                element.append(uni);
+              //                pos += 4;
+              //              } // else throw exception?
+              //              break;
             default:
               element.append(&c, 1);
               break;
@@ -141,7 +140,6 @@ void Properties::load(InputStream& in)
       }
     }
     map[key] = element;
-    cout << key << " => " << element << endl;
   }
 }
 
@@ -150,4 +148,14 @@ void Properties::load(File& f)
   FileInputStream in(f);
   BufferedReader reader(&in);
   load(reader);
+}
+
+std::string Properties::getProperty(string& key)
+{
+  return map[key];
+}
+
+std::string Properties::getProperty(const char* key)
+{
+  return map[string(key)];
 }
