@@ -268,11 +268,17 @@ bool File::setXAttr(string key, int value)
 #endif
 }
 
-std::string File::getXAttr(string& key)
+std::string File::getXAttr(string key)
 {
 #ifdef WIN32
   return string();
 #else
+  char buf[100];
+  int len = getxattr(path.c_str(), key.c_str(), buf, 100, 0, XATTR_NOFOLLOW);
+  if (len >= 0) {
+    return string(buf, len);
+  } else {
+    return string();
+  }
 #endif
-
 }

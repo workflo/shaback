@@ -154,6 +154,8 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   run->numFilesRead++;
   run->numBytesRead += srcFile.getSize();
 
+  // TODO: Read xattr, skip SHA1 computation
+
   Sha1 sha1;
   FileInputStream in(srcFile);
   while (true) {
@@ -166,7 +168,9 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   sha1.finalize();
   string hashValue = sha1.toString();
 
-  srcFile.setXAttr("user.shaback.sha1", sha1.toString());
+//  cout << srcFile.path << ": " << srcFile.getXAttr("user.shaback.sha1") << " : " << srcFile.getXAttr("user.shaback.mtime") << endl;
+
+  srcFile.setXAttr("user.shaback.sha1", sha1.toString()); // TODO: Use dynamic digest name
   srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
 
   if (!contains(hashValue)) {
@@ -237,10 +241,12 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   string filename = config.backupName;
   filename.append("_").append(startDate.toFilename()).append(".sroot");
 
-  cout << "Index file: " << filename << endl;
-
   File file(config.indexDir, filename);
   FileOutputStream os(file);
 
   os.write(rootHashValue.data(), rootHashValue.size());
+
+  os.close();
+
+  cout << "Index file: " << file.path << endl;
 }

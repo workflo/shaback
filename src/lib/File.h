@@ -37,7 +37,7 @@ class File
     bool move(File& destination);
     bool setXAttr(std::string key, std::string value);
     bool setXAttr(std::string key, int value);
-    std::string getXAttr(std::string& key);
+    std::string getXAttr(std::string key);
 
     std::string path;
     std::string fname;
