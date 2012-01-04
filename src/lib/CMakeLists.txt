@@ -6,6 +6,7 @@ set(shaback_lib_SRCS
 		     Date.cpp
 		     DeflateOutputStream.cpp
 		     DeflateInputStream.cpp
+		     Digest.cpp
 		     Exception.cpp
 		     File.cpp
 		     FileOutputStream.cpp

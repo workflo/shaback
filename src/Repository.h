@@ -15,6 +15,7 @@ class Repository
     ~Repository();
 
     int backup();
+    void restore();
 
     void open();
     void lock();
@@ -35,6 +36,10 @@ class Repository
     int compressionAlgorithm;
     Cache cache;
     Date startDate;
+
+    void openCache();
+    void restoreByRootFile(File& rootFile);
+    void restoreByTreeId(std::string& treeId);
 };
 
 #define COMPRESSION_NONE    0

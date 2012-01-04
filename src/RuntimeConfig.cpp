@@ -89,11 +89,11 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
   if (optind < argc) {
     while (optind < argc) {
-      if (this->operation.empty()) {
+      if (operation.empty()) {
         // First argument is OPERATION:
-        this->operation = argv[optind++];
+        operation = argv[optind++];
       } else {
-        std::cout << "non-option ARGV-element: " << argv[optind++] << std::endl;
+        cliArgs.push_back(argv[optind++]);
       }
     }
   }

@@ -8,7 +8,6 @@
 #include "lib/BufferedWriter.h"
 #include "lib/BufferedReader.h"
 #include "lib/Date.h"
-#include "lib/Exception.h"
 #include "lib/FileInputStream.h"
 #include "lib/FileOutputStream.h"
 #include "lib/Properties.h"
@@ -16,7 +15,9 @@
 
 #include "Repository.h"
 #include "BackupRun.h"
+#include "RestoreRun.h"
 #include "ShabackOutputStream.h"
+#include "ShabackException.h"
 
 using namespace std;
 
@@ -55,17 +56,11 @@ Repository::Repository(RuntimeConfig& config) :
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
   }
-
-  if (!config.localCacheFile.empty()) {
-    cache.open(GDBM_NEWDB);
-    importCacheFile();
-  }
 }
 
 Repository::~Repository()
 {
   if (!config.localCacheFile.empty()) {
-    exportCacheFile();
     cache.close();
   }
 }
@@ -91,14 +86,28 @@ void Repository::unlock()
   // TBI	
 }
 
+void Repository::openCache()
+{
+  cache.open(GDBM_NEWDB);
+  importCacheFile();
+}
+
 int Repository::backup()
 {
   open();
+  if (!config.localCacheFile.empty()) {
+    openCache();
+  }
+
   BackupRun run(config, *this);
   int rc = run.run();
 
   if (config.showTotals) {
     run.showTotals();
+  }
+
+  if (!config.localCacheFile.empty()) {
+    exportCacheFile();
   }
 
   return rc;
@@ -159,9 +168,6 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   FileInputStream in(srcFile);
 
   if (hashValue.empty() || strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) != srcFile.getPosixMtime()) {
-//     if (!hashValue.empty()) {
-//      cout << "SHA1 set, but date differs: " << hashValue << endl;
-//    }
     Sha1 sha1;
     while (true) {
       int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
@@ -176,7 +182,6 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
     srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
   }
-  //  cout << srcFile.path << ": " << srcFile.getXAttr("user.shaback.sha1") << " : " << srcFile.getXAttr("user.shaback.mtime") << endl;
 
   if (!contains(hashValue)) {
     in.reset();
@@ -254,4 +259,45 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   os.close();
 
   cout << "Index file: " << file.path << endl;
+}
+
+void Repository::restore()
+{
+  if (config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to restore.");
+  }
+
+  open();
+
+  string treeSpec = config.cliArgs.at(0);
+
+  //  cout << "Restoring " << treeSpec << endl;
+
+  if (Digest::looksLikeDigest(treeSpec)) {
+    //    cout << "  Looks like a tree file ID." << endl;
+    restoreByTreeId(treeSpec);
+  } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
+    //    cout << "  Looks like a root file." << endl;
+    string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
+    File rootFile(config.indexDir, fname);
+
+    restoreByRootFile(rootFile);
+  }
+}
+
+void Repository::restoreByRootFile(File& rootFile)
+{
+  FileInputStream in(rootFile);
+  string hashValue;
+  if (in.readLine(hashValue)) {
+    restoreByTreeId(hashValue);
+  } else {
+    throw RestoreException(string("Root index file is empty: ").append(rootFile.path));
+  }
+}
+
+void Repository::restoreByTreeId(string& treeId)
+{
+  RestoreRun run(config, *this);
+  run.run(treeId);
 }

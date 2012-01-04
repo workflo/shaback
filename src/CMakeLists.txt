@@ -21,13 +21,16 @@ ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
-		shaback.cpp 
-		main.cpp 
-		RuntimeConfig.cpp 
-		Repository.cpp 
 		BackupRun.cpp 
 		Cache.cpp 
-		ShabackOutputStream.cpp)
+		main.cpp 
+		Repository.cpp 
+		RestoreRun.cpp
+		RuntimeConfig.cpp 
+		shaback.cpp 
+		ShabackException.cpp
+		ShabackOutputStream.cpp
+		)
 
 target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} shabacklib)
 

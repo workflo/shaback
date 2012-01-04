@@ -89,6 +89,9 @@ int main(int argc, char** argv)
         shaback.createRepository();
       } else if (config.operation == "backup") {
         return shaback.repository.backup();
+      } else if (config.operation == "restore") {
+        shaback.repository.restore();
+        return 0;
       } else if (config.operation == "deflate") {
         return shaback.deflate();
       } else if (config.operation == "inflate") {
