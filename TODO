@@ -17,6 +17,10 @@ Backup:
   - Twofish
   - AES
 
+Encryption:
+-----------------------
+- Make sure the specified password is correct
+
 Repository:
 -----------------------
 

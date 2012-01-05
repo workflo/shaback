@@ -31,6 +31,7 @@ add_executable(shaback
 		ShabackException.cpp
 		ShabackInputStream.cpp
 		ShabackOutputStream.cpp
+		TreeFileEntry.cpp
 		)
 
 target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} shabacklib)

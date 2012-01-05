@@ -9,3 +9,8 @@ RestoreException::RestoreException(string msg) :
   Exception(msg)
 {
 }
+
+InvalidTreeFile::InvalidTreeFile(string msg) :
+  Exception(msg)
+{
+}

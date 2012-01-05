@@ -2,9 +2,11 @@
 #define SHABACK_Repository_H
 
 #include <string>
+#include <vector>
 #include "RuntimeConfig.h"
 #include "Cache.h"
 #include "lib/Date.h"
+#include "TreeFileEntry.h"
 
 class BackupRun;
 
@@ -28,7 +30,7 @@ class Repository
     void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
     void exportCacheFile();
-    std::string loadTreeFile(std::string& treeId);
+    std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
 
   protected:
     RuntimeConfig config;

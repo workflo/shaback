@@ -9,4 +9,9 @@ class RestoreException : public Exception
     RestoreException(std::string msg);
 };
 
+class InvalidTreeFile : public Exception
+{
+  public:
+    InvalidTreeFile(std::string nsg);
+};
 #endif // SHABACK_ShabackException_H

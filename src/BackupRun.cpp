@@ -6,6 +6,7 @@
 #include "BackupRun.h"
 #include "lib/Sha1.h"
 #include "lib/Exception.h"
+#include "TreeFileEntry.h"
 
 using namespace std;
 
@@ -157,13 +158,13 @@ void BackupRun::showTotals()
 {
   // TODO: Switch for MacOS X
   printf("Files inspected:  %12d\n", numFilesRead);
-  #ifdef MACOS_X
+  #ifdef __APPLE__
   printf("Bytes inspected:  %12jd\n", (intmax_t) numBytesRead);
   #else
   printf("Bytes inspected:  %12jd\n", numBytesRead);
   #endif
   printf("Files stored:     %12d\n", numFilesStored);
-  #ifdef MACOS_X
+  #ifdef __APPLE__
   printf("Bytes stored:     %12jd\n", (intmax_t) numBytesStored);
   #else
   printf("Bytes stored:     %12jd\n", numBytesStored);

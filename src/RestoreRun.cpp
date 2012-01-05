@@ -7,6 +7,7 @@
 
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
+//#include "TreeFileEntry.h"
 
 using namespace std;
 
@@ -29,6 +30,11 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
   if (config.verbose)
     cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
 
-  string treeFileContent = repository.loadTreeFile(treeId);
-  cout << "Ausgabe: " << treeFileContent << endl;
+  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
+    TreeFileEntry entry(*it);
+
+    printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.filename.c_str(), entry.fileMode,
+        entry.uid, entry.gid, entry.mtime, entry.ctime);
+  }
 }

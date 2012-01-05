@@ -21,17 +21,20 @@ void showUsage(string& op)
   } else if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>] <treespec>\n\n");
     printf("\tRestores directories and files from the repository.\n"
-        "\t<treespec> can be either a filename from the repository's index/ directory\n"
-        "\tor the ID of the directory to be restored.\n"
-        "\n"
-        "\tFiles will always be restored into the CWD.\n");
+      "\t<treespec> can be either a filename from the repository's index/ directory\n"
+      "\tor the ID of the directory to be restored.\n"
+      "\n"
+      "\tFiles will always be restored into the CWD.\n");
+  } else if (op == "show") {
+    printf("usage: shaback show [<general_options>] [-p <pw> | --password=<pw>] <id>\n\n");
+    printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
   } else if (op == "init") {
     printf("usage: shaback init [<general_options>] [-f | --force]\n\n"
-        "\tCreates a new repository at the location specified in one of the config files\n"
-        "\tor via the --repository option. Defaults to the current working directory.\n\n"
-        "Options:\n"
-        "\t-f, --force\n"
-        "\t    Force creation even if the destination directory is not empty.\n\n");
+      "\tCreates a new repository at the location specified in one of the config files\n"
+      "\tor via the --repository option. Defaults to the current working directory.\n\n"
+      "Options:\n"
+      "\t-f, --force\n"
+      "\t    Force creation even if the destination directory is not empty.\n\n");
   } else if (op == "deflate") {
     printf("usage: shaback deflate\n\n");
   } else if (op == "inflate") {
@@ -41,13 +44,13 @@ void showUsage(string& op)
     printf("\n");
     printf("Valid commands are:\n");
     printf("   backup      Backup a set of files or directories.\n");
-    //  printf("   gc          Garbage collection: Delete unused files from archive\n");
+    printf("   gc          Garbage collection: Delete unused files from archive\n");
     //  printf("   extract     Extract backup sets from archive.\n");
-    //  printf("   fsck        Perform integrity check with optional garbage collection.\n");
+    printf("   fsck        Perform integrity check with optional garbage collection.\n");
     printf("   init        Create a new repository.\n");
-    //  printf("   list        List available backup sets.\n");
     printf("   restore     Restore files from repository.\n");
-    //  printf("   cleanup     Delete old index files\n");
+    printf("   cleanup     Delete old index files\n");
+    printf("   show        Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate     Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate     Decompress data from stdin to stdout using `Deflate' compression.\n");
     printf("\n");
@@ -62,7 +65,7 @@ void showUsage(string& op)
       "\t    Be even more verbose.\n\n");
     printf("\t-h, --help\n"
       "\t     Show usage information.\n\n");
-    printf("See 'shaback --help COMMAND' for more information on a specific command.\n");
+    printf("See `shaback <command> --help' for more information on a specific command.\n");
     //  printf("Version: " + VERSION);
   }
 }
@@ -97,12 +100,13 @@ int main(int argc, char** argv)
       } else if (config.operation == "inflate") {
         return shaback.inflate();
       } else {
-        shaback.repository.open();
+        cerr << "Invalid operation `" << config.operation << "'." << endl;
+        return 1;
       }
     }
   } catch (Exception& ex) {
     cerr << ex.getMessage() << endl;
-    exit(10);
+    return 10;
   }
 }
 

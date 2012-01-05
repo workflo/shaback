@@ -220,17 +220,25 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   return hashValue;
 }
 
-string Repository::loadTreeFile(string& treeId)
+vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
   File file = hashValueToFile(treeId);
   ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
   in.open(file);
 
-  string line;
-  in.readAll(line);
-  cout << line << endl;
+  string content;
+  in.readAll(content);
 
-  return file.path;
+  vector<TreeFileEntry> list;
+  int from = 0;
+  int until;
+  while ((until = content.find('\n', from)) != string::npos) {
+    string line = content.substr(from, until - from);
+    list.push_back(TreeFileEntry(line));
+    from = until +1;
+  }
+
+  return list;
 }
 
 void Repository::exportCacheFile()
