@@ -252,7 +252,11 @@ bool File::setXAttr(string key, string value)
   // Do nothing.
   return false;
 #else
+  #ifdef XATTR_NOFOLLOW
   return (setxattr(path.c_str(), key.c_str(), value.data(), value.size(), 0, XATTR_NOFOLLOW) == 0);
+  #else
+  return (setxattr(path.c_str(), key.c_str(), value.data(), value.size(), 0) == 0);
+  #endif
 #endif
 }
 
@@ -264,7 +268,11 @@ bool File::setXAttr(string key, int value)
 #else
   char str[20];
   sprintf(str, "%d", value);
+  #ifdef XATTR_NOFOLLOW
   return (setxattr(path.c_str(), key.c_str(), str, strlen(str), 0, XATTR_NOFOLLOW) == 0);
+  #else
+  return (setxattr(path.c_str(), key.c_str(), str, strlen(str), 0) == 0);
+  #endif
 #endif
 }
 
@@ -274,7 +282,11 @@ std::string File::getXAttr(string key)
   return string();
 #else
   char buf[100];
+  #ifdef XATTR_NOFOLLOW
   int len = getxattr(path.c_str(), key.c_str(), buf, 100, 0, XATTR_NOFOLLOW);
+  #else
+  int len = getxattr(path.c_str(), key.c_str(), buf, 100);
+  #endif
   if (len >= 0) {
     return string(buf, len);
   } else {

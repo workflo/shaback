@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "BufferedWriter.h"
 #include "Exception.h"

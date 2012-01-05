@@ -25,6 +25,17 @@ using namespace std;
 Repository::Repository(RuntimeConfig& config) :
   config(config), cache(config.localCacheFile)
 {
+}
+
+Repository::~Repository()
+{
+  if (!config.localCacheFile.empty()) {
+    cache.close();
+  }
+}
+
+void Repository::open()
+{
   Properties props;
 
   props.load(config.repoPropertiesFile);
@@ -57,17 +68,7 @@ Repository::Repository(RuntimeConfig& config) :
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
   }
-}
 
-Repository::~Repository()
-{
-  if (!config.localCacheFile.empty()) {
-    cache.close();
-  }
-}
-
-void Repository::open()
-{
   if (!config.filesDir.isDir() || !config.indexDir.isDir() || !config.locksDir.isDir() || !config.cacheDir.isDir()
       || !config.repoPropertiesFile.isFile()) {
     cerr << "Does not look like a shaback repository: " << config.repository << endl;
