@@ -3,13 +3,14 @@
 //#include <stdio.h>
 //#include <string.h>
 
-#include "ShabackException.h"
+#include "lib/File.h"
 
+#include "ShabackException.h"
 #include "TreeFileEntry.h"
 
 using namespace std;
 
-TreeFileEntry::TreeFileEntry(string& line)
+TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
 {
   if (line.size() < 10)
     throw InvalidTreeFile("Tree file contains empty/short line");
@@ -33,6 +34,9 @@ TreeFileEntry::TreeFileEntry(string& line)
   if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing filename");
   filename = line.substr(from, until - from);
   from = until +1;
+  path = parentDir;
+  if (!path.empty()) path.append(File::separator);
+  path.append(filename);
 
   // File mode (POSIX)
   if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file mode octets");

@@ -34,7 +34,12 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
 
-    printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.filename.c_str(), entry.fileMode,
+    printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.path.c_str(), entry.fileMode,
         entry.uid, entry.gid, entry.mtime, entry.ctime);
+	
+    if (entry.type == TREEFILEENTRY_DIRECTORY) {
+      cout << "diving into " << entry.filename << endl;
+      restore(entry.id, destinationDir);
+    }
   }
 }

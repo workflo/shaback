@@ -10,11 +10,12 @@
 class TreeFileEntry
 {
   public:
-    TreeFileEntry(std::string& line);
+    TreeFileEntry(std::string& line, std::string& parentDir);
 
     char type;
     std::string id;
     std::string filename;
+    std::string path;
     int fileMode;
     int uid;
     int gid;

@@ -91,3 +91,5 @@ UnsupportedOperation::UnsupportedOperation(string op) :
 
 MissingCryptoPassword::MissingCryptoPassword()
 : Exception("Missing crypto password") {}
+
+DeflateException::DeflateException(string msg) : Exception(msg) {}

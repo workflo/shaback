@@ -62,7 +62,7 @@ bool InputStream::readAll(string& str)
 
   int bytesRead = read(buf, INPUTSTREAM_READ_BUFFER_LEN);
   if (bytesRead == -1)
-    return -1;
+    return false;
 
   while (true) {
     str.append(buf, bytesRead);
@@ -71,7 +71,7 @@ bool InputStream::readAll(string& str)
       break;
   }
 
-  return str.size();
+  return true;
 }
 
 void InputStream::close()

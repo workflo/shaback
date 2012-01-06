@@ -61,4 +61,10 @@ class MissingCryptoPassword: public Exception
     MissingCryptoPassword();
 };
 
+class DeflateException : public Exception
+{
+  public:
+    DeflateException(std::string msg);
+};
+
 #endif // SHABACK_Exception_H

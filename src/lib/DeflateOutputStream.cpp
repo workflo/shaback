@@ -9,13 +9,12 @@ using namespace std;
 DeflateOutputStream::DeflateOutputStream(OutputStream* out)
   : out(out)
 {
-  ret = Z_OK;
   zipStream.zalloc = Z_NULL;
   zipStream.zfree = Z_NULL;
   zipStream.opaque = Z_NULL;
-  if (deflateInit(&zipStream, Z_DEFAULT_COMPRESSION) != Z_OK) {
-    // TODO: Throw exception
-    cerr << "DeflateOutputStream error" << endl;
+
+  if ((ret = deflateInit(&zipStream, Z_DEFAULT_COMPRESSION)) != Z_OK) {
+    throw DeflateException(string("deflateInit failed: ").append(zError(ret)));
   }
 }
 

@@ -6,6 +6,7 @@
 #include "BackupRun.h"
 #include "lib/Sha1.h"
 #include "lib/Exception.h"
+#include "TreeFile.h"
 #include "TreeFileEntry.h"
 
 using namespace std;
@@ -33,7 +34,8 @@ int BackupRun::run()
     return 5;
   }
 
-  string rootFile;
+  string rootFile(TREEFILE_HEADER);
+  rootFile.append("\n\n");
 
   for (vector<string>::iterator it = config.dirs.begin(); it < config.dirs.end(); it++) {
     File file(*it);
@@ -64,8 +66,9 @@ int BackupRun::run()
 
 string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren)
 {
-  string treeFile;
-
+  string treeFile(TREEFILE_HEADER);
+  treeFile.append("\n").append(dir.path).append("\n");
+  
   if (!skipChildren) {
     vector<File> files = dir.listFiles("*");
 

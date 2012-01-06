@@ -9,15 +9,14 @@ using namespace std;
 DeflateInputStream::DeflateInputStream(InputStream* in)
   : in(in)
 {
-  ret = Z_OK;
   zipStream.zalloc = Z_NULL;
   zipStream.zfree = Z_NULL;
   zipStream.opaque = Z_NULL;
 
-  if (inflateInit(&zipStream) != Z_OK) {
-    // TODO: Throw exception
-    cerr << "DeflateInputStream error" << endl;
+  if ((ret = inflateInit(&zipStream)) != Z_OK) {
+    throw DeflateException(string("inflateInit failed: ").append(zError(ret)));
   }
+  zipStream.avail_in = 0;
 }
 
 DeflateInputStream::~DeflateInputStream()
@@ -48,10 +47,11 @@ int DeflateInputStream::read(char* b, int len)
 
   ret = inflate(&zipStream, Z_NO_FLUSH);
 
+  
   if (ret == Z_STREAM_END && zipStream.avail_out == len) {
     return -1;
-  } else if (ret == Z_STREAM_ERROR) {
-    // TODO: Throw exception
+  } else if (ret < 0) {
+    throw DeflateException(string("inflate failed: ").append(zError(ret)));
   }
 
   return min(len, DEFLATE_CHUNK_SIZE) - zipStream.avail_out;

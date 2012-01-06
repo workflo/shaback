@@ -19,6 +19,7 @@
 #include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
 #include "ShabackException.h"
+#include "TreeFile.h"
 
 using namespace std;
 
@@ -232,9 +233,19 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   vector<TreeFileEntry> list;
   int from = 0;
   int until;
+  
+  if ((until = content.find('\n', from)) == string::npos) throw InvalidTreeFile("Missing header line");
+  string header = content.substr(from, until - from);
+  if (header != TREEFILE_HEADER) throw InvalidTreeFile("Unexpected header line in tree file");
+  from = until +1;
+  
+  if ((until = content.find('\n', from)) == string::npos) throw InvalidTreeFile("Missing parent directory line");
+  string parentDir = content.substr(from, until - from);
+  from = until +1;
+  
   while ((until = content.find('\n', from)) != string::npos) {
     string line = content.substr(from, until - from);
-    list.push_back(TreeFileEntry(line));
+    list.push_back(TreeFileEntry(line, parentDir));
     from = until +1;
   }
 

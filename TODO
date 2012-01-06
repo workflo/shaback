@@ -3,6 +3,7 @@ Restore:
 - Restore a whole backup set from the root index file
 - Restore a directory from a given SHA id
 - Search for different versions of a given file (by name)
+- Build Knoppix with shaback
 
 Library:
 -----------------------
@@ -13,6 +14,7 @@ Backup:
   - lock/unlock
   - Split large files
   - ACL
+  - Write report file after backup
 - Different cipher algorithms:
   - Twofish
   - AES
@@ -34,3 +36,15 @@ Funny optimizations:
 Config:
 -----------------------
 - Allow different hashing algorithms (SHA-1, SHA-256)
+- Lua:
+  - Determine hostname
+  - system()
+  - postBackup hook: write report, rsync repository, send email etc.
+  - backupError hook
+  - send email
+
+Restore GUI
+-----------------------
+- Have a Java/Swing UI
+- Call CLI shaback via IPC (stdin/stdout)
+- Local cache for tree files
