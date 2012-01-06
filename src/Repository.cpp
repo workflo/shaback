@@ -10,6 +10,7 @@
 #include "lib/Date.h"
 #include "lib/FileInputStream.h"
 #include "lib/FileOutputStream.h"
+#include "lib/StandardOutputStream.h"
 #include "lib/Properties.h"
 #include "lib/Sha1.h"
 
@@ -130,6 +131,7 @@ File Repository::hashValueToFile(string hashValue)
 bool Repository::contains(string& hashValue)
 {
   return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
+//  return hashValueToFile(hashValue).isFile();
 }
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
@@ -138,6 +140,8 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   sha1.update(treeFile);
   sha1.finalize();
   string hashValue = sha1.toString();
+
+//  cerr << hashValue << ":\n" << treeFile << "\n--------------------" << endl;
 
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
@@ -338,28 +342,14 @@ void Repository::restoreByTreeId(string& treeId)
   run.restore(treeId, destinationDir);
 }
 
-void Repository::exportFile(TreeFileEntry& entry, File& outFile)
+void Repository::exportFile(string& id, OutputStream& out)
 {
-  File inFile = hashValueToFile(entry.id);
+  File inFile = hashValueToFile(id);
   ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
   in.open(inFile);
 
-  outFile.remove();
-
-  FileOutputStream out(outFile);
   in.copyTo(out);
   out.close();
-
-  try {
-    outFile.chmod(entry.fileMode);
-  } catch (Exception& ex) {
-    cerr << "chmod failed: " << ex.getMessage() << endl;
-  }
-  try {
-    outFile.chown(entry.uid, entry.gid);
-  } catch (Exception& ex) {
-    cerr << "chown failed: " << ex.getMessage() << endl;
-  }
 }
 
 void Repository::exportSymlink(TreeFileEntry& entry, File& linkFile)
@@ -380,4 +370,17 @@ void Repository::exportSymlink(TreeFileEntry& entry, File& linkFile)
   } catch (Exception& ex) {
     cerr << "chown failed: " << ex.getMessage() << endl;
   }
+}
+
+void Repository::show()
+{
+  if (config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to show.");
+  }
+
+  open();
+
+  string id = config.cliArgs.at(0);
+  StandardOutputStream out(stdout);
+  exportFile(id, out);
 }

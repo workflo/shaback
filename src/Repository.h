@@ -22,6 +22,7 @@ class Repository
     void open();
     void lock();
     void unlock();
+    void show();
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
@@ -31,7 +32,7 @@ class Repository
     void importCacheFile();
     void exportCacheFile();
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
-    void exportFile(TreeFileEntry& entry, File& outFile);
+    void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
 
   protected:

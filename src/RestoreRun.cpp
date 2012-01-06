@@ -4,10 +4,10 @@
 #include <string.h>
 
 #include "lib/Exception.h"
+#include "lib/FileOutputStream.h"
 
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
-//#include "TreeFileEntry.h"
 
 using namespace std;
 
@@ -52,7 +52,23 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
 
         if (config.verbose)
           cout << "[F] " << file.path << endl;
-        repository.exportFile(entry, file);
+
+        file.remove();
+
+        FileOutputStream out(file);
+        repository.exportFile(entry.id, out);
+        out.close();
+
+        try {
+          file.chmod(entry.fileMode);
+        } catch (Exception& ex) {
+          cerr << "chmod failed: " << ex.getMessage() << endl;
+        }
+        try {
+          file.chown(entry.uid, entry.gid);
+        } catch (Exception& ex) {
+          cerr << "chown failed: " << ex.getMessage() << endl;
+        }
       }
         break;
 

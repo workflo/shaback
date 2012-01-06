@@ -95,6 +95,9 @@ int main(int argc, char** argv)
       } else if (config.operation == "restore") {
         shaback.repository.restore();
         return 0;
+      } else if (config.operation == "show") {
+        shaback.repository.show();
+        return 0;
       } else if (config.operation == "deflate") {
         return shaback.deflate();
       } else if (config.operation == "inflate") {
