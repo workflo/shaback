@@ -119,7 +119,7 @@ bool File::isFile()
 #ifdef WIN32
   return (!(ffblk.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) ? true : false;
 #else
-  return S_ISREG(this->statBuffer.st_mode);
+  return fileExists && S_ISREG(this->statBuffer.st_mode);
 #endif
 }
 
