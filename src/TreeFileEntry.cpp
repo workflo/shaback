@@ -30,10 +30,12 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   id = line.substr(from, until - from);
   from = until +1;
 
-  // filename
+  // Filename
   if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing filename");
   filename = line.substr(from, until - from);
   from = until +1;
+
+  // Path
   path = parentDir;
   if (!path.empty()) path.append(File::separator);
   path.append(filename);

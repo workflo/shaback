@@ -32,9 +32,11 @@ string File::separator = "/";
 #endif
 
 File::File() :
-  path("")
+  path(""), initialized(false)
 {
-  this->initialized = false;
+  // TODO: Default constructor should point to CWD rather than $HOME
+  // TODO: Static method to retreive File object representing $HOME
+
 #ifdef WIN32
   char tmpbuf[MAX_PATH];
   DWORD size;
@@ -54,39 +56,25 @@ File::File() :
 }
 
 File::File(const char* path) :
-  path(path)
+  path(path), initialized(false)
 {
-  this->initialized = false;
   this->fname = this->path.substr(this->path.rfind("/") + 1);
 }
 
 File::File(string& path) :
-  path(path)
+  path(path), initialized(false)
 {
-  this->initialized = false;
   this->fname = path.substr(path.rfind("/") + 1);
 }
 
-File::File(File& parent, string& filename)
+File::File(File& parent, string filename) : initialized(false)
 {
-  this->path = parent.path;
-  if (parent.path.size() > 0 && parent.path.at(parent.path.size() - 1) != '/') {
-    this->path.append("/");
+  path = parent.path;
+  if (!path.empty() && path.at(path.size() - 1) != '/' && !filename.empty() && filename.at(0) != '/') {
+    path.append("/");
   }
-  this->path.append(filename);
-  this->initialized = false;
-  this->fname = path.substr(path.rfind("/") + 1);
-}
-
-File::File(File& parent, const char* filename)
-{
-  this->path = parent.path;
-  if (parent.path.size() > 0 && parent.path.at(parent.path.size() - 1) != '/') {
-    this->path.append("/");
-  }
-  this->path.append(filename);
-  this->initialized = false;
-  this->fname = path.substr(path.rfind("/") + 1);
+  path.append(filename);
+  fname = path.substr(path.rfind("/") + 1);
 }
 
 File::~File()
@@ -252,11 +240,11 @@ bool File::setXAttr(string key, string value)
   // Do nothing.
   return false;
 #else
-  #ifdef XATTR_NOFOLLOW
+#ifdef XATTR_NOFOLLOW
   return (setxattr(path.c_str(), key.c_str(), value.data(), value.size(), 0, XATTR_NOFOLLOW) == 0);
-  #else
+#else
   return (setxattr(path.c_str(), key.c_str(), value.data(), value.size(), 0) == 0);
-  #endif
+#endif
 #endif
 }
 
@@ -268,11 +256,11 @@ bool File::setXAttr(string key, int value)
 #else
   char str[20];
   sprintf(str, "%d", value);
-  #ifdef XATTR_NOFOLLOW
+#ifdef XATTR_NOFOLLOW
   return (setxattr(path.c_str(), key.c_str(), str, strlen(str), 0, XATTR_NOFOLLOW) == 0);
-  #else
+#else
   return (setxattr(path.c_str(), key.c_str(), str, strlen(str), 0) == 0);
-  #endif
+#endif
 #endif
 }
 
@@ -282,11 +270,11 @@ std::string File::getXAttr(string key)
   return string();
 #else
   char buf[100];
-  #ifdef XATTR_NOFOLLOW
+#ifdef XATTR_NOFOLLOW
   int len = getxattr(path.c_str(), key.c_str(), buf, 100, 0, XATTR_NOFOLLOW);
-  #else
+#else
   int len = getxattr(path.c_str(), key.c_str(), buf, 100);
-  #endif
+#endif
   if (len >= 0) {
     return string(buf, len);
   } else {

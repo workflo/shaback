@@ -36,10 +36,22 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
 
     printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.path.c_str(), entry.fileMode,
         entry.uid, entry.gid, entry.mtime, entry.ctime);
-	
-    if (entry.type == TREEFILEENTRY_DIRECTORY) {
-      cout << "diving into " << entry.filename << endl;
-      restore(entry.id, destinationDir);
+
+    switch (entry.type) {
+      case TREEFILEENTRY_DIRECTORY:
+        cout << "diving into " << entry.filename << endl;
+        restore(entry.id, destinationDir);
+        break;
+
+      case TREEFILEENTRY_FILE:
+        repository.exportFile(entry, destinationDir);
+        break;
+
+      case TREEFILEENTRY_SYMLINK:
+        break;
+
+      default:
+        throw IllegalStateException("Unexpected tree file entry type");
     }
   }
 }

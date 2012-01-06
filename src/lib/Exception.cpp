@@ -74,6 +74,11 @@ string FileNotFoundException::getFilename()
   return filename;
 }
 
+IllegalStateException::IllegalStateException(string msg) :
+  Exception(msg)
+{
+}
+
 UnsupportedCompressionAlgorithm::UnsupportedCompressionAlgorithm(string algo) :
   Exception(string("Unsupported compression algorithm: ").append(algo))
 {
@@ -89,7 +94,12 @@ UnsupportedOperation::UnsupportedOperation(string op) :
 {
 }
 
-MissingCryptoPassword::MissingCryptoPassword()
-: Exception("Missing crypto password") {}
+MissingCryptoPassword::MissingCryptoPassword() :
+  Exception("Missing crypto password")
+{
+}
 
-DeflateException::DeflateException(string msg) : Exception(msg) {}
+DeflateException::DeflateException(string msg) :
+  Exception(msg)
+{
+}

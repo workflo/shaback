@@ -37,6 +37,12 @@ class FileNotFoundException: public IOException
     std::string filename;
 };
 
+class IllegalStateException : public Exception
+{
+  public:
+    IllegalStateException(std::string msg);
+};
+
 class UnsupportedCompressionAlgorithm: public Exception
 {
   public:

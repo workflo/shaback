@@ -334,3 +334,14 @@ void Repository::restoreByTreeId(string& treeId)
   File destinationDir(".");
   run.restore(treeId, destinationDir);
 }
+
+
+void Repository::exportFile(TreeFileEntry& entry, File& destinationDir)
+{
+  File inFile = hashValueToFile(entry.id);
+  ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
+  in.open(inFile);
+
+  File outFile(destinationDir, entry.path);
+  cout << "Restoring to " << outFile.path << endl;
+}
