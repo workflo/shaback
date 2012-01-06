@@ -31,7 +31,8 @@ class Repository
     void importCacheFile();
     void exportCacheFile();
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
-    void exportFile(TreeFileEntry& entry, File& destinationDir);
+    void exportFile(TreeFileEntry& entry, File& outFile);
+    void exportSymlink(TreeFileEntry& entry, File& outFile);
 
   protected:
     RuntimeConfig config;

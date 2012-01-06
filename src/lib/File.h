@@ -21,8 +21,7 @@ class File
 {
   public:
     File();
-    File(const char* path);
-    File(std::string& path);
+    File(std::string path);
     File(File& parent, std::string filename);
     ~File();
     void refresh();
@@ -31,12 +30,18 @@ class File
     bool isSymlink();
     bool exists();
     bool mkdir();
+    bool mkdirs();
     std::string readlink();
     std::vector<File> listFiles(std::string pattern);
     bool move(File& destination);
     bool setXAttr(std::string key, std::string value);
     bool setXAttr(std::string key, int value);
     std::string getXAttr(std::string key);
+    File getParent();
+    bool remove();
+
+    void chmod(int mode);
+    void chown(int uid, int gid);
 
     std::string path;
     std::string fname;
@@ -113,6 +118,9 @@ class File
       return statBuffer.st_dev;
 #endif
     }
+
+  protected:
+    void canonicalize();
 
   private:
     bool initialized;

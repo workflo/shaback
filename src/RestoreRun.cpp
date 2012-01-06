@@ -27,27 +27,42 @@ RestoreRun::~RestoreRun()
 
 void RestoreRun::restore(string& treeId, File& destinationDir)
 {
-  if (config.verbose)
-    cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
+  //  if (config.verbose)
+  //    cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
 
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
 
-    printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.path.c_str(), entry.fileMode,
-        entry.uid, entry.gid, entry.mtime, entry.ctime);
+    //    printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.path.c_str(), entry.fileMode,
+    //        entry.uid, entry.gid, entry.mtime, entry.ctime);
 
     switch (entry.type) {
-      case TREEFILEENTRY_DIRECTORY:
-        cout << "diving into " << entry.filename << endl;
+      case TREEFILEENTRY_DIRECTORY: {
+        File dir(destinationDir, entry.path);
+        if (config.verbose)
+          cout << "[D] " << dir.path << endl;
+        dir.mkdirs();
         restore(entry.id, destinationDir);
+      }
         break;
 
-      case TREEFILEENTRY_FILE:
-        repository.exportFile(entry, destinationDir);
+      case TREEFILEENTRY_FILE: {
+        File file(destinationDir, entry.path);
+
+        if (config.verbose)
+          cout << "[F] " << file.path << endl;
+        repository.exportFile(entry, file);
+      }
         break;
 
-      case TREEFILEENTRY_SYMLINK:
+      case TREEFILEENTRY_SYMLINK: {
+        File file(destinationDir, entry.path);
+
+        if (config.verbose)
+          cout << "[S] " << file.path << endl;
+        repository.exportSymlink(entry, file);
+      }
         break;
 
       default:

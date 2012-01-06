@@ -69,4 +69,18 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   n = line.substr(from, until - from);
   from = until +1;
   ctime = strtol(n.c_str(), 0, 10);
+
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing ...");
+  from = until +1;
+
+  if (type == TREEFILEENTRY_SYMLINK) {
+    // Symlink destination
+    if ((until = line.find('\t', from)) == string::npos) {
+      symLinkDest = line.substr(from);
+    } else {
+      symLinkDest = line.substr(from, until - from);
+    }
+    if (symLinkDest.empty()) throw InvalidTreeFile("Missing symlink destination");
+    from = until +1;
+  }
 }

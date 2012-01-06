@@ -21,6 +21,7 @@ class TreeFileEntry
     int gid;
     int mtime;
     int ctime;
+    std::string symLinkDest;
 };
 
 #endif // SHABACK_TreeFileEntry_H

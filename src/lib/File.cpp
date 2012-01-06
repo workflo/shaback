@@ -53,27 +53,21 @@ File::File() :
     path = pw->pw_dir;
   }
 #endif
+  canonicalize();
 }
 
-File::File(const char* path) :
+File::File(string path) :
   path(path), initialized(false)
 {
-  this->fname = this->path.substr(this->path.rfind("/") + 1);
-}
-
-File::File(string& path) :
-  path(path), initialized(false)
-{
-  this->fname = path.substr(path.rfind("/") + 1);
+  canonicalize();
+  fname = path.substr(path.rfind("/") + 1);
 }
 
 File::File(File& parent, string filename) : initialized(false)
 {
   path = parent.path;
-  if (!path.empty() && path.at(path.size() - 1) != '/' && !filename.empty() && filename.at(0) != '/') {
-    path.append("/");
-  }
-  path.append(filename);
+  path.append("/").append(filename);
+  canonicalize();
   fname = path.substr(path.rfind("/") + 1);
 }
 
@@ -162,6 +156,22 @@ bool File::mkdir()
   return (::_mkdir(this->path.c_str()) == 0);
 #else
   return (::mkdir(this->path.c_str(), 0777) == 0);
+#endif
+}
+
+bool File::mkdirs()
+{
+  initialized = false;
+  File parent = getParent();
+
+  if (!parent.isDir()) {
+    parent.mkdirs();
+  }
+
+#ifdef WIN32
+  return (::_mkdir(path.c_str()) == 0);
+#else
+  return (::mkdir(path.c_str(), 0777) == 0);
 #endif
 }
 
@@ -281,4 +291,50 @@ std::string File::getXAttr(string key)
     return string();
   }
 #endif
+}
+
+File File::getParent()
+{
+  int lastSlash = path.rfind("/");
+  if (lastSlash == string::npos) {
+    throw FileNotFoundException(string(path).append("/.."));
+  }
+//  cout << "getParent: " << path.substr(0, lastSlash)<<endl;
+  return File(path.substr(0, lastSlash));
+}
+
+void File::canonicalize()
+{
+  // Remove all trailing slashes:
+  while (path.size() > 1 && path.at(path.size() -1) == '/') {
+    path.erase(path.size() -1);
+  }
+
+  // Remove duplicate slashes:
+  int pos;
+  while ((pos = path.find("//")) != string::npos) {
+    path.erase(pos, 1);
+  }
+
+  // TODO: Remove "../"
+}
+
+void File::chmod(int mode)
+{
+  int ret = ::lchmod(path.c_str(), mode);
+  if (ret != 0)
+    throw Exception::errnoToException(path);
+}
+
+void File::chown(int uid, int gid)
+{
+  int ret = ::lchown(path.c_str(), uid, uid);
+  if (ret != 0)
+    throw Exception::errnoToException(path);
+}
+
+bool File::remove()
+{
+  int ret = ::remove(path.c_str());
+  return (ret == 0);
 }

@@ -233,20 +233,23 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   vector<TreeFileEntry> list;
   int from = 0;
   int until;
-  
-  if ((until = content.find('\n', from)) == string::npos) throw InvalidTreeFile("Missing header line");
+
+  if ((until = content.find('\n', from)) == string::npos)
+    throw InvalidTreeFile("Missing header line");
   string header = content.substr(from, until - from);
-  if (header != TREEFILE_HEADER) throw InvalidTreeFile("Unexpected header line in tree file");
-  from = until +1;
-  
-  if ((until = content.find('\n', from)) == string::npos) throw InvalidTreeFile("Missing parent directory line");
+  if (header != TREEFILE_HEADER)
+    throw InvalidTreeFile("Unexpected header line in tree file");
+  from = until + 1;
+
+  if ((until = content.find('\n', from)) == string::npos)
+    throw InvalidTreeFile("Missing parent directory line");
   string parentDir = content.substr(from, until - from);
-  from = until +1;
-  
+  from = until + 1;
+
   while ((until = content.find('\n', from)) != string::npos) {
     string line = content.substr(from, until - from);
     list.push_back(TreeFileEntry(line, parentDir));
-    from = until +1;
+    from = until + 1;
   }
 
   return list;
@@ -335,13 +338,46 @@ void Repository::restoreByTreeId(string& treeId)
   run.restore(treeId, destinationDir);
 }
 
-
-void Repository::exportFile(TreeFileEntry& entry, File& destinationDir)
+void Repository::exportFile(TreeFileEntry& entry, File& outFile)
 {
   File inFile = hashValueToFile(entry.id);
   ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
   in.open(inFile);
 
-  File outFile(destinationDir, entry.path);
-  cout << "Restoring to " << outFile.path << endl;
+  outFile.remove();
+
+  FileOutputStream out(outFile);
+  in.copyTo(out);
+  out.close();
+
+  try {
+    outFile.chmod(entry.fileMode);
+  } catch (Exception& ex) {
+    cerr << "chmod failed: " << ex.getMessage() << endl;
+  }
+  try {
+    outFile.chown(entry.uid, entry.gid);
+  } catch (Exception& ex) {
+    cerr << "chown failed: " << ex.getMessage() << endl;
+  }
+}
+
+void Repository::exportSymlink(TreeFileEntry& entry, File& linkFile)
+{
+  linkFile.remove();
+
+  int ret = ::symlink(entry.symLinkDest.c_str(), linkFile.path.c_str());
+  if (ret != 0)
+    throw Exception::errnoToException(linkFile.path);
+
+  try {
+    linkFile.chmod(entry.fileMode);
+  } catch (Exception& ex) {
+    cerr << "chmod failed: " << ex.getMessage() << endl;
+  }
+  try {
+    linkFile.chown(entry.uid, entry.gid);
+  } catch (Exception& ex) {
+    cerr << "chown failed: " << ex.getMessage() << endl;
+  }
 }
