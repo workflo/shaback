@@ -103,22 +103,43 @@ void GarbageCollection::showTotals()
 
 void GarbageCollection::removeUnusedFiles()
 {
-  char dirname[20];
+  char dirname[3];
+  char idPrefix[5];
+
   for (int level0 = 0; level0 <= 0xff; level0++) {
     sprintf(dirname, "%02x", level0);
     File dirLevel0(config.filesDir, dirname);
 
     for (int level1 = 0; level1 <= 0xff; level1++) {
       sprintf(dirname, "%02x", level1);
+      sprintf(idPrefix, "%02x%02x", level0, level1);
       File dirLevel1(dirLevel0, dirname);
 
-      if (config.debug)
+      if (config.verbose)
         cout << dirLevel1.path << endl;
 
-      vector<File> tmpFiles = dirLevel1.listFiles("*.tmp*");
+      vector<File> tmpFiles = dirLevel1.listFiles("*");
       for (vector<File>::iterator it = tmpFiles.begin(); it < tmpFiles.end(); it++) {
         File f(*it);
-        if (f.remove()) tmpFilesDeleted ++;
+
+        string id = idPrefix;
+        id.append(f.fname);
+
+        if (f.fname.find(".tmp") != string::npos) {
+          // Delete all tmp files:
+          if (f.remove()) {
+            if (config.debug)
+              cout << "[d] " << f.path << endl;
+            tmpFilesDeleted++;
+          }
+        } else if (!repository.cache.contains(id)) {
+          // Delete unreferenced files:
+          if (f.remove()) {
+            if (config.debug)
+              cout << "[d] " << f.path << endl;
+            filesDeleted++;
+          }
+        }
       }
     }
   }
