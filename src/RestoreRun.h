@@ -16,6 +16,10 @@ class RestoreRun
     int numFilesRestored;
     int numErrors;
 
+  protected:
+    void restoreMetaData(File& file, TreeFileEntry& entry);
+    void reportError(std::string msg);
+
   private:
     Repository& repository;
     RuntimeConfig& config;

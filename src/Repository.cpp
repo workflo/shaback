@@ -359,17 +359,6 @@ void Repository::exportSymlink(TreeFileEntry& entry, File& linkFile)
   int ret = ::symlink(entry.symLinkDest.c_str(), linkFile.path.c_str());
   if (ret != 0)
     throw Exception::errnoToException(linkFile.path);
-
-  try {
-    linkFile.chmod(entry.fileMode);
-  } catch (Exception& ex) {
-    cerr << "chmod failed: " << ex.getMessage() << endl;
-  }
-  try {
-    linkFile.chown(entry.uid, entry.gid);
-  } catch (Exception& ex) {
-    cerr << "chown failed: " << ex.getMessage() << endl;
-  }
 }
 
 void Repository::show()

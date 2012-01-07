@@ -12,12 +12,9 @@
 using namespace std;
 
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config)
+  repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0)
 {
   repository.lock();
-  numFilesRestored = 0;
-  numBytesRestored = 0;
-  numErrors = 0;
 }
 
 RestoreRun::~RestoreRun()
@@ -44,8 +41,10 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
           cout << "[D] " << dir.path << endl;
         dir.mkdirs();
         restore(entry.id, destinationDir);
-      }
+
+        restoreMetaData(dir, entry);
         break;
+      }
 
       case TREEFILEENTRY_FILE: {
         File file(destinationDir, entry.path);
@@ -59,18 +58,9 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         repository.exportFile(entry.id, out);
         out.close();
 
-        try {
-          file.chmod(entry.fileMode);
-        } catch (Exception& ex) {
-          cerr << "chmod failed: " << ex.getMessage() << endl;
-        }
-        try {
-          file.chown(entry.uid, entry.gid);
-        } catch (Exception& ex) {
-          cerr << "chown failed: " << ex.getMessage() << endl;
-        }
-      }
+        restoreMetaData(file, entry);
         break;
+      }
 
       case TREEFILEENTRY_SYMLINK: {
         File file(destinationDir, entry.path);
@@ -78,11 +68,36 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         if (config.verbose)
           cout << "[S] " << file.path << endl;
         repository.exportSymlink(entry, file);
-      }
+
+        restoreMetaData(file, entry);
         break;
+      }
 
       default:
         throw IllegalStateException("Unexpected tree file entry type");
     }
   }
+}
+
+void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
+{
+  try {
+    file.chmod(entry.fileMode);
+  } catch (Exception& ex) {
+    reportError(string("chmod: ").append(ex.getMessage()));
+  }
+
+  // TODO: set ctime and mtime
+
+  try {
+    file.chown(entry.uid, entry.gid);
+  } catch (Exception& ex) {
+    reportError(string("chown: ").append(ex.getMessage()));
+  }
+}
+
+void RestoreRun::reportError(string msg)
+{
+  numErrors++;
+  cerr << "[E] " << msg << endl;
 }
