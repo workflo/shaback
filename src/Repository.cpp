@@ -16,6 +16,7 @@
 
 #include "Repository.h"
 #include "BackupRun.h"
+#include "GarbageCollection.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
@@ -78,7 +79,7 @@ void Repository::open()
   }
 }
 
-void Repository::lock()
+void Repository::lock(bool exclusive)
 {
   //cout << "lock" << endl;
   // TBI
@@ -93,7 +94,6 @@ void Repository::unlock()
 void Repository::openCache()
 {
   cache.open(GDBM_NEWDB);
-  importCacheFile();
 }
 
 int Repository::backup()
@@ -101,6 +101,7 @@ int Repository::backup()
   open();
   if (!config.localCacheFile.empty()) {
     openCache();
+    importCacheFile();
   }
 
   BackupRun run(config, *this);
@@ -376,4 +377,11 @@ void Repository::show()
   string id = config.cliArgs.at(0);
   StandardOutputStream out(stdout);
   exportFile(id, out);
+}
+
+void Repository::gc()
+{
+  open();
+  GarbageCollection gc(config, *this);
+  gc.run();
 }

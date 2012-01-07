@@ -20,9 +20,10 @@ class Repository
     void restore();
 
     void open();
-    void lock();
+    void lock(bool exclusive = false);
     void unlock();
     void show();
+    void gc();
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
@@ -34,16 +35,17 @@ class Repository
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
     void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
+    void openCache();
+
+    Cache cache;
 
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
     int encryptionAlgorithm;
     int compressionAlgorithm;
-    Cache cache;
     Date startDate;
 
-    void openCache();
     void restoreByRootFile(File& rootFile);
     void restoreByTreeId(std::string& treeId);
 };

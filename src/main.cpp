@@ -26,6 +26,9 @@ void showUsage(string& op)
       "\t<dir-id> is the ID of the directory file to be restored.\n"
       "\n"
       "\tFiles will always be restored into the CWD.\n");
+  } else if (op == "gc") {
+    printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
+    printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
   } else if (op == "show") {
     printf("usage: shaback show [<general_options>] [-p <pw> | --password=<pw>] <id>\n\n");
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
@@ -45,7 +48,7 @@ void showUsage(string& op)
     printf("\n");
     printf("Valid commands are:\n");
     printf("   backup      Backup a set of files or directories.\n");
-    printf("   gc          Garbage collection: Delete unused files from archive\n");
+    printf("   gc          Garbage collection: Delete unused files from archive.\n");
     //  printf("   extract     Extract backup sets from archive.\n");
     //    printf("   fsck        Perform integrity check with optional garbage collection.\n");
     printf("   init        Create a new repository.\n");
@@ -95,10 +98,10 @@ int main(int argc, char** argv)
         return shaback.repository.backup();
       } else if (config.operation == "restore") {
         shaback.repository.restore();
-        return 0;
       } else if (config.operation == "show") {
         shaback.repository.show();
-        return 0;
+      } else if (config.operation == "gc") {
+        shaback.repository.gc();
       } else if (config.operation == "deflate") {
         return shaback.deflate();
       } else if (config.operation == "inflate") {
@@ -107,6 +110,7 @@ int main(int argc, char** argv)
         cerr << "Invalid operation `" << config.operation << "'." << endl;
         return 1;
       }
+      return 0;
     }
   } catch (Exception& ex) {
     cerr << ex.getMessage() << endl;

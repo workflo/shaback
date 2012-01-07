@@ -14,3 +14,8 @@ InvalidTreeFile::InvalidTreeFile(string msg) :
   Exception(msg)
 {
 }
+
+GarbageCollectionException::GarbageCollectionException(string msg) :
+  Exception(msg)
+{
+}
