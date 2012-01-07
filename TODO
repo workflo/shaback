@@ -44,5 +44,5 @@ Config:
 Restore GUI
 -----------------------
 - Have a Java/Swing UI
-- Call CLI shaback via IPC (stdin/stdout)
-- Local cache for tree files
+  - Call CLI shaback via IPC (stdin/stdout)
+  - Local cache for tree files

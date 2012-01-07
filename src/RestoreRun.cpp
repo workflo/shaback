@@ -65,7 +65,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         out.close();
 
         restoreMetaData(file, entry);
-        numFilesRestored ++;
+        numFilesRestored++;
         break;
       }
 
@@ -100,10 +100,12 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
     reportError(string("chown: ").append(ex.getMessage()));
   }
 
-  try {
-    file.utime(entry.mtime);
-  } catch (Exception& ex) {
-    reportError(string("utime: ").append(ex.getMessage()));
+  if (entry.type != TREEFILEENTRY_SYMLINK) {
+    try {
+      file.utime(entry.mtime);
+    } catch (Exception& ex) {
+      reportError(string("utime: ").append(ex.getMessage()));
+    }
   }
 }
 
@@ -116,10 +118,10 @@ void RestoreRun::reportError(string msg)
 void RestoreRun::showTotals()
 {
   printf("Files restored:   %12d\n", numFilesRestored);
-//  #ifdef __APPLE__
-//  printf("Bytes restored:   %12jd\n", (intmax_t) numBytesRestored);
-//  #else
-//  printf("Bytes restored:   %12jd\n", numBytesRestored);
-//  #endif
+  //  #ifdef __APPLE__
+  //  printf("Bytes restored:   %12jd\n", (intmax_t) numBytesRestored);
+  //  #else
+  //  printf("Bytes restored:   %12jd\n", numBytesRestored);
+  //  #endif
   printf("Errors:           %12d\n", numErrors);
 }
