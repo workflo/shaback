@@ -11,11 +11,9 @@ Backup:
 - Pinuts:
   - lock/unlock
   - Split large files
+    - Research on VMDK
   - ACL
   - Write report file after backup
-- Different cipher algorithms:
-  - Twofish
-  - AES
 
 Encryption:
 -----------------------
@@ -26,6 +24,9 @@ Repository:
 
 Garbage collection:
 -----------------------
+- GC
+- FSCK
+- Cleanup (delete old index root files)
 
 Funny optimizations:
 -----------------------
@@ -34,6 +35,7 @@ Funny optimizations:
 Config:
 -----------------------
 - Allow different hashing algorithms (SHA-1, SHA-256)
+- Allow different encryption algorithms (Twofish, AES)
 - Lua:
   - Determine hostname
   - system()

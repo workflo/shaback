@@ -19,10 +19,11 @@ void showUsage(string& op)
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-t | --totals] [-p <pw> | --password=<pw>]\n\n");
   } else if (op == "restore") {
-    printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>] <treespec>\n\n");
-    printf("\tRestores directories and files from the repository.\n"
-      "\t<treespec> can be either a filename from the repository's index/ directory\n"
-      "\tor the ID of the directory to be restored.\n"
+    printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
+      "                      [-t | --totals] <rootfile> | <dir-id>\n\n");
+    printf("\tRestores directories and files from the repository.\n\n"
+      "\t<rootfile> is a filename from the repository's index/ directory.\n"
+      "\t<dir-id> is the ID of the directory file to be restored.\n"
       "\n"
       "\tFiles will always be restored into the CWD.\n");
   } else if (op == "show") {
@@ -46,10 +47,10 @@ void showUsage(string& op)
     printf("   backup      Backup a set of files or directories.\n");
     printf("   gc          Garbage collection: Delete unused files from archive\n");
     //  printf("   extract     Extract backup sets from archive.\n");
-    printf("   fsck        Perform integrity check with optional garbage collection.\n");
+    //    printf("   fsck        Perform integrity check with optional garbage collection.\n");
     printf("   init        Create a new repository.\n");
     printf("   restore     Restore files from repository.\n");
-    printf("   cleanup     Delete old index files\n");
+    //    printf("   cleanup     Delete old index files\n");
     printf("   show        Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate     Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate     Decompress data from stdin to stdout using `Deflate' compression.\n");
