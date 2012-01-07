@@ -14,6 +14,7 @@
 # include <pwd.h>
 # include <fnmatch.h>
 # include <sys/xattr.h>
+# include <utime.h>
 #endif
 
 #include "File.h"
@@ -337,4 +338,16 @@ bool File::remove()
 {
   int ret = ::remove(path.c_str());
   return (ret == 0);
+}
+
+void File::utime(int mtime)
+{
+  struct utimbuf tm;
+
+  tm.actime = mtime;
+  tm.modtime = mtime;
+
+  int ret = ::utime(path.c_str(), &tm);
+  if (ret != 0)
+    throw Exception::errnoToException(path);
 }

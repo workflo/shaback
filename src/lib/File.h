@@ -42,6 +42,7 @@ class File
 
     void chmod(int mode);
     void chown(int uid, int gid);
+    void utime(int mtime);
 
     std::string path;
     std::string fname;

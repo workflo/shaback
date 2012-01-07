@@ -94,6 +94,12 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
   } catch (Exception& ex) {
     reportError(string("chown: ").append(ex.getMessage()));
   }
+
+  try {
+    file.utime(entry.mtime);
+  } catch (Exception& ex) {
+    reportError(string("utime: ").append(ex.getMessage()));
+  }
 }
 
 void RestoreRun::reportError(string msg)
