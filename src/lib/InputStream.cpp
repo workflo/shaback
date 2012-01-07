@@ -7,6 +7,10 @@ using namespace std;
 const long InputStream::SKIP_BUFFER_SIZE = 2048;
 char* InputStream::skipBuffer = 0;
 
+InputStream::~InputStream()
+{
+}
+
 int InputStream::read(char* b, int len)
 {
   int c = read();
