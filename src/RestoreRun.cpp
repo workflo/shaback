@@ -28,6 +28,12 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
   //    cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
 
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+
+  // Create parent directory:
+  if (!treeList.empty()) {
+    File(destinationDir, treeList.at(0).parentDir).mkdirs();
+  }
+
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
 
@@ -39,7 +45,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         File dir(destinationDir, entry.path);
         if (config.verbose)
           cout << "[D] " << dir.path << endl;
-        dir.mkdirs();
+//        dir.mkdirs();
         restore(entry.id, destinationDir);
 
         restoreMetaData(dir, entry);

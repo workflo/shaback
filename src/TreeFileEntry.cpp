@@ -36,6 +36,7 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   from = until +1;
 
   // Path
+  this->parentDir = parentDir;
   path = parentDir;
   if (!path.empty()) path.append(File::separator);
   path.append(filename);

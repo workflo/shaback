@@ -16,6 +16,7 @@ class TreeFileEntry
     std::string id;
     std::string filename;
     std::string path;
+    std::string parentDir;
     int fileMode;
     int uid;
     int gid;

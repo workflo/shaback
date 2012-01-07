@@ -1,8 +1,6 @@
 Restore:
 -----------------------
 - Last bytes missing when encryption is used
-- Restore ctime and mtime
-- Restore a directory from a given SHA id
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
