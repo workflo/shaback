@@ -13,7 +13,7 @@
 using namespace std;
 
 GarbageCollection::GarbageCollection(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config), numErrors(0)
+  repository(repository), config(config), numErrors(0), tmpFilesDeleted(0), filesDeleted(0)
 {
   repository.lock(true);
 }
@@ -40,6 +40,12 @@ void GarbageCollection::run()
       cout << rootFile.path << endl;
     processRootFile(rootFile);
   }
+
+  if (numErrors > 0 && !config.force)
+    throw GarbageCollectionException(
+        "There where errors. Bailing out, no harm has been done to archive! Use '--force' to override.");
+
+  removeUnusedFiles();
 
   showTotals();
 }
@@ -90,5 +96,30 @@ void GarbageCollection::reportError(Exception& ex)
 
 void GarbageCollection::showTotals()
 {
-  printf("Errors:           %12d\n", numErrors);
+  printf("Files deleted:     %12d\n", filesDeleted);
+  printf("Tmp files deleted: %12d\n", tmpFilesDeleted);
+  printf("Errors:            %12d\n", numErrors);
+}
+
+void GarbageCollection::removeUnusedFiles()
+{
+  char dirname[20];
+  for (int level0 = 0; level0 <= 0xff; level0++) {
+    sprintf(dirname, "%02x", level0);
+    File dirLevel0(config.filesDir, dirname);
+
+    for (int level1 = 0; level1 <= 0xff; level1++) {
+      sprintf(dirname, "%02x", level1);
+      File dirLevel1(dirLevel0, dirname);
+
+      if (config.debug)
+        cout << dirLevel1.path << endl;
+
+      vector<File> tmpFiles = dirLevel1.listFiles("*.tmp*");
+      for (vector<File>::iterator it = tmpFiles.begin(); it < tmpFiles.end(); it++) {
+        File f(*it);
+        if (f.remove()) tmpFilesDeleted ++;
+      }
+    }
+  }
 }

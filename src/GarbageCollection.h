@@ -19,10 +19,13 @@ class GarbageCollection
     void processRootFile(File& rootFile);
     void processTreeFile(std::string id);
     void reportError(Exception& ex);
+    void removeUnusedFiles();
 
     Repository& repository;
     RuntimeConfig& config;
     int numErrors;
+    int tmpFilesDeleted;
+    int filesDeleted;
 };
 
 #endif // SHABACK_GarbageCollection_H
