@@ -3,9 +3,6 @@ Restore:
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
-Library:
------------------------
-
 Backup:
 -----------------------
 - Pinuts:
@@ -14,12 +11,6 @@ Backup:
     - Research on VMDK
   - ACL
   - Write report file after backup
-
-Encryption:
------------------------
-
-Repository:
------------------------
 
 Garbage collection:
 -----------------------
