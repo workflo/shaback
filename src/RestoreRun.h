@@ -11,6 +11,7 @@ class RestoreRun
     ~RestoreRun();
 
     void restore(std::string& treeId, File& destinationDir);
+    void showTotals();
 
     off_t numBytesRestored;
     int numFilesRestored;

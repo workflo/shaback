@@ -1,6 +1,5 @@
 Restore:
 -----------------------
-- Last bytes missing when encryption is used
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 

@@ -7,7 +7,7 @@
 using namespace std;
 
 BlowfishInputStream::BlowfishInputStream(string& password, InputStream* in) :
-  in(in)
+  in(in), finished(false)
 {
   // Static Initialization Vector:
   strncpy((char*) iv, SHABACK_IV, BF_BLOCK);
@@ -43,8 +43,19 @@ int BlowfishInputStream::read(char* b, int len)
     return -1;
 
   int bytesRead = in->read((char*) inputBuffer, min(len, BLOWFISH_CHUNK_SIZE));
-  if (bytesRead == -1)
-    return -1;
+  if (bytesRead == -1) {
+    if (finished)
+      return -1;
+    finished = true;
+    if (!EVP_DecryptFinal(&ctx, (unsigned char*) b, &outlen)) {
+      throw IOException("EVP_DecryptFinal failed");
+    }
+    if (outlen == 0) {
+      return -1;
+    } else {
+      return outlen;
+    }
+  }
 
   if (!EVP_DecryptUpdate(&ctx, (unsigned char*) b, &outlen, (const unsigned char*) inputBuffer, bytesRead)) {
     throw IOException("EVP_DecryptUpdate failed");

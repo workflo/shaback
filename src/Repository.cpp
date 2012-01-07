@@ -340,6 +340,10 @@ void Repository::restoreByTreeId(string& treeId)
   RestoreRun run(config, *this);
   File destinationDir(".");
   run.restore(treeId, destinationDir);
+
+  if (config.showTotals) {
+    run.showTotals();
+  }
 }
 
 void Repository::exportFile(string& id, OutputStream& out)

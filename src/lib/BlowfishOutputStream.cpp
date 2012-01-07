@@ -24,7 +24,6 @@ BlowfishOutputStream::BlowfishOutputStream(string& password, OutputStream* out) 
   EVP_EncryptInit_ex(&ctx, EVP_bf_cbc(), NULL, key, iv);
 
   outlen = 0;
-  //  remainderLen = 0;
 }
 
 BlowfishOutputStream::~BlowfishOutputStream()
@@ -45,19 +44,12 @@ void BlowfishOutputStream::write(const char* b, int len)
     if (!EVP_EncryptUpdate(&ctx, outputBuffer, &outlen, (const unsigned char*) b, min(len, BLOWFISH_CHUNK_SIZE))) {
       throw IOException("EVP_EncryptUpdate failed");
     }
-//    cout << "write: len=" << len << endl;
 
     out->write((const char*) outputBuffer, outlen);
-
-//    cout << "write: len=" << len << "; outlen=" << outlen << endl;
 
     b += BLOWFISH_CHUNK_SIZE;
     len -= BLOWFISH_CHUNK_SIZE;
   }
-  //  remainderLen = (len % BF_BLOCK);
-  //  if (remainderLen) {
-  //    cout << "Padding: " << remainderLen << endl;
-  //  }
 }
 
 void BlowfishOutputStream::finish()
@@ -66,7 +58,6 @@ void BlowfishOutputStream::finish()
     throw IOException("EVP_CipherFinal_ex failed");
   }
   out->write((const char*) outputBuffer, outlen);
-  //  cout << "finish: outlen=" << outlen << endl;
 }
 
 void BlowfishOutputStream::close()

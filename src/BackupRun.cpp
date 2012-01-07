@@ -159,7 +159,6 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
 
 void BackupRun::showTotals()
 {
-  // TODO: Switch for MacOS X
   printf("Files inspected:  %12d\n", numFilesRead);
   #ifdef __APPLE__
   printf("Bytes inspected:  %12jd\n", (intmax_t) numBytesRead);

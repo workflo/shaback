@@ -7,7 +7,7 @@
 #include "OutputStream.h"
 
 #define SHABACK_IV "SHABACK2"
-#define BLOWFISH_CHUNK_SIZE (BF_BLOCK * 1024)
+#define BLOWFISH_CHUNK_SIZE (BF_BLOCK * 1024 /8)
 
 class BlowfishOutputStream: public OutputStream
 {
@@ -27,7 +27,5 @@ class BlowfishOutputStream: public OutputStream
     unsigned char iv[BF_BLOCK];
     unsigned char key[16];
     int outlen;
-//    unsigned char remainder[EVP_MAX_BLOCK_LENGTH];
-//    int remainderLen;
 };
 #endif// SHABACK_BlowfishOutputStream_H

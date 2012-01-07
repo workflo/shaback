@@ -25,5 +25,6 @@ class BlowfishInputStream: public InputStream
     unsigned char iv[BF_BLOCK];
     unsigned char key[16];
     int outlen;
+    bool finished;
 };
 #endif// SHABACK_BlowfishInputStream_H

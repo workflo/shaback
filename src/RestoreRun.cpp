@@ -30,7 +30,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
 
   // Create parent directory:
-  if (!treeList.empty()) {
+  if (!treeList.empty() && !treeList.at(0).parentDir.empty()) {
     File(destinationDir, treeList.at(0).parentDir).mkdirs();
   }
 
@@ -44,8 +44,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
       case TREEFILEENTRY_DIRECTORY: {
         File dir(destinationDir, entry.path);
         if (config.verbose)
-          cout << "[D] " << dir.path << endl;
-//        dir.mkdirs();
+          cout << "[d] " << dir.path << endl;
+        dir.mkdirs();
         restore(entry.id, destinationDir);
 
         restoreMetaData(dir, entry);
@@ -56,7 +56,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         File file(destinationDir, entry.path);
 
         if (config.verbose)
-          cout << "[F] " << file.path << endl;
+          cout << "[f] " << file.path << endl;
 
         file.remove();
 
@@ -65,6 +65,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         out.close();
 
         restoreMetaData(file, entry);
+        numFilesRestored ++;
         break;
       }
 
@@ -72,7 +73,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         File file(destinationDir, entry.path);
 
         if (config.verbose)
-          cout << "[S] " << file.path << endl;
+          cout << "[s] " << file.path << endl;
         repository.exportSymlink(entry, file);
 
         restoreMetaData(file, entry);
@@ -93,8 +94,6 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
     reportError(string("chmod: ").append(ex.getMessage()));
   }
 
-  // TODO: set ctime and mtime
-
   try {
     file.chown(entry.uid, entry.gid);
   } catch (Exception& ex) {
@@ -112,4 +111,15 @@ void RestoreRun::reportError(string msg)
 {
   numErrors++;
   cerr << "[E] " << msg << endl;
+}
+
+void RestoreRun::showTotals()
+{
+  printf("Files restored:   %12d\n", numFilesRestored);
+//  #ifdef __APPLE__
+//  printf("Bytes restored:   %12jd\n", (intmax_t) numBytesRestored);
+//  #else
+//  printf("Bytes restored:   %12jd\n", numBytesRestored);
+//  #endif
+  printf("Errors:           %12d\n", numErrors);
 }
