@@ -1,9 +1,9 @@
-Restore:
+Restore
 -----------------------
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
-Backup:
+Backup
 -----------------------
 - Pinuts:
   - lock/unlock
@@ -12,16 +12,16 @@ Backup:
   - ACL
   - Write report file after backup
 
-Garbage collection:
+Garbage collection
 -----------------------
 - FSCK
 - Cleanup (delete old index root files)
 
-Funny optimizations:
+Funny optimizations
 -----------------------
 - Sort dir entries by inode
 
-Config:
+Config
 -----------------------
 - Allow different hashing algorithms (SHA-1, SHA-256)
 - Allow different encryption algorithms (Twofish, AES)
@@ -34,6 +34,5 @@ Config:
 
 Restore GUI
 -----------------------
-- Have a Java/Swing UI
-  - Call CLI shaback via IPC (stdin/stdout)
+- Have a ncurses based UI
   - Local cache for tree files
