@@ -14,39 +14,38 @@ The repository is a directory with the following structure:
 	<REPO_DIR>
      	cache/
 		files/
-			00/00
+			00/00/
      		...
-			ff/ff
+			ff/fe/
+			ff/ff/
 		index/
 		locks/
 		repo.properties
 
-cache/
----------------------------
+### cache/
 
-files/
----------------------------
+### files/
 
 The `files/` directory is the actual repository. It contains 256 sub directories (named `00`, `01`, `02`, ..., `fe`, `ff`) each of which also contains 256 sub directories (named `00`, `01`, `02`, ..., `fe`, `ff`).
 
-index/
----------------------------
+### index/
 
-locks/
----------------------------
+Contains a `.sroot` file for each backup run. The file's is comprised of the backup set (or host) name and a timestamp. The file's content is the bare ID of the root tree index file.
+
+### locks/
 
 Contains lock files during the runtime of a backup or garbage collection run.
 Locks a necessary because garbage collection requires exclusive access to the repository. Backups and restoring files from a backup may be performed concurrently.
 
-repo.properties
----------------------------
+### repo.properties
 
-This file contains configuration concerning the repository as a whole: It defines which data compression and encryption algorithms to use. These settings must be set *before* any backups are performed and may not be altered afterwards.
+This file contains configuration concerning the repository as a whole: It defines which data compression and encryption algorithms to use. These settings must be set **before** any backups are performed and may not be altered afterwards.
 The file format is that of a standard Java(tm) properties file with the following keys:
 
 	compression = Deflate
 	encrytion = Blowfish
 	digest = SHA1
 
-Tree index files
-...........................
+## Tree index files
+---------------------------
+
