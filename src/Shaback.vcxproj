@@ -86,7 +86,6 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FileInputStream.cpp" />
     <ClCompile Include="FileOutputStream.cpp" />
-    <ClCompile Include="getopt.c" />
     <ClCompile Include="InputStream.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OutputStream.cpp" />
@@ -97,6 +96,7 @@
     <ClCompile Include="ShabackOutputStream.cpp" />
     <ClCompile Include="StandardInputStream.cpp" />
     <ClCompile Include="StandardOutputStream.cpp" />
+    <ClCompile Include="XGetopt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackupRun.h" />
@@ -108,7 +108,6 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="FileInputStream.h" />
     <ClInclude Include="FileOutputStream.h" />
-    <ClInclude Include="getopt.h" />
     <ClInclude Include="InputStream.h" />
     <ClInclude Include="OutputStream.h" />
     <ClInclude Include="Repository.h" />
@@ -118,6 +117,7 @@
     <ClInclude Include="ShabackOutputStream.h" />
     <ClInclude Include="StandardInputStream.h" />
     <ClInclude Include="StandardOutputStream.h" />
+    <ClInclude Include="XGetopt.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\..\..\..\Programme\GnuWin32\lib\libgdbm.lib" />

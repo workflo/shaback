@@ -65,7 +65,7 @@
     <ClCompile Include="StandardOutputStream.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="getopt.c">
+    <ClCompile Include="XGetopt.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
@@ -124,7 +124,7 @@
     <ClInclude Include="StandardInputStream.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="getopt.h">
+    <ClInclude Include="XGetopt.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
