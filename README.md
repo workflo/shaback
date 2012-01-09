@@ -30,7 +30,7 @@ The `files/` directory is the actual repository. It contains 256 sub directories
 
 ### index/
 
-Contains a `.sroot` file for each backup run. The file's is comprised of the backup set (or host) name and a timestamp. The file's content is the bare ID of the root tree index file.
+Contains a `.sroot` file for each backup run. The file's name is comprised of the backup set (or host) name and a timestamp. The file's content is the bare ID of the root tree index file.
 
 ### locks/
 
@@ -42,10 +42,10 @@ Locks a necessary because garbage collection requires exclusive access to the re
 This file contains configuration concerning the repository as a whole: It defines which data compression and encryption algorithms to use. These settings must be set **before** any backups are performed and may not be altered afterwards.
 The file format is that of a standard Java(tm) properties file with the following keys:
 
+	version = 2
 	compression = Deflate
 	encrytion = Blowfish
 	digest = SHA1
 
 ## Tree index files
----------------------------
 
