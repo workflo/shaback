@@ -10,17 +10,17 @@ The Repository
 ---------------------------
 
 The repository is a directory with the following structure:
-  <repository>
-    cache/
-    files/
-      00/00
-      …
-      ff/ff
-    index/
-    locks/
-    repo.properties
+    <repository>
+        cache/
+	files/
+	00/00
+     ...
+	ff/ff
+	index/
+	locks/
+	repo.properties
 
 files/
-____________
+-----
 
-The files directory is the actual repository. It contains 256 sub directories (named 00, 01, 02, …, ff) each of which also contains 256 sub directories (named 00, 01, 02, …, ff).
+The `files/` directory is the actual repository. It contains 256 sub directories (named `00`, `01`, `02`, ..., `ff`) each of which also contains 256 sub directories (named `00`, `01`, `02`, ..., `ff`).
