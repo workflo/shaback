@@ -307,7 +307,6 @@ void Repository::importCacheFile()
 
 void Repository::storeRootTreeFile(string& rootHashValue)
 {
-  cout << "rootFile: " << rootHashValue << endl;
   string filename = config.backupName;
   filename.append("_").append(startDate.toFilename()).append(".sroot");
 
@@ -318,6 +317,7 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
   os.close();
 
+  cout << "ID:         " << rootHashValue << endl;
   cout << "Index file: " << file.path << endl;
 }
 

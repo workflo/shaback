@@ -340,14 +340,14 @@ void File::canonicalize()
 
 void File::chmod(int mode)
 {
-  int ret = ::lchmod(path.c_str(), mode);
+  int ret = ::chmod(path.c_str(), mode);
   if (ret != 0)
     throw Exception::errnoToException(path);
 }
 
 void File::chown(int uid, int gid)
 {
-  int ret = ::lchown(path.c_str(), uid, uid);
+  int ret = ::chown(path.c_str(), uid, uid);
   if (ret != 0)
     throw Exception::errnoToException(path);
 }

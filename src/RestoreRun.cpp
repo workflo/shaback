@@ -93,8 +93,6 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         if (config.verbose)
           cout << "[s] " << file.path << endl;
         repository.exportSymlink(entry, file);
-
-        restoreMetaData(file, entry);
         break;
       }
 
