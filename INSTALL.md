@@ -9,6 +9,7 @@ Debian
 
 MacOS X
 ------------------------------
+You need to install [MacPorts](http://www.macports.org/) first.
 
 	sudo port install cmake
 	sudo port install lua
@@ -22,7 +23,7 @@ Build from source
 	cd src
 	cmake .
 	make
-
+	make install
 
 Windows
 ==============================
