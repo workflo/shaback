@@ -38,7 +38,7 @@ The following listing is a typical example of a simple `~/.shaback.lua` config f
     addExcludePattern('*~')
     addExcludePattern('**/*.tmp')
 
-See [Config.md](Config.md) for a complete list of config options and their explanations.
+See [Config.md](https://github.com/workflo/shaback/blob/master/Config.md) for a complete list of config options and their explanations.
 
 Perform backups
 ---------------------------
@@ -109,4 +109,4 @@ TODO
 - Bootable Linux CD for desaster recovery (Knoppix)
 - Text-based GUI (ncurses)
 
-See [TODO.md](TODO.md) for a complete list of tasks and plans.
+See [TODO.md](https://github.com/workflo/shaback/blob/master/TODO.md) for a complete list of tasks and plans.
