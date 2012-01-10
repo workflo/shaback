@@ -49,14 +49,14 @@ If everything is configured correctly, all you need to do to start a backup run 
 
     shaback backup
 
-After successfully finishing the backup the name of the newly created index file is printed to stdout. You need this file to restore files from this very backup run later.
-After each backup run you'll find a new root index file under `<REPO_DIR>/index/`. These files' names are composed of the backup name, a timestamp and the `.sroot` suffix.
+After successfully finishing the backup the ID and the name of the newly created index file is printed to stdout. You need this file to restore files from this very backup run later.
+After each backup run you'll find the new root index file under `<REPO_DIR>/index/`. These files' names are composed of the backup name, a timestamp and the `.sroot` suffix.
 
 Recover from backup
 ---------------------------
 
 To recover directories from the repository you need to know either the backup ID that was reported after the respective backup run or the name of the root index file from your `<REPO_DIR>/index/` directory (which actually contains the before-mentioned ID).
-Go to the directory where you want the restored file to be stored an start restoring:
+Go to the directory where you want the restored file to be stored and start restoring:
 
     shaback restore <ID or index_file>
 
@@ -68,11 +68,3 @@ How it works
 ===========================
 
 See [DEVELOPER.md](https://github.com/workflo/shaback/blob/master/DEVELOPER.md).
-
-TODO
-===========================
-
-- Bootable Linux CD for desaster recovery (Knoppix)
-- Text-based GUI (ncurses)
-
-See [TODO.md](https://github.com/workflo/shaback/blob/master/TODO.md) for a complete list of tasks and plans.
