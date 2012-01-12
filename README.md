@@ -1,7 +1,7 @@
 Synopsis
 ===========================
 
-Shaback is a backup tool for unixish server and client systems. Shaback stores all data in a designated repository directory. Each repository can be used to store backups of an arbitrary number of hosts and file sets. The way the data is stored ensures that storing duplicates is strictly avoided and each file content is stored only once.
+Shaback is a backup tool for unixish systems. The name 'shaback' is a composition of SHA-1 (because it depends on the usage of SHA hash digest) and Backup. Shaback stores all data in a designated repository directory. Each repository can be used to store backups of an arbitrary number of hosts and file sets. The way the data is stored ensures that storing duplicates is strictly avoided and each file content is stored only once.
 
 How it's used
 ===========================

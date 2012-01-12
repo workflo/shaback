@@ -5,12 +5,14 @@ Restore
 
 Backup
 -----------------------
+- Check password: REPO_DIR/password contains an encrypted/deflated version of the SHA hash of the password
 - Pinuts:
   - lock/unlock
   - Split large files
     - Research on VMDK
   - ACL
   - Write report file after backup
+- Store smaller files within tree file
 
 Garbage collection
 -----------------------
@@ -23,6 +25,7 @@ Funny optimizations
 
 Config
 -----------------------
+- Search correct etc/shaback dir for config files
 - Allow different hashing algorithms (SHA-1, SHA-256)
 - Allow different encryption algorithms (Twofish, AES)
 - Lua:
@@ -36,3 +39,7 @@ Restore GUI
 -----------------------
 - Have a ncurses based UI
   - Local cache for tree files
+
+Meta
+-----------------------
+- Have Debian packages

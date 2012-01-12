@@ -122,7 +122,7 @@ void RuntimeConfig::load()
   File home;
 
   //this->tryToLoadFrom(SYSCONFDIR "/shaback/conf.d");
-  tryToLoadFrom("etc/shaback/conf.d");
+  //tryToLoadFrom("etc/shaback/conf.d");
 
   File localConfig(home, ".shaback.lua");
   if (localConfig.isFile()) {
