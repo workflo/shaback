@@ -13,5 +13,5 @@ addDir('/home')
 addExcludePattern('*~')
 -------------------------
 
-
-
+cryptoPassword('xyz')
+-------------------------
