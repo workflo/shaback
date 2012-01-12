@@ -25,7 +25,6 @@ Funny optimizations
 
 Config
 -----------------------
-- Search correct etc/shaback dir for config files
 - Allow different hashing algorithms (SHA-1, SHA-256)
 - Allow different encryption algorithms (Twofish, AES)
 - Lua:
