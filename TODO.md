@@ -1,5 +1,7 @@
 Restore
 -----------------------
+- Have a ncurses based UI
+  - Local cache for tree files
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
@@ -12,21 +14,16 @@ Backup
     - Research on VMDK
   - ACL
   - Write report file after backup
-- Store smaller files within tree file
 
 Garbage collection
 -----------------------
 - FSCK
 - Cleanup (delete old index root files)
 
-Funny optimizations
------------------------
-- Sort dir entries by inode
-
 Config
 -----------------------
-- Allow different hashing algorithms (SHA-1, SHA-256)
 - Allow different encryption algorithms (Twofish, AES)
+- Allow different hashing algorithms (SHA-1, SHA-256)
 - Lua:
   - Determine hostname
   - system()
@@ -34,11 +31,12 @@ Config
   - backupError hook
   - send email
 
-Restore GUI
------------------------
-- Have a ncurses based UI
-  - Local cache for tree files
-
 Meta
 -----------------------
 - Have Debian packages
+
+Funny optimizations
+-----------------------
+- Backup: Sort dir entries by inode
+- Backup: Store smaller files within tree file
+- Restore files in the order of their storage directories (i.e. SHA-1 digests)
