@@ -44,7 +44,7 @@ Sets the password used to encrypt and decrypt backup data.
 backupName(name)
 -------------------------
 
-Sets the name of this backup set. The name is reflected in the suffix of the index file name created in your `<REPO_DIR>/index` directory.
+Sets the name of this backup set. The name is reflected in the suffix of the index file name created in your `<REPO_DIR>/index/` directory.
 
     backupName('myBackupName')
 

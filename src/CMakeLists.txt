@@ -10,13 +10,6 @@ find_package(OpenSSL REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
 
-# Erst ab cmake 2.8.5:
-if (CMAKE_VERSION VERSION_GREATER "2.8.4")
-  include (GNUInstallDirs)
-else (CMAKE_VERSION VERSION_GREATER "2.8.4")
-  set (CMAKE_INSTALL_SYSCONFDIR "/etc")
-endif (CMAKE_VERSION VERSION_GREATER "2.8.4")
-
 ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
@@ -37,7 +30,7 @@ add_executable(shaback
 
 target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} shabacklib)
 
-install(DIRECTORY etc/shaback DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
 install(PROGRAMS shaback DESTINATION bin)
 
 # configure a header file to pass some of the CMake settings
