@@ -58,9 +58,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
     static struct option long_options[] = { { "debug", no_argument, 0, 'd' }, { "verbose", no_argument, 0, 'v' }, {
         "totals", no_argument, 0, 't' }, { "config", required_argument, 0, 'c' }, { "repository", required_argument, 0,
         'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { "name",
-        required_argument, 0, 'n' }, { "help", no_argument, 0, 'h' }, { 0, 0, 0, 0 } };
+        required_argument, 0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, {
+        "compression", required_argument, 0, 'C' }, { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -314,6 +315,7 @@ void RuntimeConfig::finalize()
   locksDir = File(repoDir, "locks");
   cacheDir = File(repoDir, "cache");
   repoPropertiesFile = File(repoDir, "repo.properties");
+  passwordCheckFile = File(repoDir, "password");
 }
 
 bool RuntimeConfig::excludeFile(File& file)

@@ -51,12 +51,24 @@ void showUsage(string& op)
     printf("usage: shaback show [<general_options>] [-p <pw> | --password=<pw>] <id>\n\n");
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
   } else if (op == "init") {
-    printf("usage: shaback init [<general_options>] [-f | --force]\n\n"
+    printf("usage: shaback init [<general_options>] [-f | --force]\n"
+      "                      [-E <enc> | --encryption=<enc>] [-p <pw> | --password=<pw>]\n\n"
       "\tCreates a new repository at the location specified in one of the config files\n"
       "\tor via the --repository option. Defaults to the current working directory.\n\n"
       "Options:\n"
       "\t-f, --force\n"
-      "\t    Force creation even if the destination directory is not empty.\n\n");
+      "\t    Force creation even if the destination directory is not empty.\n\n"
+      "\t-E=<enc>, --encryption=<enc>\n"
+      "\t    Enable encryption for this repository. You cannot alter this setting\n"
+      "\t    after the repository has been created!\n"
+      "\t    Be sure to specify a password via the --password option (see below).\n"
+      "\t    <enc> must be one of: `None' or `Blowfish'. Defaults to `None'.\n\n"
+      "\t-C=<comp>, --compression=<comp>\n"
+      "\t    Enable data compression for this repository. You cannot alter this setting\n"
+      "\t    after the repository has been created!\n"
+      "\t    <comp> must be one of: `None' or `Deflate'. Defaults to `Deflate'.\n\n"
+      "\t-p <pw>, --password=<pw>\n"
+      "\t    If encryption is enabled, this specifies the password to be used.\n\n");
   } else if (op == "deflate") {
     printf("usage: shaback deflate\n\n");
   } else if (op == "inflate") {

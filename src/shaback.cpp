@@ -113,6 +113,10 @@ void Shaback::createRepository()
     os.write(repoProperties.data(), repoProperties.size());
   }
 
+  if (!config.passwordCheckFile.isFile()) {
+
+  }
+
   cout << "Repository created: " << config.repository << endl;
 }
 

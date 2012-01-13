@@ -58,7 +58,19 @@ public:
     File locksDir;
     File cacheDir;
     File repoDir;
+
+    /**
+     * This (.properties) file contains basic settings like the selected
+     * compression and encrytion algorithms.
+     */
     File repoPropertiesFile;
+
+    /**
+     * If encryption is enabled, this file contains the encrypted
+     * (and optionally deflated) SHA-256 digest of the chosen password.
+     * This way shaback can check whether the given password is correct.
+     */
+    File passwordCheckFile;
     
     bool excludeFile(File& file);
     
