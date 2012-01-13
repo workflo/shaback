@@ -5,6 +5,7 @@ Restore
 
 Backup
 -----------------------
+- Automatically exclude cache file and repository from backup
 - Pinuts:
   - lock/unlock
   - Split large files
@@ -26,6 +27,7 @@ Config
 - Allow different hashing algorithms (SHA-1, SHA-256)
 - Allow different encryption algorithms (Twofish, AES)
 - Lua:
+  - setDirs()
   - Determine hostname
   - system()
   - postBackup hook: write report, rsync repository, send email etc.
