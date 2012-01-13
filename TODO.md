@@ -26,7 +26,6 @@ Config
 - Allow different encryption algorithms (Twofish, AES)
 - Allow different hashing algorithms (SHA-1, SHA-256)
 - Lua:
-  - setDirs()
   - Determine hostname
   - system()
   - postBackup hook: write report, rsync repository, send email etc.

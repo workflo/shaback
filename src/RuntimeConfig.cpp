@@ -216,6 +216,14 @@ static int l_addDir(lua_State *L)
   return 0;
 }
 
+static int l_clearDirs(lua_State *L)
+{
+  RuntimeConfig* config = getRuntimeConfig(L, 1);
+  config->dirs.clear();
+
+  return 0;
+}
+
 static int l_addExcludePattern(lua_State *L)
 {
   const char* pattern = lua_tostring(L, 1);
@@ -278,6 +286,9 @@ void RuntimeConfig::initLua()
 
   lua_pushcfunction(this->luaState, l_addDir);
   lua_setglobal(this->luaState, "addDir");
+
+  lua_pushcfunction(this->luaState, l_clearDirs);
+  lua_setglobal(this->luaState, "clearDirs");
 
   lua_pushcfunction(this->luaState, l_addExcludePattern);
   lua_setglobal(this->luaState, "addExcludePattern");

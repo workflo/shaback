@@ -27,6 +27,11 @@ Adds a directory to the list of source directories to be backed up.
     addDir('/home')
     addDir('/Users')
 
+clearDirs()
+-------------------------
+
+Clears the list of directories to be backed up.
+
 addExcludePattern(pattern)
 -------------------------
 
