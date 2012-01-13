@@ -1,11 +1,14 @@
 Restore
 -----------------------
+- Have a ncurses based UI
+  - Local cache for tree files
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
 Backup
 -----------------------
 - Automatically exclude cache file and repository from backup
+- Check password: REPO_DIR/password contains an encrypted/deflated version of the SHA hash of the password
 - Pinuts:
   - lock/unlock
   - Split large files
@@ -18,14 +21,10 @@ Garbage collection
 - FSCK
 - Cleanup (delete old index root files)
 
-Funny optimizations
------------------------
-- Sort dir entries by inode
-
 Config
 -----------------------
-- Allow different hashing algorithms (SHA-1, SHA-256)
 - Allow different encryption algorithms (Twofish, AES)
+- Allow different hashing algorithms (SHA-1, SHA-256)
 - Lua:
   - setDirs()
   - Determine hostname
@@ -34,7 +33,12 @@ Config
   - backupError hook
   - send email
 
-Restore GUI
+Meta
 -----------------------
-- Have a ncurses based UI
-  - Local cache for tree files
+- Have Debian packages
+
+Funny optimizations
+-----------------------
+- Backup: Sort dir entries by inode
+- Backup: Store smaller files within tree file
+- Restore files in the order of their storage directories (i.e. SHA-1 digests)

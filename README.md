@@ -1,7 +1,7 @@
 Synopsis
 ===========================
 
-Shaback is a backup tool for unixish server and client systems. Shaback stores all data in a designated repository directory. Each repository can be used to store backups of an arbitrary number of hosts and file sets. The way the data is stored ensures that storing duplicates is strictly avoided and each file content is stored only once.
+Shaback is a backup tool for unixish systems. The name 'shaback' is a composition of *SHA* (because it depends on the usage of SHA-1 hash digests) and *Backup*. Shaback stores all data in a designated repository directory. Each repository can be used to store backups of an arbitrary number of hosts and file sets. The way the data is stored ensures that storing duplicates is strictly avoided and each file content is stored only once.
 
 How it's used
 ===========================
@@ -63,6 +63,11 @@ Go to the directory where you want the restored file to be stored and start rest
 Using data encryption
 ---------------------------
 
+To enable encryption of backup data you need to edit your `<REPO_DIR>/repo.properties` file right after creating the repository:
+
+    encryption = Blowfish
+
+Be sure to pass the correct(!) password via the `--password` option or set it in your `.shaback.lua` [config file](https://github.com/workflo/shaback/blob/master/CONFIG.md).
 
 How it works
 ===========================
