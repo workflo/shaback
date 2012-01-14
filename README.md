@@ -39,12 +39,14 @@ The following listing is a typical example of a simple `~/.shaback.lua` config f
 
     oneFileSystem(true)
 
+    clearDirs()
     addDir('/home')
 
     addExcludePattern('*~')
     addExcludePattern('*/*.tmp')
 
     backupName('alderaan')
+    cryptoPassword('MySecretShabackPassword')
 
 See [CONFIG.md](https://github.com/workflo/shaback/blob/master/CONFIG.md) for a complete list of config options and their explanations.
 
