@@ -432,9 +432,31 @@ int Repository::compressionByName(string name)
   }
 }
 
+string Repository::compressionToName(int compression)
+{
+  switch(compression) {
+    case COMPRESSION_DEFLATE:
+      return "Deflate";
+    default:
+      return "None";
+  }
+}
+
+string Repository::encryptionToName(int encryption)
+{
+  switch(encryption) {
+    case ENCRYPTION_BLOWFISH:
+      return "Blowfish";
+    default:
+      return "None";
+  }
+}
+
 string Repository::hashPassword(string password)
 {
   Sha256 sha;
+  string salt(PASSWORDFILE_SALT);
+  sha.update(salt);
   sha.update(password);
   sha.finalize();
   return sha.toString();

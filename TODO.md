@@ -8,7 +8,7 @@ Restore
 Backup
 -----------------------
 - Automatically exclude cache file and repository from backup
-- Check password: REPO_DIR/password contains an encrypted/deflated version of the SHA hash of the password
+- File: Make paths absolute
 - Pinuts:
   - lock/unlock
   - Split large files

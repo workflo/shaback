@@ -101,6 +101,16 @@ class Repository
      */
     static std::string hashPassword(std::string password);
 
+    /**
+     * Maps the internal compression algorithm's number to a human-readable name.
+     */
+    static std::string compressionToName(int compression);
+
+    /**
+     * Maps the internal encryption algorithm's number to a human-readable name.
+     */
+    static std::string encryptionToName(int encryption);
+
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
@@ -124,5 +134,7 @@ class Repository
 
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2
+
+#define PASSWORDFILE_SALT "This salt makes the hashed password useless for decryption"
 
 #endif // SHABACK_Repository_H

@@ -19,7 +19,13 @@ The first thing to do is create a repository where all data will be stored. A re
 
     shaback init -r <REPO_DIR>
 
-After the repository has been created, you are encouraged to have a look at the newly created file `<REPO_DIR>/repo.properties`. There you can chose whether to use data compression (Deflate) and/or encryption (Blowfish). This selection **must** be done before the first backup is actually done.
+This creates an empty repository with "Deflate" data compression and no encyption. 
+You can pass the `--compression` option to select a different data compression algorithm. Currently only `Deflate` and `None` are available.
+You can pass the `--encryption` option to enable data encryption. Currently only `Blowfish` and `None` are available. If you chose to use data encryption here you must also provide a password via the `--password` option.
+
+Example:
+
+   shaback init -r <REPO_DIR> --encryption=Blowfish --compression=Deflate --password=<pw>
 
 Config file
 ---------------------------
@@ -59,15 +65,6 @@ To recover directories from the repository you need to know either the backup ID
 Go to the directory where you want the restored file to be stored and start restoring:
 
     shaback restore <ID or index_file>
-
-Using data encryption
----------------------------
-
-To enable encryption of backup data you need to edit your `<REPO_DIR>/repo.properties` file right after creating the repository:
-
-    encryption = Blowfish
-
-Be sure to pass the correct(!) password via the `--password` option or set it in your `.shaback.lua` [config file](https://github.com/workflo/shaback/blob/master/CONFIG.md).
 
 How it works
 ===========================
