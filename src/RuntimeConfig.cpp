@@ -33,6 +33,7 @@ extern "C" {
 
 #include "RuntimeConfig.h"
 #include "ShabackConfig.h"
+#include "Repository.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
 
@@ -47,6 +48,8 @@ RuntimeConfig::RuntimeConfig()
   showTotals = false;
   help = false;
   force = false;
+  init_compressionAlgorithm = COMPRESSION_DEFLATE;
+  init_encryptionAlgorithm = ENCRYPTION_NONE;
   backupName = "noname";
   initLua();
 }
@@ -100,6 +103,14 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'p':
         cryptoPassword = optarg;
+        break;
+
+      case 'E':
+        init_encryptionAlgorithm = Repository::encryptionByName(optarg);
+        break;
+
+      case 'C':
+        init_compressionAlgorithm = Repository::compressionByName(optarg);
         break;
 
       default:

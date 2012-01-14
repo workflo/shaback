@@ -20,13 +20,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "shaback.h"
-#include "RuntimeConfig.h"
 #include "lib/DeflateOutputStream.h"
 #include "lib/StandardOutputStream.h"
 #include "lib/FileOutputStream.h"
 #include "lib/DeflateInputStream.h"
 #include "lib/StandardInputStream.h"
+
+#include "shaback.h"
+#include "RuntimeConfig.h"
 
 using namespace std;
 
@@ -113,8 +114,12 @@ void Shaback::createRepository()
     os.write(repoProperties.data(), repoProperties.size());
   }
 
-  if (!config.passwordCheckFile.isFile()) {
-
+  if (config.init_encryptionAlgorithm != ENCRYPTION_NONE && !config.passwordCheckFile.isFile()) {
+    // Create "password" file:
+    string hash = Repository::hashPassword(config.cryptoPassword);
+    FileOutputStream os(config.passwordCheckFile);
+    os.write(hash.data(), hash.size());
+    os.close();
   }
 
   cout << "Repository created: " << config.repository << endl;

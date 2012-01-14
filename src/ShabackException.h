@@ -38,4 +38,10 @@ class GarbageCollectionException : public Exception
   public:
     GarbageCollectionException(std::string msg);
 };
+
+class PasswordException : public Exception
+{
+  public:
+    PasswordException(std::string msg);
+};
 #endif // SHABACK_ShabackException_H

@@ -31,6 +31,7 @@
 #include "lib/StandardOutputStream.h"
 #include "lib/Properties.h"
 #include "lib/Sha1.h"
+#include "lib/Sha256.h"
 
 #include "Repository.h"
 #include "BackupRun.h"
@@ -68,32 +69,31 @@ void Repository::open()
   props.load(config.repoPropertiesFile);
 
   string hashAlgorithm = props.getProperty("digest");
-  string compressionAlgorithm = props.getProperty("compression");
-  string encryptionAlgorithm = props.getProperty("encryption");
 
-  if (compressionAlgorithm == "Deflate") {
-    this->compressionAlgorithm = COMPRESSION_DEFLATE;
-  } else if (compressionAlgorithm == "None" || compressionAlgorithm.empty()) {
-    this->compressionAlgorithm = COMPRESSION_NONE;
-  } else {
-    throw UnsupportedCompressionAlgorithm(compressionAlgorithm);
-  }
+  compressionAlgorithm = compressionByName(props.getProperty("compression"));
+  encryptionAlgorithm = encryptionByName(props.getProperty("encryption"));
 
-  if (encryptionAlgorithm == "Blowfish") {
-    this->encryptionAlgorithm = ENCRYPTION_BLOWFISH;
-  } else if (encryptionAlgorithm == "AES") {
-    this->encryptionAlgorithm = ENCRYPTION_AES;
-  } else if (encryptionAlgorithm == "DES") {
-    this->encryptionAlgorithm = ENCRYPTION_DES;
-  } else if (encryptionAlgorithm == "None" || encryptionAlgorithm.empty()) {
-    this->encryptionAlgorithm = ENCRYPTION_NONE;
-  } else {
-    throw UnsupportedEncryptionAlgorithm(encryptionAlgorithm);
-  }
-
-  if (this->encryptionAlgorithm != ENCRYPTION_NONE) {
+  if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
+    checkPassword();
+  }
+}
+
+void Repository::checkPassword()
+{
+  FileInputStream in(config.passwordCheckFile);
+  string hashFromFile;
+  string hashFromPassword = hashPassword(config.cryptoPassword);
+
+  if (in.readAll(hashFromFile)) {
+    if (hashFromFile == hashFromPassword) {
+      // Passwords match!
+    } else {
+      throw PasswordException(string("Wrong password provided for repository ").append(config.repoDir.path));
+    }
+  } else {
+    throw PasswordException(string("Password file does not contain hashed password: ").append(config.passwordCheckFile.path));
   }
 }
 
@@ -150,7 +150,7 @@ File Repository::hashValueToFile(string hashValue)
 bool Repository::contains(string& hashValue)
 {
   return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
-//  return hashValueToFile(hashValue).isFile();
+  //  return hashValueToFile(hashValue).isFile();
 }
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
@@ -160,7 +160,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   sha1.finalize();
   string hashValue = sha1.toString();
 
-//  cerr << hashValue << ":\n" << treeFile << "\n--------------------" << endl;
+  //  cerr << hashValue << ":\n" << treeFile << "\n--------------------" << endl;
 
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
@@ -402,4 +402,40 @@ void Repository::gc()
   open();
   GarbageCollection gc(config, *this);
   gc.run();
+}
+
+int Repository::encryptionByName(string name)
+{
+  if (name == "Blowfish") {
+    return ENCRYPTION_BLOWFISH;
+    //  } else if (name == "Twofish") {
+    //    return ENCRYPTION_TWOFISH;
+    //  } else if (name == "AES") {
+    //    return ENCRYPTION_AES;
+    //  } else if (name == "DES") {
+    //    return ENCRYPTION_DES;
+  } else if (name == "None" || name.empty()) {
+    return ENCRYPTION_NONE;
+  } else {
+    throw UnsupportedEncryptionAlgorithm(name);
+  }
+}
+
+int Repository::compressionByName(string name)
+{
+  if (name == "Deflate") {
+    return COMPRESSION_DEFLATE;
+  } else if (name == "None" || name.empty()) {
+    return COMPRESSION_NONE;
+  } else {
+    throw UnsupportedCompressionAlgorithm(name);
+  }
+}
+
+string Repository::hashPassword(string password)
+{
+  Sha256 sha;
+  sha.update(password);
+  sha.finalize();
+  return sha.toString();
 }

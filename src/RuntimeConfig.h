@@ -29,7 +29,7 @@ extern "C" {
 
 class RuntimeConfig
 {
-public:
+  public:
     RuntimeConfig();
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
@@ -49,10 +49,20 @@ public:
     lua_State* luaState;
     std::vector<std::string> excludePatterns;
     std::vector<std::string> splitPatterns;
+
+    /** List of directories to be backed up. */
     std::vector<std::string> dirs;
     std::vector<std::string> cliArgs;
+
+    /** Clear-text password when using an encryted repository. */
     std::string cryptoPassword;
-    
+
+    /** Encryption algorithm to be used when creating a new repository. */
+    int init_encryptionAlgorithm;
+
+    /** Compression algorithm to be used when creating a new repository. */
+    int init_compressionAlgorithm;
+
     File filesDir;
     File indexDir;
     File locksDir;
@@ -71,12 +81,12 @@ public:
      * This way shaback can check whether the given password is correct.
      */
     File passwordCheckFile;
-    
+
     bool excludeFile(File& file);
-    
+
     void finalize();
 
- protected:
+  protected:
     void initLua();
     void tryToLoadFrom(std::string dir);
 };

@@ -37,3 +37,8 @@ GarbageCollectionException::GarbageCollectionException(string msg) :
   Exception(msg)
 {
 }
+
+PasswordException::PasswordException(string msg) :
+  Exception(msg)
+{
+}

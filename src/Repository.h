@@ -80,6 +80,27 @@ class Repository
 
     Cache cache;
 
+    /**
+     * Maps the given name of an encryption algorithm to its respective
+     * constant.
+     *
+     * @throws UnsupportedEncryptionAlgorithm If the given algorithm is not known.
+     */
+    static int encryptionByName(std::string name);
+
+    /**
+     * Maps the given name of a compression algorithm to its respective
+     * constant.
+     *
+     * @throws UnsupportedCompressionAlgorithm If the given algorithm is not known.
+     */
+    static int compressionByName(std::string name);
+
+    /**
+     * Returns the hash digest for the given password as a hex string.
+     */
+    static std::string hashPassword(std::string password);
+
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
@@ -89,6 +110,7 @@ class Repository
 
     void restoreByRootFile(File& rootFile);
     void restoreByTreeId(std::string& treeId);
+    void checkPassword();
 };
 
 #define COMPRESSION_NONE    0
@@ -96,8 +118,9 @@ class Repository
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_BLOWFISH 1
-#define ENCRYPTION_AES      2
-#define ENCRYPTION_DES      3
+//#define ENCRYPTION_TWOFISH  2
+//#define ENCRYPTION_AES      3
+//#define ENCRYPTION_DES      4
 
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2
