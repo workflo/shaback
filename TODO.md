@@ -8,7 +8,6 @@ Restore
 Backup
 -----------------------
 - Automatically exclude cache file and repository from backup
-- File: Make paths absolute
 - Pinuts:
   - lock/unlock
   - Split large files
@@ -18,6 +17,8 @@ Backup
 
 Garbage collection
 -----------------------
+- Delete old cache files
+- Export new complete cache file
 - FSCK
 - Cleanup (delete old index root files)
 

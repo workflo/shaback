@@ -68,6 +68,17 @@ class RuntimeConfig
     File locksDir;
     File cacheDir;
     File repoDir;
+    bool haveExclusiveLock;
+    
+    /**
+     * Out non-exclusive lock file.
+     */
+    File lockFile;
+    
+    /**
+     * The globally exclusive lock file.
+     */
+    File exclusiveLockFile;
 
     /**
      * This (.properties) file contains basic settings like the selected

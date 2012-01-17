@@ -33,7 +33,6 @@ using namespace std;
 GarbageCollection::GarbageCollection(RuntimeConfig& config, Repository& repository) :
   repository(repository), config(config), numErrors(0), tmpFilesDeleted(0), filesDeleted(0)
 {
-  repository.lock(true);
 }
 
 GarbageCollection::~GarbageCollection()
@@ -43,6 +42,7 @@ GarbageCollection::~GarbageCollection()
 
 void GarbageCollection::run()
 {
+  repository.lock(true);
   repository.open();
 
   if (config.localCacheFile.empty()) {

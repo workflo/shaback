@@ -99,14 +99,64 @@ void Repository::checkPassword()
 
 void Repository::lock(bool exclusive)
 {
-  //cout << "lock" << endl;
-  // TBI
+  // cout << "lock: " <<config.exclusiveLockFile.path << ", " << config.lockFile.path << endl;
+  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL | S_IRWXU | S_IROTH | S_IRGRP );
+  if (lockFileFh == -1)
+    throw Exception::errnoToException(config.lockFile.path);
+  
+  int ret = ::symlink(config.lockFile.fname.c_str(), config.exclusiveLockFile.path.c_str());
+  if (ret != 0) {
+    if (errno == EEXIST) {
+      throw LockingException(string("Repository is locked. Check lock files in ").append(config.locksDir.path));
+      // TODO: EPERM: symlinks not supported!
+    } else {
+      throw Exception::errnoToException(config.exclusiveLockFile.path);
+    }
+  }
+
+  if (exclusive) {
+    config.haveExclusiveLock = true;
+    // TODO: Look for other, non-exclusive locks
+  } else {
+    config.exclusiveLockFile.remove();
+  }
+  
+  /*
+        open(self.localLockFile, 'w', os.O_CREAT | os.O_EXCL)
+        try:
+            os.symlink(self.localLockFile, self.globalLockFile)
+        except OSError as err:
+            self.unlock()
+            if err.errno == 17:
+                self.error("Archive is locked. Unable to acquire global lock. Check lock files in `" + self.locksDir + "'.")
+            else:
+                raise err
+            sys.exit(2)
+
+        if keepGlobalLock:
+            self.keepGlobalLock = True
+            otherLocks = glob.glob(os.path.join(self.locksDir, '*.lock'))
+            if len(otherLocks) > 1:
+                self.unlock()
+                self.error("Non-exclusive locks exist. Check lock files in `" + self.locksDir + "'.")
+                for f in otherLocks:
+                    if f != self.localLockFile:
+                        self.error(" - " + f)
+                sys.exit(2)
+
+                
+        if not keepGlobalLock:
+            os.unlink(self.globalLockFile)
+            */
 }
 
 void Repository::unlock()
 {
   //cout << "unlock" << endl;
-  // TBI	
+  config.lockFile.remove();
+  if (config.haveExclusiveLock) {
+    config.exclusiveLockFile.remove();
+  }
 }
 
 void Repository::openCache()

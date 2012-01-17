@@ -44,4 +44,10 @@ class PasswordException : public Exception
   public:
     PasswordException(std::string msg);
 };
+
+class LockingException : public Exception
+{
+  public:
+    LockingException(std::string msg);
+};
 #endif // SHABACK_ShabackException_H

@@ -32,7 +32,6 @@ using namespace std;
 BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
   repository(repository), config(config)
 {
-  repository.lock();
   numFilesRead = 0;
   numFilesStored = 0;
   numBytesRead = 0;
@@ -47,6 +46,8 @@ BackupRun::~BackupRun()
 
 int BackupRun::run()
 {
+  repository.lock();
+
   if (config.dirs.empty()) {
     cerr << "No files to backup." << endl;
     return 5;

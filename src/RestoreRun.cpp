@@ -32,6 +32,7 @@ using namespace std;
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
   repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0)
 {
+  // TODO Move out of constructor!!
   repository.lock();
 }
 

@@ -48,6 +48,7 @@ RuntimeConfig::RuntimeConfig()
   showTotals = false;
   help = false;
   force = false;
+  haveExclusiveLock = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   backupName = "noname";
@@ -320,6 +321,9 @@ void RuntimeConfig::initLua()
 
 void RuntimeConfig::finalize()
 {
+  char pid[20];
+  sprintf(pid, "%u", getpid());
+  
   repoDir = File(repository);
   filesDir = File(repoDir, "files");
   indexDir = File(repoDir, "index");
@@ -327,6 +331,8 @@ void RuntimeConfig::finalize()
   cacheDir = File(repoDir, "cache");
   repoPropertiesFile = File(repoDir, "repo.properties");
   passwordCheckFile = File(repoDir, "password");
+  lockFile = File(locksDir, string(backupName).append("-").append(pid).append(".lock"));
+  exclusiveLockFile = File(locksDir, "lock");
 }
 
 bool RuntimeConfig::excludeFile(File& file)

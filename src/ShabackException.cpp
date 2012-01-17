@@ -42,3 +42,8 @@ PasswordException::PasswordException(string msg) :
   Exception(msg)
 {
 }
+
+LockingException::LockingException(string msg) :
+  Exception(msg)
+{
+}
