@@ -4,7 +4,7 @@ Dependencies
 Debian
 ------------------------------
 
-	sudo apt-get install cmake g++ libssl-dev libz-dev liblua5.1-dev liblzo2-dev
+	sudo apt-get install cmake g++ libssl-dev libz-dev liblua5.1-dev
 
 
 MacOS X
