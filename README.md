@@ -23,9 +23,9 @@ This creates an empty repository with "Deflate" data compression and no encyptio
 You can pass the `--compression` option to select a different data compression algorithm. Currently only `Deflate` and `None` are available.
 You can pass the `--encryption` option to enable data encryption. Currently only `Blowfish` and `None` are available. If you chose to use data encryption here you must also provide a password via the `--password` option.
 
-Example:
+**Example**
 
-   shaback init -r <REPO_DIR> --encryption=Blowfish --compression=Deflate --password=<pw>
+    shaback init -r <REPO_DIR> --encryption=Blowfish --compression=Deflate --password=<pw>
 
 Config file
 ---------------------------
@@ -39,12 +39,14 @@ The following listing is a typical example of a simple `~/.shaback.lua` config f
 
     oneFileSystem(true)
 
+    clearDirs()
     addDir('/home')
 
     addExcludePattern('*~')
     addExcludePattern('*/*.tmp')
 
     backupName('alderaan')
+    cryptoPassword('MySecretShabackPassword')
 
 See [CONFIG.md](https://github.com/workflo/shaback/blob/master/CONFIG.md) for a complete list of config options and their explanations.
 
