@@ -9,7 +9,7 @@ Debian
 
 MacOS X
 ------------------------------
-You need to install [MacPorts](http://www.macports.org/) first.
+You need to install XCode and [MacPorts](http://www.macports.org/) first.
 
 	sudo port install cmake lua gdbm openssl zlib
 
