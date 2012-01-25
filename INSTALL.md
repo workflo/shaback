@@ -11,10 +11,7 @@ MacOS X
 ------------------------------
 You need to install [MacPorts](http://www.macports.org/) first.
 
-	sudo port install cmake
-	sudo port install lua
-	sudo port install gdbm
-	sudo port install openssl
+	sudo port install cmake lua gdbm openssl zlib
 
 
 Build from source
