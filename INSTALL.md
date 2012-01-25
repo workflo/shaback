@@ -20,7 +20,7 @@ Build from source
 	cd src
 	cmake .
 	make
-	make install
+	sudo make install
 
 Windows
 ==============================
