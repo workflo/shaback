@@ -99,15 +99,14 @@ void Repository::checkPassword()
 
 void Repository::lock(bool exclusive)
 {
-  // cout << "lock: " <<config.exclusiveLockFile.path << ", " << config.lockFile.path << endl;
-  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL | S_IRWXU | S_IROTH | S_IRGRP );
+  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP );
   if (lockFileFh == -1)
     throw Exception::errnoToException(config.lockFile.path);
   
   int ret = ::symlink(config.lockFile.fname.c_str(), config.exclusiveLockFile.path.c_str());
   if (ret != 0) {
     if (errno == EEXIST) {
-      throw LockingException(string("Repository is locked. Check lock files in ").append(config.locksDir.path));
+      throw LockingException(string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
       // TODO: EPERM: symlinks not supported!
     } else {
       throw Exception::errnoToException(config.exclusiveLockFile.path);
@@ -116,7 +115,12 @@ void Repository::lock(bool exclusive)
 
   if (exclusive) {
     config.haveExclusiveLock = true;
-    // TODO: Look for other, non-exclusive locks
+
+    // Look for other, non-exclusive locks
+    vector<File> lockFiles = config.locksDir.listFiles("*.lock");
+    if (lockFiles.size() > 1) {
+      throw LockingException(string("Cannot exclusively lock repository while other locks exist. Check lock files in ").append(config.locksDir.path));
+    }
   } else {
     config.exclusiveLockFile.remove();
   }
@@ -152,7 +156,6 @@ void Repository::lock(bool exclusive)
 
 void Repository::unlock()
 {
-  //cout << "unlock" << endl;
   config.lockFile.remove();
   if (config.haveExclusiveLock) {
     config.exclusiveLockFile.remove();
@@ -510,4 +513,14 @@ string Repository::hashPassword(string password)
   sha.update(password);
   sha.finalize();
   return sha.toString();
+}
+
+void Repository::removeAllCacheFiles()
+{
+  vector<File> cacheFiles = config.cacheDir.listFiles("*.scache");
+
+  for (vector<File>::iterator it = cacheFiles.begin(); it < cacheFiles.end(); it++) {
+    File cacheFile(*it);
+    cacheFile.remove();
+  }
 }

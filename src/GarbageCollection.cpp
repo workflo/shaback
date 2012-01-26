@@ -64,7 +64,9 @@ void GarbageCollection::run()
     throw GarbageCollectionException(
         "There where errors. Bailing out, no harm has been done to archive! Use '--force' to override.");
 
+  repository.removeAllCacheFiles();
   removeUnusedFiles();
+  repository.exportCacheFile();
 
   showTotals();
 }
@@ -129,13 +131,13 @@ void GarbageCollection::removeUnusedFiles()
     sprintf(dirname, "%02x", level0);
     File dirLevel0(config.filesDir, dirname);
 
+    if (config.verbose)
+      cout << dirLevel0.path << endl;
+
     for (int level1 = 0; level1 <= 0xff; level1++) {
       sprintf(dirname, "%02x", level1);
       sprintf(idPrefix, "%02x%02x", level0, level1);
       File dirLevel1(dirLevel0, dirname);
-
-      if (config.verbose)
-        cout << dirLevel1.path << endl;
 
       vector<File> tmpFiles = dirLevel1.listFiles("*");
       for (vector<File>::iterator it = tmpFiles.begin(); it < tmpFiles.end(); it++) {

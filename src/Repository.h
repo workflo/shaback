@@ -72,13 +72,22 @@ class Repository
     std::string storeFile(BackupRun* run, File& srcFile);
     void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
+
+    /**
+     * Exports all hash digests from the local cache file into
+     * a new cache file in the repository's cache/ directory.
+     */
     void exportCacheFile();
+
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
     void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
     void openCache();
 
-    Cache cache;
+    /**
+     * Removes all files from the repository's cache/ directory.
+     */
+    void removeAllCacheFiles();
 
     /**
      * Maps the given name of an encryption algorithm to its respective
@@ -111,6 +120,8 @@ class Repository
      */
     static std::string encryptionToName(int encryption);
 
+    Cache cache;
+
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
@@ -135,6 +146,7 @@ class Repository
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2
 
+// Don't touch me!
 #define PASSWORDFILE_SALT "This salt makes the hashed password useless for decryption"
 
 #endif // SHABACK_Repository_H

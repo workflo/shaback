@@ -9,7 +9,6 @@ Backup
 -----------------------
 - Automatically exclude cache file and repository from backup
 - Pinuts:
-  - lock/unlock
   - Split large files
     - Research on VMDK
   - ACL
@@ -17,8 +16,6 @@ Backup
 
 Garbage collection
 -----------------------
-- Delete old cache files
-- Export new complete cache file
 - FSCK
 - Cleanup (delete old index root files)
 
