@@ -33,9 +33,10 @@
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
-#include "Repository.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
+#include "Repository.h"
+#include "RestoreGui.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
@@ -124,34 +125,6 @@ void Repository::lock(bool exclusive)
   } else {
     config.exclusiveLockFile.remove();
   }
-  
-  /*
-        open(self.localLockFile, 'w', os.O_CREAT | os.O_EXCL)
-        try:
-            os.symlink(self.localLockFile, self.globalLockFile)
-        except OSError as err:
-            self.unlock()
-            if err.errno == 17:
-                self.error("Archive is locked. Unable to acquire global lock. Check lock files in `" + self.locksDir + "'.")
-            else:
-                raise err
-            sys.exit(2)
-
-        if keepGlobalLock:
-            self.keepGlobalLock = True
-            otherLocks = glob.glob(os.path.join(self.locksDir, '*.lock'))
-            if len(otherLocks) > 1:
-                self.unlock()
-                self.error("Non-exclusive locks exist. Check lock files in `" + self.locksDir + "'.")
-                for f in otherLocks:
-                    if f != self.localLockFile:
-                        self.error(" - " + f)
-                sys.exit(2)
-
-                
-        if not keepGlobalLock:
-            os.unlink(self.globalLockFile)
-            */
 }
 
 void Repository::unlock()
@@ -376,23 +349,24 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
 void Repository::restore()
 {
-  if (config.cliArgs.empty()) {
-    throw RestoreException("Don't know what to restore.");
-  }
-
   open();
 
-  string treeSpec = config.cliArgs.at(0);
-
-  if (Digest::looksLikeDigest(treeSpec)) {
-    restoreByTreeId(treeSpec);
-  } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-    string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-    File rootFile(config.indexDir, fname);
-
-    restoreByRootFile(rootFile);
+  if (config.cliArgs.empty()) {
+    RestoreGui gui(config, *this);
+    gui.run();
   } else {
-    throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
+    string treeSpec = config.cliArgs.at(0);
+
+    if (Digest::looksLikeDigest(treeSpec)) {
+      restoreByTreeId(treeSpec);
+    } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
+      string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
+      File rootFile(config.indexDir, fname);
+
+      restoreByRootFile(rootFile);
+    } else {
+      throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
+    }
   }
 }
 
