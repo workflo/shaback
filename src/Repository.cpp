@@ -36,7 +36,6 @@
 #include "BackupRun.h"
 #include "GarbageCollection.h"
 #include "Repository.h"
-#include "RestoreGui.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
@@ -94,20 +93,22 @@ void Repository::checkPassword()
       throw PasswordException(string("Wrong password provided for repository ").append(config.repoDir.path));
     }
   } else {
-    throw PasswordException(string("Password file does not contain hashed password: ").append(config.passwordCheckFile.path));
+    throw PasswordException(
+        string("Password file does not contain hashed password: ").append(config.passwordCheckFile.path));
   }
 }
 
 void Repository::lock(bool exclusive)
 {
-  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP );
+  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP);
   if (lockFileFh == -1)
     throw Exception::errnoToException(config.lockFile.path);
-  
+
   int ret = ::symlink(config.lockFile.fname.c_str(), config.exclusiveLockFile.path.c_str());
   if (ret != 0) {
     if (errno == EEXIST) {
-      throw LockingException(string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
+      throw LockingException(
+          string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
       // TODO: EPERM: symlinks not supported!
     } else {
       throw Exception::errnoToException(config.exclusiveLockFile.path);
@@ -120,7 +121,9 @@ void Repository::lock(bool exclusive)
     // Look for other, non-exclusive locks
     vector<File> lockFiles = config.locksDir.listFiles("*.lock");
     if (lockFiles.size() > 1) {
-      throw LockingException(string("Cannot exclusively lock repository while other locks exist. Check lock files in ").append(config.locksDir.path));
+      throw LockingException(
+          string("Cannot exclusively lock repository while other locks exist. Check lock files in ").append(
+              config.locksDir.path));
     }
   } else {
     config.exclusiveLockFile.remove();
@@ -349,24 +352,23 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
 void Repository::restore()
 {
+  if (config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to restore.");
+  }
+
   open();
 
-  if (config.cliArgs.empty()) {
-    RestoreGui gui(config, *this);
-    gui.run();
+  string treeSpec = config.cliArgs.at(0);
+
+  if (Digest::looksLikeDigest(treeSpec)) {
+    restoreByTreeId(treeSpec);
+  } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
+    string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
+    File rootFile(config.indexDir, fname);
+
+    restoreByRootFile(rootFile);
   } else {
-    string treeSpec = config.cliArgs.at(0);
-
-    if (Digest::looksLikeDigest(treeSpec)) {
-      restoreByTreeId(treeSpec);
-    } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-      string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-      File rootFile(config.indexDir, fname);
-
-      restoreByRootFile(rootFile);
-    } else {
-      throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
-    }
+    throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
   }
 }
 
@@ -461,7 +463,7 @@ int Repository::compressionByName(string name)
 
 string Repository::compressionToName(int compression)
 {
-  switch(compression) {
+  switch (compression) {
     case COMPRESSION_DEFLATE:
       return "Deflate";
     default:
@@ -471,7 +473,7 @@ string Repository::compressionToName(int compression)
 
 string Repository::encryptionToName(int encryption)
 {
-  switch(encryption) {
+  switch (encryption) {
     case ENCRYPTION_BLOWFISH:
       return "Blowfish";
     default:

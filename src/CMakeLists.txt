@@ -9,7 +9,6 @@ find_package(ZLIB REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
-find_package(Curses REQUIRED)
 
 ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
@@ -20,7 +19,6 @@ add_executable(shaback
 		GarbageCollection.cpp
 		main.cpp 
 		Repository.cpp
-                RestoreGui.cpp
 		RestoreRun.cpp
 		RuntimeConfig.cpp 
 		shaback.cpp 
@@ -35,7 +33,6 @@ target_link_libraries(shaback
   ${OPENSSL_CRYPTO_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GDBM_LIBRARY}
-  ${CURSES_NCURSES_LIBRARY} ${FORM_LIBRARY} panel
   shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
