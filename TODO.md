@@ -8,7 +8,6 @@ Restore
 Backup
 -----------------------
 - Automatically exclude cache file and repository from backup
-- also backup files and directories specified on the command line
 - Pinuts:
   - Split large files
     - Research on VMDK

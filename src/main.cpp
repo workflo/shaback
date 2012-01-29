@@ -35,7 +35,23 @@ void showUsage(string& op)
 {
   if (op == "backup") {
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
-      "                      [-t | --totals] [-p <pw> | --password=<pw>]\n\n");
+      "                      [-t | --totals] [-p <pw> | --password=<pw>]\n"
+      "                      [<file> ...]\n\n"
+      "\tPerforms backup run. If no filenames are specified on the command line,\n"
+      "\tfiles and directories are backed up as specified in the config file\n"
+      "\tvia the addDir('<file>') command.\n\n"
+      "Options:\n"
+      "\t-n <name>, --name=<name>\n"
+      "\t    Specifies the backup set's name. The name will be reflected as the index\n"
+      "\t    file's name prefix.\n\n"
+      "\t-t, --totals\n"
+      "\t    Give summary report at the end of the backup run.\n\n"
+      "\t-p <pw>, --password=<pw>\n"
+      "\t    If encryption is enabled, this specifies the password to be used.\n\n"
+      "\t<file>...\n"
+      "\t    An arbitrary number of files and directories to be backed up.\n"
+      "\t    If no files are specified here, the directory list from the config\n"
+      "\t    file takes effect.\n\n");
   } else if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] <rootfile> | <dir-id>\n\n");

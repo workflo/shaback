@@ -48,7 +48,9 @@ int BackupRun::run()
 {
   repository.lock();
 
-  if (config.dirs.empty()) {
+  if (!config.cliArgs.empty()) {
+    config.dirs = config.cliArgs;
+  } else if (config.dirs.empty()) {
     cerr << "No files to backup." << endl;
     return 5;
   }
