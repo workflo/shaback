@@ -93,7 +93,16 @@ class RuntimeConfig
      */
     File passwordCheckFile;
 
+    /**
+     * Determines whether this file should be excluded from the backup set.
+     */
     bool excludeFile(File& file);
+
+    /**
+     * Determines whether this file should be split into blocks
+     * according to its name and size.
+     */
+    bool splitFile(File& file);
 
     void finalize();
 

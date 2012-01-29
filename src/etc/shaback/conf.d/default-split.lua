@@ -9,6 +9,3 @@ addSplitPattern('*/oradata/*.log')
 addSplitPattern('*.MYI')
 addSplitPattern('*.MYD')
 addSplitPattern('*/ibdata*')
-
--- CVS
-addSplitPattern('*,v')

@@ -127,6 +127,8 @@ class Repository
     int hashAlgorithm;
     int encryptionAlgorithm;
     int compressionAlgorithm;
+    int splitBlockSize;
+    int splitMinBlocks;
     Date startDate;
 
     void restoreByRootFile(File& rootFile);

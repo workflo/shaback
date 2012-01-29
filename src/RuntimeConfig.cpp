@@ -349,3 +349,18 @@ bool RuntimeConfig::excludeFile(File& file)
   }
   return false;
 }
+
+bool RuntimeConfig::splitFile(File& file)
+{
+  for (vector<string>::iterator it = splitPatterns.begin(); it < splitPatterns.end(); it++) {
+    string pattern(*it);
+#ifdef WIN32
+    // TODO: WIN32: fnmatch
+#else
+    if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
+      return true;
+    }
+#endif
+  }
+  return false;
+}

@@ -49,6 +49,7 @@ int BackupRun::run()
   repository.lock();
 
   if (!config.cliArgs.empty()) {
+    // Override backup set from files specified on the command line:
     config.dirs = config.cliArgs;
   } else if (config.dirs.empty()) {
     cerr << "No files to backup." << endl;

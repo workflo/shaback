@@ -45,7 +45,7 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-  config(config), cache(config.localCacheFile)
+  config(config), cache(config.localCacheFile), splitBlockSize(1024*1024), splitMinBlocks(5)
 {
 }
 
