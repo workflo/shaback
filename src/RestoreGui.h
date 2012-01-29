@@ -20,6 +20,7 @@
 #define SHABACK_RestoreGui_H
 
 #include <string>
+#include <dialog.h>
 #include "Repository.h"
 
 class RestoreGui

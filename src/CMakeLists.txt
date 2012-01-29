@@ -35,7 +35,7 @@ target_link_libraries(shaback
   ${OPENSSL_CRYPTO_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GDBM_LIBRARY}
-  ${CURSES_NCURSES_LIBRARY} ${FORM_LIBRARY} panel
+  ${CURSES_NCURSES_LIBRARY} ${FORM_LIBRARY} dialog
   shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
