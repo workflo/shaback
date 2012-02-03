@@ -45,11 +45,7 @@ void GarbageCollection::run()
   repository.lock(true);
   repository.open();
 
-  if (config.localCacheFile.empty()) {
-    throw GarbageCollectionException("A local cache file is needed for garbage collection.");
-  } else {
-    repository.openCache();
-  }
+  repository.openCache();
 
   vector<File> rootFiles = config.indexDir.listFiles("*.sroot");
 

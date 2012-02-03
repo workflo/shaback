@@ -40,7 +40,7 @@ class File
   public:
     File();
     File(std::string path);
-    File(File& parent, std::string filename);
+    File(File parent, std::string filename);
     ~File();
 
     /**

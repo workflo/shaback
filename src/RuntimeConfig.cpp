@@ -41,6 +41,7 @@ using namespace std;
 
 RuntimeConfig::RuntimeConfig()
 {
+  File tmpdir = File::tmpdir();
   repository = ".";
   verbose = false;
   debug = false;
@@ -52,7 +53,18 @@ RuntimeConfig::RuntimeConfig()
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   backupName = "noname";
+
+  char localCacheFileName[40];
+  sprintf(localCacheFileName, "shaback-read-cache-%d.gdbm", getpid());
+  localCacheFile = File(tmpdir, localCacheFileName);
+  cout << localCacheFile.path << endl;
+
   initLua();
+}
+
+RuntimeConfig::~RuntimeConfig()
+{
+  localCacheFile.remove();
 }
 
 void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)

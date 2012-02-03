@@ -51,9 +51,7 @@ Repository::Repository(RuntimeConfig& config) :
 
 Repository::~Repository()
 {
-  if (!config.localCacheFile.empty()) {
-    cache.close();
-  }
+  cache.close();
 }
 
 void Repository::open()
@@ -146,10 +144,8 @@ void Repository::openCache()
 int Repository::backup()
 {
   open();
-  if (!config.localCacheFile.empty()) {
-    openCache();
-    importCacheFile();
-  }
+  openCache();
+  importCacheFile();
 
   BackupRun run(config, *this);
   int rc = run.run();
@@ -158,9 +154,7 @@ int Repository::backup()
     run.showTotals();
   }
 
-  if (!config.localCacheFile.empty()) {
-    exportCacheFile();
-  }
+  exportCacheFile();
 
   return rc;
 }
@@ -179,7 +173,6 @@ File Repository::hashValueToFile(string hashValue)
 bool Repository::contains(string& hashValue)
 {
   return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
-  //  return hashValueToFile(hashValue).isFile();
 }
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)

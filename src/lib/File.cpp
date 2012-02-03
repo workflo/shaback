@@ -59,7 +59,7 @@ File::File(string path) :
   fname = path.substr(path.rfind("/") + 1);
 }
 
-File::File(File& parent, string filename) : initialized(false)
+File::File(File parent, string filename) : initialized(false)
 {
   path = parent.path;
   path.append("/").append(filename);

@@ -31,6 +31,7 @@ class RuntimeConfig
 {
   public:
     RuntimeConfig();
+    ~RuntimeConfig();
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
@@ -44,7 +45,7 @@ class RuntimeConfig
 
     std::string operation;
     std::string repository;
-    std::string localCacheFile;
+    File localCacheFile;
     std::string backupName;
     lua_State* luaState;
     std::vector<std::string> excludePatterns;
