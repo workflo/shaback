@@ -49,7 +49,15 @@ class RuntimeConfig
     std::string backupName;
     lua_State* luaState;
     std::vector<std::string> excludePatterns;
+
+    /** Filename/path patterns of files to be split into blocks. */
     std::vector<std::string> splitPatterns;
+
+    /** Split only files that are at least this size. */
+    long long splitFileMinSize;
+
+    /** Block size for splitting large files. */
+    int splitFileBlockSize;
 
     /** List of directories to be backed up. */
     std::vector<std::string> dirs;

@@ -53,6 +53,8 @@ RuntimeConfig::RuntimeConfig()
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   backupName = "noname";
+  splitFileBlockSize = 1024 * 1024 * 5;
+  splitFileMinSize = splitFileBlockSize * 5;
 
   char localCacheFileName[40];
   sprintf(localCacheFileName, "shaback-write-cache-%d.gdbm", getpid());
@@ -73,9 +75,9 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
     int option_index = 0;
     static struct option long_options[] = { { "debug", no_argument, 0, 'd' }, { "verbose", no_argument, 0, 'v' }, {
         "totals", no_argument, 0, 't' }, { "config", required_argument, 0, 'c' }, { "repository", required_argument, 0,
-        'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { "name",
-        required_argument, 0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, {
-        "compression", required_argument, 0, 'C' }, { 0, 0, 0, 0 } };
+        'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { "name", required_argument,
+        0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, { "compression",
+        required_argument, 0, 'C' }, { 0, 0, 0, 0 } };
 
     int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:", long_options, &option_index);
     if (c == -1)
@@ -170,7 +172,8 @@ void RuntimeConfig::loadConfigFile(std::string filename)
   int error = luaL_dofile (this->luaState, filename.c_str());
   if (error) {
     std::cerr << lua_tostring(this->luaState, -1) << std::endl;
-    lua_pop(this->luaState, 1); /* pop error message from the stack */
+    lua_pop(this->luaState, 1);
+    /* pop error message from the stack */
     exit(2);
   }
 }
@@ -334,7 +337,7 @@ void RuntimeConfig::finalize()
 {
   char pid[20];
   sprintf(pid, "%u", getpid());
-  
+
   repoDir = File(repository);
   filesDir = File(repoDir, "files");
   indexDir = File(repoDir, "index");
@@ -363,15 +366,18 @@ bool RuntimeConfig::excludeFile(File& file)
 
 bool RuntimeConfig::splitFile(File& file)
 {
-  for (vector<string>::iterator it = splitPatterns.begin(); it < splitPatterns.end(); it++) {
-    string pattern(*it);
+  if (file.getSize() >= splitFileMinSize) {
+    for (vector<string>::iterator it = splitPatterns.begin(); it < splitPatterns.end(); it++) {
+      string pattern(*it);
 #ifdef WIN32
-    // TODO: WIN32: fnmatch
+      // TODO: WIN32: fnmatch
 #else
-    if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
-      return true;
-    }
+      if (fnmatch(pattern.c_str(), file.path.c_str(), 0) == 0) {
+        return true;
+      }
 #endif
+    }
   }
+
   return false;
 }
