@@ -55,7 +55,7 @@ RuntimeConfig::RuntimeConfig()
   backupName = "noname";
 
   char localCacheFileName[40];
-  sprintf(localCacheFileName, "shaback-read-cache-%d.gdbm", getpid());
+  sprintf(localCacheFileName, "shaback-write-cache-%d.gdbm", getpid());
   localCacheFile = File(tmpdir, localCacheFileName);
   cout << localCacheFile.path << endl;
 
