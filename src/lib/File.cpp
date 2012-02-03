@@ -50,30 +50,7 @@ char File::separatorChar = '/';
 string File::separator = "/";
 #endif
 
-File::File() :
-  path(""), initialized(false)
-{
-  // TODO: Default constructor should point to CWD rather than $HOME
-  // TODO: Static method to retreive File object representing $HOME
-
-#ifdef WIN32
-  char tmpbuf[MAX_PATH];
-  DWORD size;
-
-  //if (GetCurrentDirectory(JAKELIB_MAX_PATH, tmpbuf) != 0)
-  //  properties->setProperty(`"user.dir"`, `""` .. tmpbuf);
-
-  size = MAX_PATH;
-  if (SHGetSpecialFolderPathA(NULL, tmpbuf, CSIDL_PERSONAL, false))
-  path = tmpbuf;
-#else
-  struct passwd *pw = getpwuid(getuid());
-  if (pw) {
-    path = pw->pw_dir;
-  }
-#endif
-  canonicalize();
-}
+File::File() : path("."), initialized(false) {}
 
 File::File(string path) :
   path(path), initialized(false)
@@ -92,6 +69,50 @@ File::File(File& parent, string filename) : initialized(false)
 
 File::~File()
 {
+}
+
+File File::home()
+{
+  string path;
+
+#ifdef WIN32
+  char tmpbuf[MAX_PATH];
+  DWORD size;
+
+  //if (GetCurrentDirectory(JAKELIB_MAX_PATH, tmpbuf) != 0)
+  //  properties->setProperty(`"user.dir"`, `""` .. tmpbuf);
+
+  size = MAX_PATH;
+  if (SHGetSpecialFolderPathA(NULL, tmpbuf, CSIDL_PERSONAL, false))
+  path = tmpbuf;
+#else
+  struct passwd *pw = getpwuid(getuid());
+  if (pw) {
+    path = pw->pw_dir;
+  }
+#endif
+
+  return File(path);
+}
+
+File File::tmpdir()
+{
+  string path;
+
+#ifdef WIN32
+
+  // TODO: File::tmpdir for WIN32
+
+#else
+
+  char* p = getenv("TMPDIR");
+  if (!p) p = getenv("TMP");
+  if (!p) p = getenv("TEMP");
+  if (!p) p = "/tmp";
+
+  return File(p);
+
+#endif
 }
 
 void File::assertInitialized()

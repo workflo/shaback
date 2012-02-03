@@ -133,7 +133,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
 void RuntimeConfig::load()
 {
-  File home;
+  File home = File::home();
 
   tryToLoadFrom(SHABACK_SYSCONFDIR "/shaback/conf.d");
 
@@ -213,8 +213,7 @@ static int l_localCache(lua_State *L)
 {
   const char* file = lua_tostring(L, 1);
 
-  RuntimeConfig* config = getRuntimeConfig(L, 2);
-  config->localCacheFile = file;
+  cerr << "Lua function localCache() is deprecated. Env vars TMPDIR, TMP, TEMP are used instead." << endl;
 
   return 0;
 }

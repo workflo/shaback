@@ -35,7 +35,6 @@ Shaback can be customized with config files written in [Lua](http://www.lua.org)
 The following listing is a typical example of a simple `~/.shaback.lua` config file:
 
     repository('/mnt/backup-medium')
-    localCache('/var/spool/shaback/cache.gdbm')
 
     oneFileSystem(true)
 
