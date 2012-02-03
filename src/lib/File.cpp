@@ -101,7 +101,7 @@ File File::tmpdir()
 
 #ifdef WIN32
 
-  // TODO: File::tmpdir for WIN32
+  // TODO: WIN32: File::tmpdir
 
 #else
 
@@ -355,8 +355,6 @@ void File::canonicalize()
   while ((pos = path.find("//")) != string::npos) {
     path.erase(pos, 1);
   }
-
-  // TODO: Remove "../"
 }
 
 void File::chmod(int mode)
