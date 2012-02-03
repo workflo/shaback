@@ -235,9 +235,10 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     in.reset();
 
     File destFile = hashValueToFile(hashValue);
+    bool split = config.splitFile(srcFile);
 
     if (config.verbose || config.debug) {
-      cout << "[m] " << srcFile.path << endl;
+      cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
       if (config.debug) {
         cout << "[f] " << destFile.path << endl;
       }
