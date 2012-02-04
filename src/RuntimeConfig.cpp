@@ -59,7 +59,6 @@ RuntimeConfig::RuntimeConfig()
   char localCacheFileName[40];
   sprintf(localCacheFileName, "shaback-write-cache-%d.gdbm", getpid());
   localCacheFile = File(tmpdir, localCacheFileName);
-  cout << localCacheFile.path << endl;
 
   initLua();
 }
