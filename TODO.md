@@ -7,6 +7,7 @@ Restore
 
 Backup
 -----------------------
+- Lazyly create second level directories in repository dir. Saves disk space for small repos.
 - Automatically exclude cache file and repository from backup
 - Pinuts:
   - Split large files
