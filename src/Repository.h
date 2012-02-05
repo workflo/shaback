@@ -24,6 +24,7 @@
 #include "RuntimeConfig.h"
 #include "Cache.h"
 #include "lib/Date.h"
+#include "ShabackOutputStream.h"
 #include "TreeFileEntry.h"
 
 class BackupRun;
@@ -147,6 +148,15 @@ class Repository
     void restoreByRootFile(File& rootFile);
     void restoreByTreeId(std::string& treeId);
     void checkPassword();
+
+  private:
+    /**
+     * Splits the input stream into chunks and stores them
+     * individually.
+     */
+    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
+
+    char* readBuffer;
 };
 
 #define COMPRESSION_NONE    0

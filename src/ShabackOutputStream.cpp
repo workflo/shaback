@@ -99,6 +99,11 @@ void ShabackOutputStream::write(string& s)
   write(s.data(), s.size());
 }
 
+void ShabackOutputStream::write(const char* s)
+{
+  write(s, strlen(s));
+}
+
 void ShabackOutputStream::write(const char* data, int numBytes)
 {
   outputStream->write(data, numBytes);

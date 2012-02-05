@@ -42,18 +42,22 @@
 #include "ShabackException.h"
 #include "TreeFile.h"
 
+#define READ_BUFFER_SIZE (1024 * 4)
+
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
     config(config), writeCache(config.writeCacheFile), splitBlockSize(1024 * 1024), splitMinBlocks(5), readCache(
         config.readCacheFile)
 {
+  readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
 {
   writeCache.close();
   readCache.close();
+  free(readBuffer);
 }
 
 void Repository::open()
@@ -214,9 +218,6 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   return sha1.toString();
 }
 
-#define READ_BUFFER_SIZE (1024 * 4)
-static char readBuffer[READ_BUFFER_SIZE];
-
 string Repository::storeFile(BackupRun* run, File& srcFile)
 {
   run->numFilesRead++;
@@ -245,8 +246,13 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   if (!contains(hashValue)) {
     in.reset();
 
+    // Split this file?
+    const bool split = config.splitFile(srcFile);
+    if (split) {
+      hashValue.append("_s");
+    }
+
     File destFile = hashValueToFile(hashValue);
-    bool split = config.splitFile(srcFile);
 
     if (config.verbose || config.debug) {
       cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
@@ -258,15 +264,19 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
     os.open(destFile);
 
-    while (true) {
-      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1)
-        break;
-      os.write(readBuffer, bytesRead);
+    if (split) {
+      storeSplitFile(run, hashValue, in, os);
+    } else {
+      while (true) {
+        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+        if (bytesRead == -1)
+          break;
+        os.write(readBuffer, bytesRead);
+        run->numBytesStored += bytesRead;
+      }
     }
 
     run->numFilesStored++;
-    run->numBytesStored += srcFile.getSize();
   } else {
     if (config.debug) {
       cout << "[ ] " << srcFile.path << endl;
@@ -276,6 +286,53 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
   writeCache.put(hashValue);
 
   return hashValue;
+}
+
+void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
+    ShabackOutputStream &blockFileOut)
+{
+  Sha1 totalSha1;
+
+  while (true) {
+    Sha1 blockSha1;
+    const int bytesRead = in.read(readBuffer, splitBlockSize);
+    if (bytesRead == -1)
+      break;
+
+    blockSha1.update(readBuffer, bytesRead);
+    blockSha1.finalize();
+    string blockHashValue = blockSha1.toString();
+
+    if (!contains(blockHashValue)) {
+      File blockDestFile = hashValueToFile(blockHashValue);
+
+      if (config.verbose || config.debug) {
+        cout << blockHashValue << endl;
+      }
+
+      ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
+      os.open(blockDestFile);
+
+      os.write(readBuffer, bytesRead);
+      os.close();
+
+      writeCache.put(blockHashValue);
+      run->numBytesStored += bytesRead;
+    }
+
+    blockFileOut.write(blockHashValue);
+    blockFileOut.write("\n");
+
+    totalSha1.update(readBuffer, bytesRead);
+  }
+
+  totalSha1.finalize();
+  string totalHashValue = totalSha1.toString();
+
+  if (fileHashValue.compare(0, totalHashValue.size(), totalHashValue) != 0) {
+    // TODO: throw exception if hash value has changed
+//    cerr << "File changed while being backed up: " << fileSha1.toString() << " <> " << fileHashValue << endl;
+  }
 }
 
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)

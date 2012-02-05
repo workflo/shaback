@@ -35,6 +35,7 @@ class ShabackOutputStream
     void close();
 
     void write(std::string& s);
+    void write(const char* s);
     void write(const char* data, int numBytes);
 
   private:

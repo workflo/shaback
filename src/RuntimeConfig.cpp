@@ -230,7 +230,7 @@ static int l_localCache(lua_State *L)
 {
   const char* file = lua_tostring(L, 1);
 
-  cerr << "Lua function localCache() is deprecated. Env vars TMPDIR, TMP, TEMP are used instead." << endl;
+  cerr << "Lua function localCache() is deprecated. Env vars SHABACK_TMP, TMPDIR, TMP, TEMP are used instead." << endl;
 
   return 0;
 }
