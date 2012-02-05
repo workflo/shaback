@@ -28,7 +28,7 @@ class RestoreRun
     RestoreRun(RuntimeConfig& config, Repository& Repository);
     ~RestoreRun();
 
-    void restore(std::string& treeId, File& destinationDir);
+    void restore(std::string& treeId, File& destinationDir, int depth = 0);
     void showTotals();
 
     off_t numBytesRestored;

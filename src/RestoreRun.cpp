@@ -41,17 +41,12 @@ RestoreRun::~RestoreRun()
   repository.unlock();
 }
 
-void RestoreRun::restore(string& treeId, File& destinationDir)
+void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 {
   //  if (config.verbose)
   //    cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
 
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
-
-  // Create parent directory:
-  if (!treeList.empty() && !treeList.at(0).parentDir.empty()) {
-    File(destinationDir, treeList.at(0).parentDir).mkdirs();
-  }
 
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
@@ -65,7 +60,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         if (config.verbose)
           cout << "[d] " << dir.path << endl;
         dir.mkdirs();
-        restore(entry.id, destinationDir);
+        restore(entry.id, destinationDir, depth +1);
 
         restoreMetaData(dir, entry);
         break;
@@ -77,6 +72,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
         if (config.verbose)
           cout << "[f] " << file.path << endl;
 
+        if (depth == 0)
+          file.getParent().mkdirs();
         file.remove();
 
         FileOutputStream out(file);
@@ -93,7 +90,12 @@ void RestoreRun::restore(string& treeId, File& destinationDir)
 
         if (config.verbose)
           cout << "[s] " << file.path << endl;
+
+        if (depth == 0)
+          file.getParent().mkdirs();
+
         repository.exportSymlink(entry, file);
+        numFilesRestored++;
         break;
       }
 
