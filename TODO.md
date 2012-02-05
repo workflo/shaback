@@ -7,11 +7,12 @@ Restore
 
 Backup
 -----------------------
+- Split large files:
+  - Garbage Collection
+  - Restore
 - Lazyly create second level directories in repository dir. Saves disk space for small repos.
 - Automatically exclude cache file and repository from backup
 - Pinuts:
-  - Split large files
-    - Research on VMDK
   - ACL
   - Write report file after backup
 
