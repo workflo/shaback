@@ -24,7 +24,7 @@
 using namespace std;
 
 Cache::Cache(File file) :
-  file(file), opened(false)
+    file(file), opened(false)
 {
 }
 
@@ -68,6 +68,24 @@ bool Cache::contains(string& key)
   } else {
     return false;
   }
+}
+
+string Cache::get(string& key)
+{
+  if (opened) {
+    datum k;
+    k.dptr = (char*) key.data();
+    k.dsize = key.length();
+    datum v = gdbm_fetch(gdbmFile, k);
+
+    if (v.dptr) {
+      string s(v.dptr, v.dsize);
+      free(v.dptr);
+      return s;
+    }
+  }
+
+  return "";
 }
 
 void Cache::put(string& key, string& value)

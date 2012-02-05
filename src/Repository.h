@@ -82,7 +82,16 @@ class Repository
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
     void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
-    void openCache();
+
+    /**
+     * Lazily creates a new write cache.
+     */
+    void openWriteCache();
+
+    /**
+     * Lazily opens the read cache.
+     */
+    void openReadCache();
 
     /**
      * Removes all files from the repository's cache/ directory.
@@ -120,7 +129,11 @@ class Repository
      */
     static std::string encryptionToName(int encryption);
 
-    Cache cache;
+    /** The temporary write cache. Used to speed up backup. */
+    Cache writeCache;
+
+    /** The (persistent) read cache. Used to speed up traversing tree files. */
+    Cache readCache;
 
   protected:
     RuntimeConfig config;

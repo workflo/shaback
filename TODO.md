@@ -17,7 +17,6 @@ Backup
 
 Garbage collection
 -----------------------
-- Local read cache to speed up loading tree files
 - FSCK
 - Cleanup (delete old index root files)
 

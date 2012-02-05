@@ -105,7 +105,8 @@ File File::tmpdir()
 
 #else
 
-  char* p = getenv("TMPDIR");
+  char* p = getenv("SHABACK_TMP");
+  if (!p) p = getenv("TMPDIR");
   if (!p) p = getenv("TMP");
   if (!p) p = getenv("TEMP");
   if (!p) p = "/tmp";

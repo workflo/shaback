@@ -45,7 +45,8 @@ void GarbageCollection::run()
   repository.lock(true);
   repository.open();
 
-  repository.openCache();
+  repository.openWriteCache();
+  repository.openReadCache();
 
   vector<File> rootFiles = config.indexDir.listFiles("*.sroot");
 
@@ -72,7 +73,7 @@ void GarbageCollection::processRootFile(File& rootFile)
   FileInputStream in(rootFile);
   string hashValue;
   if (in.readLine(hashValue)) {
-    repository.cache.put(hashValue);
+    repository.writeCache.put(hashValue);
     processTreeFile(hashValue);
   } else {
     throw GarbageCollectionException(string("Root index file is empty: ").append(rootFile.path));
@@ -87,12 +88,12 @@ void GarbageCollection::processTreeFile(std::string id)
       TreeFileEntry entry(*it);
       switch (entry.type) {
         case TREEFILEENTRY_DIRECTORY:
-          repository.cache.put(entry.id);
+          repository.writeCache.put(entry.id);
           processTreeFile(entry.id);
           break;
 
         case TREEFILEENTRY_FILE:
-          repository.cache.put(entry.id);
+          repository.writeCache.put(entry.id);
           break;
 
         case TREEFILEENTRY_SYMLINK:
@@ -149,12 +150,13 @@ void GarbageCollection::removeUnusedFiles()
               cout << "[d] " << f.path << endl;
             tmpFilesDeleted++;
           }
-        } else if (!repository.cache.contains(id)) {
+        } else if (!repository.writeCache.contains(id)) {
           // Delete unreferenced files:
           if (f.remove()) {
             if (config.debug)
               cout << "[d] " << f.path << endl;
             filesDeleted++;
+            repository.readCache.remove(id);
           }
         }
       }

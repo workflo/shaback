@@ -41,7 +41,6 @@ using namespace std;
 
 RuntimeConfig::RuntimeConfig()
 {
-  File tmpdir = File::tmpdir();
   repository = ".";
   verbose = false;
   debug = false;
@@ -56,16 +55,20 @@ RuntimeConfig::RuntimeConfig()
   splitFileBlockSize = 1024 * 1024 * 5;
   splitFileMinSize = splitFileBlockSize * 5;
 
-  char localCacheFileName[40];
-  sprintf(localCacheFileName, "shaback-write-cache-%d.gdbm", getpid());
-  localCacheFile = File(tmpdir, localCacheFileName);
+  // Temporary write cache:
+  char cacheFileName[40];
+  sprintf(cacheFileName, "shaback-write-cache-%d.gdbm", getpid());
+  writeCacheFile = File(File::tmpdir(), cacheFileName);
+
+  // Read cache:
+  readCacheFile = File(File::home(), ".shaback-read-cache.gdbm");
 
   initLua();
 }
 
 RuntimeConfig::~RuntimeConfig()
 {
-  localCacheFile.remove();
+  writeCacheFile.remove();
 }
 
 void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)

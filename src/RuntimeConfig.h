@@ -45,7 +45,13 @@ class RuntimeConfig
 
     std::string operation;
     std::string repository;
-    File localCacheFile;
+
+    /** The temporary write cache file. */
+    File writeCacheFile;
+
+    /** The persistent read cache file. */
+    File readCacheFile;
+
     std::string backupName;
     lua_State* luaState;
     std::vector<std::string> excludePatterns;

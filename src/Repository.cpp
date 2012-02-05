@@ -45,13 +45,15 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-  config(config), cache(config.localCacheFile), splitBlockSize(1024*1024), splitMinBlocks(5)
+    config(config), writeCache(config.writeCacheFile), splitBlockSize(1024 * 1024), splitMinBlocks(5), readCache(
+        config.readCacheFile)
 {
 }
 
 Repository::~Repository()
 {
-  cache.close();
+  writeCache.close();
+  readCache.close();
 }
 
 void Repository::open()
@@ -136,15 +138,24 @@ void Repository::unlock()
   }
 }
 
-void Repository::openCache()
+void Repository::openWriteCache()
 {
-  cache.open(GDBM_NEWDB);
+  writeCache.open(GDBM_NEWDB);
+}
+
+void Repository::openReadCache()
+{
+  try {
+    readCache.open(GDBM_WRCREAT);
+  } catch (Exception &ex) {
+    cerr << "Warning: Unable to open read cache file: " << ex.getMessage() << endl;
+  }
 }
 
 int Repository::backup()
 {
   open();
-  openCache();
+  openWriteCache();
   importCacheFile();
 
   BackupRun run(config, *this);
@@ -172,7 +183,7 @@ File Repository::hashValueToFile(string hashValue)
 
 bool Repository::contains(string& hashValue)
 {
-  return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
+  return writeCache.contains(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
@@ -198,7 +209,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
     run->numBytesStored += treeFile.size();
   }
 
-  cache.put(hashValue);
+  writeCache.put(hashValue);
 
   return sha1.toString();
 }
@@ -262,19 +273,28 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     }
   }
 
-  cache.put(hashValue);
+  writeCache.put(hashValue);
 
   return hashValue;
 }
 
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
-  File file = hashValueToFile(treeId);
-  ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
-  in.open(file);
-
   string content;
-  in.readAll(content);
+  bool fromCache;
+
+  if (readCache.contains(treeId)) {
+    content = readCache.get(treeId);
+//    cout << "----- Cache hit: " << treeId << endl << content << endl;
+    fromCache = true;
+  } else {
+    File file = hashValueToFile(treeId);
+    ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
+    in.open(file);
+
+    in.readAll(content);
+    fromCache = false;
+  }
 
   vector<TreeFileEntry> list;
   int from = 0;
@@ -298,6 +318,10 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
     from = until + 1;
   }
 
+  if (!fromCache) {
+    readCache.put(treeId, content);
+  }
+
   return list;
 }
 
@@ -309,7 +333,7 @@ void Repository::exportCacheFile()
   File file(config.cacheDir, filename);
   FileOutputStream os(file);
   BufferedWriter writer(&os);
-  cache.exportCache(writer);
+  writeCache.exportCache(writer);
 }
 
 void Repository::importCacheFile()
@@ -322,7 +346,7 @@ void Repository::importCacheFile()
       cout << "Preloading cache from: " << file.path << endl;
     FileInputStream is(file);
     BufferedReader reader(&is);
-    int count = cache.importCache(reader);
+    int count = writeCache.importCache(reader);
     if (config.verbose)
       cout << "Cache contains " << count << " entries." << endl;
   }
@@ -351,6 +375,7 @@ void Repository::restore()
   }
 
   open();
+  openReadCache();
 
   string treeSpec = config.cliArgs.at(0);
 
