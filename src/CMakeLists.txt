@@ -25,6 +25,7 @@ add_executable(shaback
 		ShabackException.cpp
 		ShabackInputStream.cpp
 		ShabackOutputStream.cpp
+		SplitFileIndexReader.cpp
 		TreeFileEntry.cpp
 		)
 
