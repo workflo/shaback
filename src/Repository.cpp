@@ -243,14 +243,14 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
   }
 
+  // Split this file?
+  const bool split = config.splitFile(srcFile);
+  if (split) {
+    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
+  }
+
   if (!contains(hashValue)) {
     in.reset();
-
-    // Split this file?
-    const bool split = config.splitFile(srcFile);
-    if (split) {
-      hashValue.append(SPLITFILE_ID_INDICATOR_STR);
-    }
 
     File destFile = hashValueToFile(hashValue);
 
@@ -314,6 +314,8 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     if (!contains(blockHashValue)) {
       File blockDestFile = hashValueToFile(blockHashValue);
 
+      // TODO: Use temp file and rename afterwards:
+
       ShabackOutputStream os = createOutputStream();
       os.open(blockDestFile);
 
@@ -348,7 +350,6 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 
   if (readCache.contains(treeId)) {
     content = readCache.get(treeId);
-//    cout << "----- Cache hit: " << treeId << endl << content << endl;
     fromCache = true;
   } else {
     File file = hashValueToFile(treeId);
