@@ -1,7 +1,8 @@
 Restore
 -----------------------
+- "show dir" command that uses read cache
+- Have a web GUI
 - Have a ncurses based UI
-  - Local cache for tree files
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
