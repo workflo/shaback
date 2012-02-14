@@ -25,6 +25,7 @@
 #include "Cache.h"
 #include "lib/Date.h"
 #include "ShabackOutputStream.h"
+#include "ShabackInputStream.h"
 #include "TreeFileEntry.h"
 
 class BackupRun;
@@ -100,6 +101,18 @@ class Repository
     void removeAllCacheFiles();
 
     /**
+     * Returns a new \c ShabackInputStream configured to read a file from this
+     * repository.
+     */
+    ShabackInputStream createInputStream();
+
+    /**
+     * Returns a new \c ShabackOutputStream configured to write a file to this
+     * repository.
+     */
+    ShabackOutputStream createOutputStream();
+
+    /**
      * Maps the given name of an encryption algorithm to its respective
      * constant.
      *
@@ -173,5 +186,8 @@ class Repository
 
 // Don't touch me!
 #define PASSWORDFILE_SALT "This salt makes the hashed password useless for decryption"
+
+#define SPLITFILE_ID_INDICATOR_STR "_s"
+#define SPLITFILE_ID_INDICATOR 's'
 
 #endif // SHABACK_Repository_H

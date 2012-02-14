@@ -18,13 +18,15 @@
 
 #include "SplitFileIndexReader.h"
 
-SplitFileIndexReader::SplitFileIndexReader()
-{
-  // TODO Auto-generated constructor stub
+using namespace std;
 
+SplitFileIndexReader::SplitFileIndexReader(Repository& repository, string id)
+: file(repository.hashValueToFile(id)), in(repository.createInputStream())
+{
+  in.open(file);
 }
 
 SplitFileIndexReader::~SplitFileIndexReader()
 {
-  // TODO Auto-generated destructor stub
+  in.close();
 }

@@ -39,6 +39,12 @@ class GarbageCollection
     void reportError(Exception& ex);
     void removeUnusedFiles();
 
+    /**
+     * Adds all blocks of a split file to the list
+     * of files to be kept.
+     */
+    void keepSplitFileBlocks(TreeFileEntry& entry);
+
     Repository& repository;
     RuntimeConfig& config;
     int numErrors;

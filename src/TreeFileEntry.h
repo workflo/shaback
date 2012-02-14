@@ -30,9 +30,16 @@ class TreeFileEntry
   public:
     TreeFileEntry(std::string& line, std::string& parentDir);
 
+    /** One of \c TREEFILEENTRY_FILE, \c TREEFILEENTRY_DIRECTORY or \c TREEFILEENTRY_SYMLINK. */
     char type;
+
+    /** The SHA-1 ID. */
     std::string id;
+
+    /** The name of the original file. */
     std::string filename;
+
+    /** The path of the original file. */
     std::string path;
     std::string parentDir;
     int fileMode;
@@ -41,6 +48,9 @@ class TreeFileEntry
     int mtime;
     int ctime;
     std::string symLinkDest;
+
+    /** Indicates whether this file is split into blocks. */
+    bool isSplitFile;
 };
 
 #endif // SHABACK_TreeFileEntry_H

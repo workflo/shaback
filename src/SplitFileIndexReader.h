@@ -19,11 +19,22 @@
 #ifndef SHABACK_SplitFileIndexReader_H
 #define SHABACK_SplitFileIndexReader_H
 
+#include <string>
+
+#include "lib/File.h"
+
+#include "Repository.h"
+#include "ShabackInputStream.h"
+
 class SplitFileIndexReader
 {
   public:
-    SplitFileIndexReader();
+    SplitFileIndexReader(Repository& repository, std::string id);
     virtual ~SplitFileIndexReader();
+
+  protected:
+    File file;
+    ShabackInputStream in;
 };
 
 #endif /* SHABACK_SplitFileIndexReader_H */
