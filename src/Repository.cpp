@@ -47,7 +47,7 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-    config(config), writeCache(config.writeCacheFile), splitBlockSize(1024 * 1024), splitMinBlocks(5), readCache(
+    config(config), writeCache(config.writeCacheFile), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(
         config.readCacheFile)
 {
   readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
@@ -206,7 +206,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
       cout << "[t] " << file.path << endl;
     }
 
-    ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os = createOutputStream();
     os.open(file);
     os.write(treeFile);
 
@@ -243,14 +243,14 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
   }
 
+  // Split this file?
+  const bool split = config.splitFile(srcFile);
+  if (split) {
+    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
+  }
+
   if (!contains(hashValue)) {
     in.reset();
-
-    // Split this file?
-    const bool split = config.splitFile(srcFile);
-    if (split) {
-      hashValue.append("_s");
-    }
 
     File destFile = hashValueToFile(hashValue);
 
@@ -261,7 +261,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
       }
     }
 
-    ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os = createOutputStream();
     os.open(destFile);
 
     if (split) {
@@ -292,6 +292,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     ShabackOutputStream &blockFileOut)
 {
   Sha1 totalSha1;
+  int blockCount = 0;
 
   while (true) {
     Sha1 blockSha1;
@@ -303,14 +304,19 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     blockSha1.finalize();
     string blockHashValue = blockSha1.toString();
 
+    blockCount ++;
+
+    if (config.verbose) {
+      printf("  Storing block: %8d", blockCount);
+      cout << "\r";
+    }
+
     if (!contains(blockHashValue)) {
       File blockDestFile = hashValueToFile(blockHashValue);
 
-      if (config.verbose || config.debug) {
-        cout << blockHashValue << endl;
-      }
+      // TODO: Use temp file and rename afterwards:
 
-      ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
+      ShabackOutputStream os = createOutputStream();
       os.open(blockDestFile);
 
       os.write(readBuffer, bytesRead);
@@ -325,6 +331,8 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
 
     totalSha1.update(readBuffer, bytesRead);
   }
+
+  if (config.verbose) cout << endl;
 
   totalSha1.finalize();
   string totalHashValue = totalSha1.toString();
@@ -345,7 +353,7 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
     fromCache = true;
   } else {
     File file = hashValueToFile(treeId);
-    ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
+    ShabackInputStream in = createInputStream();
     in.open(file);
 
     in.readAll(content);
@@ -472,7 +480,7 @@ void Repository::restoreByTreeId(string& treeId)
 void Repository::exportFile(string& id, OutputStream& out)
 {
   File inFile = hashValueToFile(id);
-  ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
+  ShabackInputStream in = createInputStream();
   in.open(inFile);
 
   in.copyTo(out);
@@ -574,4 +582,14 @@ void Repository::removeAllCacheFiles()
     File cacheFile(*it);
     cacheFile.remove();
   }
+}
+
+ShabackInputStream Repository::createInputStream()
+{
+  return ShabackInputStream(config, compressionAlgorithm, encryptionAlgorithm);
+}
+
+ShabackOutputStream Repository::createOutputStream()
+{
+  return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
 }

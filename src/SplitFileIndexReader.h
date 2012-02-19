@@ -16,40 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_GarbageCollection_H
-#define SHABACK_GarbageCollection_H
+#ifndef SHABACK_SplitFileIndexReader_H
+#define SHABACK_SplitFileIndexReader_H
 
 #include <string>
-#include "Repository.h"
-#include "lib/File.h"
-#include "lib/Exception.h"
 
-class GarbageCollection
+#include "lib/File.h"
+
+#include "Repository.h"
+#include "ShabackInputStream.h"
+
+class SplitFileIndexReader
 {
   public:
-    GarbageCollection(RuntimeConfig& config, Repository& Repository);
-    ~GarbageCollection();
-
-    void run();
-    void showTotals();
+    SplitFileIndexReader(Repository& repository, std::string id);
+    virtual ~SplitFileIndexReader();
 
   protected:
-    void processRootFile(File& rootFile);
-    void processTreeFile(std::string id);
-    void reportError(Exception& ex);
-    void removeUnusedFiles();
-
-    /**
-     * Adds all blocks of a split file to the list
-     * of files to be kept.
-     */
-    void keepSplitFileBlocks(TreeFileEntry& entry);
-
-    Repository& repository;
-    RuntimeConfig& config;
-    int numErrors;
-    int tmpFilesDeleted;
-    int filesDeleted;
+    File file;
+    ShabackInputStream in;
 };
 
-#endif // SHABACK_GarbageCollection_H
+#endif /* SHABACK_SplitFileIndexReader_H */

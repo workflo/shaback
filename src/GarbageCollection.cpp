@@ -27,6 +27,7 @@
 
 #include "GarbageCollection.h"
 #include "ShabackException.h"
+#include "SplitFileIndexReader.h"
 
 using namespace std;
 
@@ -53,9 +54,12 @@ void GarbageCollection::run()
   for (vector<File>::iterator it = rootFiles.begin(); it < rootFiles.end(); it++) {
     File rootFile(*it);
     if (config.verbose)
-      cout << "reading root file: " << rootFile.path << endl;
+      cout << "Reading root file: " << rootFile.path << "\r";
     processRootFile(rootFile);
   }
+
+  if (config.verbose)
+    cout << endl;
 
   if (numErrors > 0 && !config.force)
     throw GarbageCollectionException(
@@ -94,6 +98,9 @@ void GarbageCollection::processTreeFile(std::string id)
 
         case TREEFILEENTRY_FILE:
           repository.writeCache.put(entry.id);
+          if (entry.isSplitFile) {
+            keepSplitFileBlocks(entry);
+          }
           break;
 
         case TREEFILEENTRY_SYMLINK:
@@ -104,6 +111,11 @@ void GarbageCollection::processTreeFile(std::string id)
   } catch (Exception& ex) {
     reportError(ex);
   }
+}
+
+void GarbageCollection::keepSplitFileBlocks(TreeFileEntry& entry)
+{
+  SplitFileIndexReader reader(repository, entry.id);
 }
 
 void GarbageCollection::reportError(Exception& ex)
@@ -129,7 +141,7 @@ void GarbageCollection::removeUnusedFiles()
     File dirLevel0(config.filesDir, dirname);
 
     if (config.verbose)
-      cout << dirLevel0.path << endl;
+      cout << "Removing garbage from: " << dirLevel0.path << "\r";
 
     for (int level1 = 0; level1 <= 0xff; level1++) {
       sprintf(dirname, "%02x", level1);
@@ -162,4 +174,6 @@ void GarbageCollection::removeUnusedFiles()
       }
     }
   }
+  if (config.verbose)
+    cout << endl;
 }
