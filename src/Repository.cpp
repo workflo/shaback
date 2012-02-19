@@ -342,7 +342,6 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 
   if (readCache.contains(treeId)) {
     content = readCache.get(treeId);
-//    cout << "----- Cache hit: " << treeId << endl << content << endl;
     fromCache = true;
   } else {
     File file = hashValueToFile(treeId);
