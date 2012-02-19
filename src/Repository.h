@@ -82,6 +82,12 @@ class Repository
     void exportCacheFile();
 
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
+    void exportFile(TreeFileEntry& entry, OutputStream& out);
+
+    /**
+     * Reads the backup file represented by the given ID to the given
+     * \c OutputStream.
+     */
     void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
 

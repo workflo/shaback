@@ -115,7 +115,6 @@ void GarbageCollection::processTreeFile(std::string id)
 
 void GarbageCollection::keepSplitFileBlocks(TreeFileEntry& entry)
 {
-  cout << "keepSplitFileBlocks for " << entry.path << endl;
   SplitFileIndexReader reader(repository, entry.id);
   string hashValue;
 

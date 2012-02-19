@@ -40,6 +40,7 @@
 #include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
 #include "ShabackException.h"
+#include "SplitFileIndexReader.h"
 #include "TreeFile.h"
 
 #define READ_BUFFER_SIZE (1024 * 4)
@@ -196,8 +197,6 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   sha1.update(treeFile);
   sha1.finalize();
   string hashValue = sha1.toString();
-
-  //  cerr << hashValue << ":\n" << treeFile << "\n--------------------" << endl;
 
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
@@ -472,6 +471,23 @@ void Repository::restoreByTreeId(string& treeId)
 
   if (config.showTotals) {
     run.showTotals();
+  }
+}
+
+void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
+{
+  if (entry.isSplitFile) {
+    SplitFileIndexReader reader(*this, entry.id);
+    string hashValue;
+    while (reader.next(hashValue)) {
+      ShabackInputStream in = createInputStream();
+      File blockFile = hashValueToFile(hashValue);
+      in.open(blockFile);
+      in.copyTo(out);
+    }
+    out.close();
+  } else {
+    exportFile(entry.id, out);
   }
 }
 
