@@ -30,7 +30,7 @@
 using namespace std;
 
 BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config)
+    repository(repository), config(config)
 {
   numFilesRead = 0;
   numFilesStored = 0;
@@ -90,7 +90,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
 {
   string treeFile(TREEFILE_HEADER);
   treeFile.append("\n").append(dir.path).append("\n");
-  
+
   if (!skipChildren) {
     vector<File> files = dir.listFiles("*");
 
@@ -105,8 +105,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
           treeFile.append(handleSymlink(child, false));
         } else if (child.isDir()) {
           treeFile.append(
-              handleDirectory(child, false,
-                  (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev())));
+              handleDirectory(child, false, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev())));
         } else if (child.isFile()) {
           treeFile.append(handleFile(child, false));
         } else {
@@ -152,8 +151,14 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
-      file.getPosixMtime(), file.getPosixCtime());
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
+      file.getPosixMtime(), file.getPosixCtime(),
+#ifdef __APPLE__
+      (intmax_t) file.getSize()
+#else
+      file.getSize()
+#endif
+      );
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
@@ -182,17 +187,17 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
 void BackupRun::showTotals()
 {
   printf("Files inspected:  %12d\n", numFilesRead);
-  #ifdef __APPLE__
+#ifdef __APPLE__
   printf("Bytes inspected:  %12jd\n", (intmax_t) numBytesRead);
-  #else
+#else
   printf("Bytes inspected:  %12jd\n", numBytesRead);
-  #endif
+#endif
   printf("Files stored:     %12d\n", numFilesStored);
-  #ifdef __APPLE__
+#ifdef __APPLE__
   printf("Bytes stored:     %12jd\n", (intmax_t) numBytesStored);
-  #else
+#else
   printf("Bytes stored:     %12jd\n", numBytesStored);
-  #endif
+#endif
   printf("Errors:           %12d\n", numErrors);
 }
 

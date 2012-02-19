@@ -24,9 +24,20 @@ SplitFileIndexReader::SplitFileIndexReader(Repository& repository, string id)
 : file(repository.hashValueToFile(id)), in(repository.createInputStream())
 {
   in.open(file);
+  reader = new BufferedReader(&in);
 }
 
 SplitFileIndexReader::~SplitFileIndexReader()
 {
+  delete reader;
   in.close();
+}
+
+bool SplitFileIndexReader::next(string& hashValue)
+{
+  if (reader->readLine(hashValue)) {
+    return (hashValue.size() >= 20);
+  } else {
+    return false;
+  }
 }

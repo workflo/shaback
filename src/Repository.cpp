@@ -314,8 +314,6 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     if (!contains(blockHashValue)) {
       File blockDestFile = hashValueToFile(blockHashValue);
 
-      // TODO: Use temp file and rename afterwards:
-
       ShabackOutputStream os = createOutputStream();
       os.open(blockDestFile);
 

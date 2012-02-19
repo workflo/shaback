@@ -22,6 +22,7 @@
 #include <string>
 
 #include "lib/File.h"
+#include "lib/BufferedReader.h"
 
 #include "Repository.h"
 #include "ShabackInputStream.h"
@@ -32,9 +33,18 @@ class SplitFileIndexReader
     SplitFileIndexReader(Repository& repository, std::string id);
     virtual ~SplitFileIndexReader();
 
+    /**
+     * Tries to read the next hash value from the index file.
+     *
+     * @param hashValue Output parameter, will contains the next hash value if available.
+     * @return Whether a hash value could be loaded.
+     */
+    virtual bool next(std::string& hashValue);
+
   protected:
     File file;
     ShabackInputStream in;
+    BufferedReader* reader;
 };
 
 #endif /* SHABACK_SplitFileIndexReader_H */
