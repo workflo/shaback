@@ -91,4 +91,10 @@ class DeflateException : public Exception
     DeflateException(std::string msg);
 };
 
+class BzException : public Exception
+{
+  public:
+    BzException(std::string msg);
+};
+
 #endif // SHABACK_Exception_H

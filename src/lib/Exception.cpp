@@ -121,3 +121,8 @@ DeflateException::DeflateException(string msg) :
   Exception(msg)
 {
 }
+
+BzException::BzException(string msg) :
+  Exception(msg)
+{
+}
