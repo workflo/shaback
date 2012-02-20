@@ -180,7 +180,9 @@ class Repository
 
 #define COMPRESSION_NONE    0
 #define COMPRESSION_DEFLATE 1
-#define COMPRESSION_BZ      2
+#define COMPRESSION_BZ      10
+#define COMPRESSION_BZ_1    11
+#define COMPRESSION_BZ_9    12
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_BLOWFISH 1

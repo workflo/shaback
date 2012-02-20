@@ -16,35 +16,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_BzOutputStream_H
-#define SHABACK_BzOutputStream_H
+#ifndef SHABACK_BzInputStream_H
+#define SHABACK_BzInputStream_H
 
 #include <string.h>
 #include <bzlib.h>
-#include "OutputStream.h"
+#include "InputStream.h"
 
-#define BZ_CHUNK_SIZE (1024 * 16)
+#define BZ_CHUNK_SIZE (16 * 1024)
 
 /**
- * An OutputStream that performs BZ data compression.
+ * An InputStream that performs BZip data compression.
  *
- * @class BzOutputStream
+ * @class BzInputStream
  */
-class BzOutputStream: public OutputStream
+class BzInputStream: public InputStream
 {
   public:
-    BzOutputStream(OutputStream* out, int compressionLevel = 5);
-    ~BzOutputStream();
+    BzInputStream(InputStream* in);
+    ~BzInputStream();
 
-    void write(int b);
-    void write(const char* b, int len);
-    void finish();
+    int read();
+    int read(char* b, int len);
     void close();
 
+    void setBlocking(bool on)
+    {
+    }
+    ;
+
   protected:
-    OutputStream* out;
+    InputStream* in;
     bz_stream zipStream;
-    char* outputBuffer;
+    char readBuffer[BZ_CHUNK_SIZE];
     int ret;
 };
-#endif// SHABACK_BzOutputStream_H
+#endif// SHABACK_BzInputStream_H

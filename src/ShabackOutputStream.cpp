@@ -88,6 +88,16 @@ void ShabackOutputStream::open(File& file)
       outputStream = compressionOutputStream;
       break;
 
+    case COMPRESSION_BZ_1:
+      compressionOutputStream = new BzOutputStream(outputStream, 1);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_BZ_9:
+      compressionOutputStream = new BzOutputStream(outputStream, 9);
+      outputStream = compressionOutputStream;
+      break;
+
     case COMPRESSION_NONE:
       break;
   }

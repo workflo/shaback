@@ -20,7 +20,7 @@ The first thing to do is create a repository where all data will be stored. A re
     shaback init -r <REPO_DIR>
 
 This creates an empty repository with "Deflate" data compression and no encyption. 
-You can pass the `--compression` option to select a different data compression algorithm. Currently only `Deflate` and `None` are available.
+You can pass the `--compression` option to select a different data compression algorithm. Currently `BZip`, `BZip-1`, `BZip-9`, `Deflate` and `None` are supported.
 You can pass the `--encryption` option to enable data encryption. Currently only `Blowfish` and `None` are available. If you chose to use data encryption here you must also provide a password via the `--password` option.
 
 **Example**
