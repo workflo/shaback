@@ -32,7 +32,7 @@ BzInputStream::BzInputStream(InputStream* in)
   zipStream.opaque = 0;
 
   if ((ret = BZ2_bzDecompressInit(&zipStream, 0, 0)) != BZ_OK) {
-    throw BzException(string("BZ2_bzDecompressInit failed"));
+    throw BzException("BZ2_bzDecompressInit failed", ret);
   }
 
   zipStream.avail_in = 0;
@@ -70,7 +70,7 @@ int BzInputStream::read(char* b, int len)
   if (ret == BZ_STREAM_END && zipStream.avail_out == len) {
     return -1;
   } else if (ret < 0) {
-    throw BzException(string("BZ2_bzDecompress failed"));
+    throw BzException("BZ2_bzDecompress failed", ret);
   }
 
   return min(len, BZ_CHUNK_SIZE) - zipStream.avail_out;

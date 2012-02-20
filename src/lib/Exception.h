@@ -95,6 +95,7 @@ class BzException : public Exception
 {
   public:
     BzException(std::string msg);
+    BzException(std::string msg, int err);
 };
 
 #endif // SHABACK_Exception_H

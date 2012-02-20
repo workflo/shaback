@@ -32,7 +32,7 @@ BzOutputStream::BzOutputStream(OutputStream* out, int compressionLevel)
   zipStream.opaque = 0;
 
   if ((ret = BZ2_bzCompressInit(&zipStream, compressionLevel, 0, 0)) != BZ_OK) {
-    throw BzException(string("BZ2_bzCompressInit failed"));
+    throw BzException("BZ2_bzCompressInit failed", ret);
   }
 
   outputBuffer = (char*) malloc(BZ_CHUNK_SIZE);
@@ -62,13 +62,13 @@ void BzOutputStream::write(const char* b, int len)
   do {
     zipStream.avail_out = BZ_CHUNK_SIZE;
     zipStream.next_out = outputBuffer;
-      
+
     ret = BZ2_bzCompress(&zipStream, BZ_RUN);
     if (ret < 0) {
-      throw BzException(string("BZ2_bzCompress failed"));
+      throw BzException("BZ2_bzCompress failed", ret);
     }
     out->write((const char*) outputBuffer, BZ_CHUNK_SIZE - zipStream.avail_out);
-  } while (zipStream.avail_out == 0);
+  } while (zipStream.avail_out == 0 && zipStream.avail_in > 0);
 }
 
 
@@ -87,7 +87,7 @@ void BzOutputStream::finish()
      
     ret = BZ2_bzCompress(&zipStream, BZ_FINISH);
     if (ret < 0) {
-      throw BzException(string("BZ2_bzCompress failed"));
+      throw BzException("BZ2_bzCompress failed", ret);
     }
     out->write((const char*) outputBuffer, BZ_CHUNK_SIZE - zipStream.avail_out);
   } while (zipStream.avail_out == 0);
