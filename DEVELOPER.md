@@ -40,3 +40,13 @@ The file format is that of a standard Java(tm) properties file with the followin
 	digest = SHA1
 
 ## Tree index files
+
+
+Libraries used
+---------------------------
+
+- openssl: http://www.openssl.org/docs/
+- zlib: http://zlib.net/manual.html
+- bzip2: http://bzip.org/docs.html
+- GDBM: http://www.gnu.org.ua/software/gdbm/manual/gdbm.html
+- Lua: http://www.lua.org/manual/5.1/
