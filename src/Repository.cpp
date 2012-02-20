@@ -554,7 +554,7 @@ int Repository::compressionByName(string name)
   } else if (name == "BZ" || name == "Bz" || name == "BZip") {
     return COMPRESSION_BZ;
   } else if (name == "BZ1" || name == "Bz1" || name == "BZip-1" || name == "BZip1") {
-    return COMPRESSION_BZ_9;
+    return COMPRESSION_BZ_1;
   } else if (name == "BZ9" || name == "Bz9" || name == "BZip-9" || name == "BZip9") {
     return COMPRESSION_BZ_9;
   } else if (name == "None" || name.empty()) {
