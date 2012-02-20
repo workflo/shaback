@@ -4,14 +4,14 @@ Dependencies
 Debian
 ------------------------------
 
-	sudo apt-get install cmake g++ libssl-dev libz-dev liblua5.1-dev
+	sudo apt-get install cmake g++ libssl-dev libz-dev liblua5.1-dev libbz2-dev
 
 
 MacOS X
 ------------------------------
 You need to install XCode and [MacPorts](http://www.macports.org/) first.
 
-	sudo port install cmake lua gdbm openssl zlib
+	sudo port install cmake lua gdbm openssl zlib bzip2
 
 
 Build from source
