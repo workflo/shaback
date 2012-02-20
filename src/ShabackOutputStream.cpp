@@ -20,6 +20,7 @@
 #include <fcntl.h>
 
 #include "ShabackOutputStream.h"
+#include "lib/BzOutputStream.h"
 #include "lib/FileOutputStream.h"
 #include "lib/DeflateOutputStream.h"
 #include "lib/BlowfishOutputStream.h"
@@ -79,6 +80,11 @@ void ShabackOutputStream::open(File& file)
   switch (compressionAlgorithm) {
     case COMPRESSION_DEFLATE:
       compressionOutputStream = new DeflateOutputStream(outputStream);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_BZ:
+      compressionOutputStream = new BzOutputStream(outputStream);
       outputStream = compressionOutputStream;
       break;
 

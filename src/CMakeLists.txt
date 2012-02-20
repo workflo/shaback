@@ -6,6 +6,7 @@ set (CMAKE_VERBOSE_MAKEFILE true)
 
 cmake_minimum_required(VERSION 2.8)
 find_package(ZLIB REQUIRED)
+find_package(BZip2 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
@@ -34,6 +35,7 @@ target_link_libraries(shaback
   ${OPENSSL_CRYPTO_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GDBM_LIBRARY}
+  ${BZIP2_LIBRARIES}
   shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")

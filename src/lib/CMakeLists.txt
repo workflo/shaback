@@ -3,6 +3,7 @@ set(shaback_lib_SRCS
 		     BlowfishInputStream.cpp
 		     BufferedWriter.cpp
 		     BufferedReader.cpp
+                     BzOutputStream.cpp
 		     Date.cpp
 		     DeflateOutputStream.cpp
 		     DeflateInputStream.cpp

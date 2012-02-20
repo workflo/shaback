@@ -551,6 +551,8 @@ int Repository::compressionByName(string name)
 {
   if (name == "Deflate") {
     return COMPRESSION_DEFLATE;
+  } else if (name == "BZ" || name == "Bz") {
+    return COMPRESSION_BZ;
   } else if (name == "None" || name.empty()) {
     return COMPRESSION_NONE;
   } else {
@@ -563,6 +565,8 @@ string Repository::compressionToName(int compression)
   switch (compression) {
     case COMPRESSION_DEFLATE:
       return "Deflate";
+    case COMPRESSION_BZ:
+      return "BZ";
     default:
       return "None";
   }
