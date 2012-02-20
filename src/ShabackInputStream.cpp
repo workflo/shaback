@@ -78,9 +78,9 @@ void ShabackInputStream::open(File& file)
       inputStream = compressionInputStream;
       break;
 
-    case COMPRESSION_BZ:
-    case COMPRESSION_BZ_1:
-    case COMPRESSION_BZ_9:
+    case COMPRESSION_BZip5:
+    case COMPRESSION_BZip1:
+    case COMPRESSION_BZip9:
       compressionInputStream = new BzInputStream(inputStream);
       inputStream = compressionInputStream;
       break;

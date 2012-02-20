@@ -83,7 +83,7 @@ void showUsage(string& op)
       "\t    Enable data compression for this repository. You cannot alter this setting\n"
       "\t    after the repository has been created!\n"
       "\t    <comp> must be one of: `None', `BZip', `BZip-1', `BZip-9' or `Deflate'.\n"
-      "\t    Defaults to `BZip'.\n\n"
+      "\t    Defaults to `Deflate'.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n");
   } else if (op == "deflate") {

@@ -554,12 +554,12 @@ int Repository::compressionByName(string name)
 {
   if (name == "Deflate") {
     return COMPRESSION_DEFLATE;
-  } else if (name == "BZ" || name == "Bz" || name == "BZip") {
-    return COMPRESSION_BZ;
+  } else if (name == "BZ" || name == "Bz" || name == "BZip" || name == "BZip-5") {
+    return COMPRESSION_BZip5;
   } else if (name == "BZ1" || name == "Bz1" || name == "BZip-1" || name == "BZip1") {
-    return COMPRESSION_BZ_1;
+    return COMPRESSION_BZip1;
   } else if (name == "BZ9" || name == "Bz9" || name == "BZip-9" || name == "BZip9") {
-    return COMPRESSION_BZ_9;
+    return COMPRESSION_BZip9;
   } else if (name == "None" || name.empty()) {
     return COMPRESSION_NONE;
   } else {
@@ -572,11 +572,11 @@ string Repository::compressionToName(int compression)
   switch (compression) {
     case COMPRESSION_DEFLATE:
       return "Deflate";
-    case COMPRESSION_BZ:
+    case COMPRESSION_BZip5:
       return "BZip";
-    case COMPRESSION_BZ_1:
+    case COMPRESSION_BZip1:
       return "BZip-1";
-    case COMPRESSION_BZ_9:
+    case COMPRESSION_BZip9:
       return "BZip-9";
     default:
       return "None";

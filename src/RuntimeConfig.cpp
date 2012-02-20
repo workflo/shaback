@@ -49,7 +49,7 @@ RuntimeConfig::RuntimeConfig()
   help = false;
   force = false;
   haveExclusiveLock = false;
-  init_compressionAlgorithm = COMPRESSION_BZ;
+  init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   backupName = "noname";
   splitFileBlockSize = 1024 * 1024 * 5;
