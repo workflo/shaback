@@ -105,8 +105,15 @@ void ShabackOutputStream::open(File& file)
 
 void ShabackOutputStream::close()
 {
-  if (outputStream)
+  if (outputStream) {
     outputStream->close();
+    outputStream = 0;
+  }
+}
+
+void ShabackOutputStream::finish()
+{
+  close();
   tmpFile.move(file);
 }
 

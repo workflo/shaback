@@ -33,6 +33,7 @@ class ShabackOutputStream
 
     void open(File& file);
     void close();
+    void finish();
 
     void write(std::string& s);
     void write(const char* s);

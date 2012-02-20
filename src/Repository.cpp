@@ -208,6 +208,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
     ShabackOutputStream os = createOutputStream();
     os.open(file);
     os.write(treeFile);
+    os.finish();
 
     run->numBytesStored += treeFile.size();
   }
@@ -275,6 +276,8 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
       }
     }
 
+    os.finish();
+
     run->numFilesStored++;
   } else {
     if (config.debug) {
@@ -317,7 +320,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
       os.open(blockDestFile);
 
       os.write(readBuffer, bytesRead);
-      os.close();
+      os.finish();
 
       writeCache.put(blockHashValue);
       run->numBytesStored += bytesRead;
