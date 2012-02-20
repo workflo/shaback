@@ -32,7 +32,7 @@ You can pass the `--encryption` option to enable data encryption. Currently only
 Backing up a 3.3 GB disk image file takes...
 
 * 7m44s, 1.3 GB using BZip-9 compression
-* 7m54s, 1.3 GB using BZip(-5) compression
+* 7m01s, 1.3 GB using BZip(-5) compression
 * 6m50s, 1.3 GB using BZip-1 compression
 * 2m36s, 1.4 GB using Deflate compression
 
