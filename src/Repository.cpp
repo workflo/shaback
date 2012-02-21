@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -403,6 +404,8 @@ void Repository::exportCacheFile()
 void Repository::importCacheFile()
 {
   vector<File> files = config.cacheDir.listFiles("*.scache");
+
+  sort(files.begin(), files.end(), filePathComparator);
 
   if (!files.empty()) {
     File& file = files.back();

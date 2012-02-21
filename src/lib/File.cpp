@@ -389,3 +389,8 @@ void File::utime(int mtime)
   if (ret != 0)
     throw Exception::errnoToException(path);
 }
+
+bool filePathComparator(File a,File b)
+{
+  return (a.path < b.path);
+}

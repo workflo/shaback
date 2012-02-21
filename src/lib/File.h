@@ -168,5 +168,7 @@ class File
 #endif
 };
 
+bool filePathComparator(File a,File b);
+
 #endif // SHABACK_File_H
 
