@@ -20,12 +20,13 @@
 #include <fcntl.h>
 
 #include "ShabackOutputStream.h"
-#include "lib/BzOutputStream.h"
-#include "lib/FileOutputStream.h"
-#include "lib/DeflateOutputStream.h"
-#include "lib/BlowfishOutputStream.h"
 #include "lib/AesOutputStream.h"
+#include "lib/BlowfishOutputStream.h"
+#include "lib/BzOutputStream.h"
+#include "lib/DeflateOutputStream.h"
 #include "lib/Exception.h"
+#include "lib/FileOutputStream.h"
+#include "lib/LzmaOutputStream.h"
 #include "Repository.h"
 
 using namespace std;
@@ -95,6 +96,21 @@ void ShabackOutputStream::open(File& file)
 
     case COMPRESSION_BZip9:
       compressionOutputStream = new BzOutputStream(outputStream, 9);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_LZMA0:
+      compressionOutputStream = new LzmaOutputStream(outputStream, 0);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_LZMA5:
+      compressionOutputStream = new LzmaOutputStream(outputStream, 5);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_LZMA9:
+      compressionOutputStream = new LzmaOutputStream(outputStream, 9);
       outputStream = compressionOutputStream;
       break;
 

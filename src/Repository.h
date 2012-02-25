@@ -183,6 +183,9 @@ class Repository
 #define COMPRESSION_BZip5   10
 #define COMPRESSION_BZip1   11
 #define COMPRESSION_BZip9   12
+#define COMPRESSION_LZMA0   20
+#define COMPRESSION_LZMA5   21
+#define COMPRESSION_LZMA9   22
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_BLOWFISH 1

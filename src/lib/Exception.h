@@ -98,4 +98,11 @@ class BzException : public Exception
     BzException(std::string msg, int err);
 };
 
+class LzmaException : public Exception
+{
+  public:
+    LzmaException(std::string msg);
+    LzmaException(std::string msg, int err);
+};
+
 #endif // SHABACK_Exception_H

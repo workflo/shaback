@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string.h>
 #include <bzlib.h>
+#include <lzma.h>
 #ifdef WIN32
 # include <windows.h>
 #endif
@@ -154,3 +155,32 @@ BzException::BzException(string msg, int err)
     }
   }
 }
+
+LzmaException::LzmaException(string msg) :
+  Exception(msg)
+{
+}
+
+LzmaException::LzmaException(string msg, int err)
+{
+  switch (err) {
+    case LZMA_OPTIONS_ERROR:
+      this->msg = msg.append(": LZMA_OPTIONS_ERROR");
+      break;
+
+    case LZMA_MEM_ERROR:
+      this->msg = msg.append(": LZMA_MEM_ERROR");
+      break;
+
+    case LZMA_DATA_ERROR:
+      this->msg = msg.append(": LZMA_DATA_ERROR");
+      break;
+
+    default: {
+      char buf[10];
+      sprintf(buf, "%i", err);
+      this->msg = msg.append(": error code=").append(buf);
+    }
+  }
+}
+
