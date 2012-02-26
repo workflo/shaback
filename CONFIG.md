@@ -5,13 +5,6 @@ Tells shaback which repository to use.
 
     repository('/mnt/backup-medium')
 
-localCache(cachefile)
--------------------------
-
-Tells shaback where to store the local cache file.
-
-    localCache('/tmp/shaback-cache.gdbm')
-
 oneFileSystem(bool)
 -------------------------
 
@@ -38,6 +31,14 @@ addExcludePattern(pattern)
 Adds an exclude pattern. `*` and `?` can be used as globbing wildcards. (See `man fnmatch` for details.)
 
     addExcludePattern('*/*~')
+
+addSplitPattern(pattern)
+-------------------------
+
+Files matching one of the specified split patterns whoes size exceeds 25MB will be split into blocks of 5MB when stored.
+This option is most usefull for large binary files that are usually barely modified. 
+
+    addSplitPattern('*.vmdk')
 
 cryptoPassword(pw)
 -------------------------

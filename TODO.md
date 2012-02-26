@@ -2,14 +2,11 @@ Restore
 -----------------------
 - "show dir" command that uses read cache
 - Have a web GUI
-- Have a ncurses based UI
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
 Backup
 -----------------------
-- Split large files:
-  - Restore
 - Lazyly create second level directories in repository dir. Saves disk space for small repos.
 - Automatically exclude cache file and repository from backup
 - Pinuts:
