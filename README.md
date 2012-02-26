@@ -20,12 +20,21 @@ The first thing to do is create a repository where all data will be stored. A re
     shaback init -r <REPO_DIR>
 
 This creates an empty repository with "Deflate" data compression and no encyption. 
-You can pass the `--compression` option to select a different data compression algorithm. Currently only `Deflate` and `None` are available.
+You can pass the `--compression` option to select a different data compression algorithm. Currently `BZip`, `BZip-1`, `BZip-9`, `Deflate` and `None` are supported.
 You can pass the `--encryption` option to enable data encryption. Currently only `Blowfish` and `None` are available. If you chose to use data encryption here you must also provide a password via the `--password` option.
 
 **Example**
 
     shaback init -r <REPO_DIR> --encryption=Blowfish --compression=Deflate --password=<pw>
+
+**Comparing compression algorithms**
+
+Backing up a 3.3 GB disk image file takes...
+
+* 7m44s, 1.3 GB using BZip-9 compression
+* 7m01s, 1.3 GB using BZip(-5) compression
+* 6m50s, 1.3 GB using BZip-1 compression
+* 2m36s, 1.4 GB using Deflate compression
 
 Config file
 ---------------------------
@@ -35,7 +44,6 @@ Shaback can be customized with config files written in [Lua](http://www.lua.org)
 The following listing is a typical example of a simple `~/.shaback.lua` config file:
 
     repository('/mnt/backup-medium')
-    localCache('/var/spool/shaback/cache.gdbm')
 
     oneFileSystem(true)
 

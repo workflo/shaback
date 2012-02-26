@@ -1,16 +1,15 @@
 Restore
 -----------------------
-- Have a ncurses based UI
-  - Local cache for tree files
+- "show dir" command that uses read cache
+- Have a web GUI
 - Search for different versions of a given file (by name)
 - Build Knoppix with shaback
 
 Backup
 -----------------------
+- Lazyly create second level directories in repository dir. Saves disk space for small repos.
 - Automatically exclude cache file and repository from backup
 - Pinuts:
-  - Split large files
-    - Research on VMDK
   - ACL
   - Write report file after backup
 

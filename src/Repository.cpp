@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -33,27 +34,32 @@
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
-#include "Repository.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
+#include "Repository.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
 #include "ShabackOutputStream.h"
 #include "ShabackException.h"
+#include "SplitFileIndexReader.h"
 #include "TreeFile.h"
+
+#define READ_BUFFER_SIZE (1024 * 4)
 
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-  config(config), cache(config.localCacheFile)
+    config(config), writeCache(config.writeCacheFile), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(
+        config.readCacheFile)
 {
+  readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
 {
-  if (!config.localCacheFile.empty()) {
-    cache.close();
-  }
+  writeCache.close();
+  readCache.close();
+  free(readBuffer);
 }
 
 void Repository::open()
@@ -93,20 +99,22 @@ void Repository::checkPassword()
       throw PasswordException(string("Wrong password provided for repository ").append(config.repoDir.path));
     }
   } else {
-    throw PasswordException(string("Password file does not contain hashed password: ").append(config.passwordCheckFile.path));
+    throw PasswordException(
+        string("Password file does not contain hashed password: ").append(config.passwordCheckFile.path));
   }
 }
 
 void Repository::lock(bool exclusive)
 {
-  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP );
+  int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP);
   if (lockFileFh == -1)
     throw Exception::errnoToException(config.lockFile.path);
-  
+
   int ret = ::symlink(config.lockFile.fname.c_str(), config.exclusiveLockFile.path.c_str());
   if (ret != 0) {
     if (errno == EEXIST) {
-      throw LockingException(string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
+      throw LockingException(
+          string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
       // TODO: EPERM: symlinks not supported!
     } else {
       throw Exception::errnoToException(config.exclusiveLockFile.path);
@@ -119,39 +127,13 @@ void Repository::lock(bool exclusive)
     // Look for other, non-exclusive locks
     vector<File> lockFiles = config.locksDir.listFiles("*.lock");
     if (lockFiles.size() > 1) {
-      throw LockingException(string("Cannot exclusively lock repository while other locks exist. Check lock files in ").append(config.locksDir.path));
+      throw LockingException(
+          string("Cannot exclusively lock repository while other locks exist. Check lock files in ").append(
+              config.locksDir.path));
     }
   } else {
     config.exclusiveLockFile.remove();
   }
-  
-  /*
-        open(self.localLockFile, 'w', os.O_CREAT | os.O_EXCL)
-        try:
-            os.symlink(self.localLockFile, self.globalLockFile)
-        except OSError as err:
-            self.unlock()
-            if err.errno == 17:
-                self.error("Archive is locked. Unable to acquire global lock. Check lock files in `" + self.locksDir + "'.")
-            else:
-                raise err
-            sys.exit(2)
-
-        if keepGlobalLock:
-            self.keepGlobalLock = True
-            otherLocks = glob.glob(os.path.join(self.locksDir, '*.lock'))
-            if len(otherLocks) > 1:
-                self.unlock()
-                self.error("Non-exclusive locks exist. Check lock files in `" + self.locksDir + "'.")
-                for f in otherLocks:
-                    if f != self.localLockFile:
-                        self.error(" - " + f)
-                sys.exit(2)
-
-                
-        if not keepGlobalLock:
-            os.unlink(self.globalLockFile)
-            */
 }
 
 void Repository::unlock()
@@ -162,18 +144,25 @@ void Repository::unlock()
   }
 }
 
-void Repository::openCache()
+void Repository::openWriteCache()
 {
-  cache.open(GDBM_NEWDB);
+  writeCache.open(GDBM_NEWDB);
+}
+
+void Repository::openReadCache()
+{
+  try {
+    readCache.open(GDBM_WRCREAT);
+  } catch (Exception &ex) {
+    cerr << "Warning: Unable to open read cache file: " << ex.getMessage() << endl;
+  }
 }
 
 int Repository::backup()
 {
   open();
-  if (!config.localCacheFile.empty()) {
-    openCache();
-    importCacheFile();
-  }
+  openWriteCache();
+  importCacheFile();
 
   BackupRun run(config, *this);
   int rc = run.run();
@@ -182,9 +171,7 @@ int Repository::backup()
     run.showTotals();
   }
 
-  if (!config.localCacheFile.empty()) {
-    exportCacheFile();
-  }
+  exportCacheFile();
 
   return rc;
 }
@@ -202,8 +189,7 @@ File Repository::hashValueToFile(string hashValue)
 
 bool Repository::contains(string& hashValue)
 {
-  return cache.contains(hashValue) || hashValueToFile(hashValue).isFile();
-  //  return hashValueToFile(hashValue).isFile();
+  return writeCache.contains(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
@@ -213,8 +199,6 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   sha1.finalize();
   string hashValue = sha1.toString();
 
-  //  cerr << hashValue << ":\n" << treeFile << "\n--------------------" << endl;
-
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
 
@@ -222,20 +206,18 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
       cout << "[t] " << file.path << endl;
     }
 
-    ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os = createOutputStream();
     os.open(file);
     os.write(treeFile);
+    os.finish();
 
     run->numBytesStored += treeFile.size();
   }
 
-  cache.put(hashValue);
+  writeCache.put(hashValue);
 
   return sha1.toString();
 }
-
-#define READ_BUFFER_SIZE (1024 * 4)
-static char readBuffer[READ_BUFFER_SIZE];
 
 string Repository::storeFile(BackupRun* run, File& srcFile)
 {
@@ -262,49 +244,122 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
   }
 
+  // Split this file?
+  const bool split = config.splitFile(srcFile);
+  if (split) {
+    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
+  }
+
   if (!contains(hashValue)) {
     in.reset();
 
     File destFile = hashValueToFile(hashValue);
 
     if (config.verbose || config.debug) {
-      cout << "[m] " << srcFile.path << endl;
+      cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
       if (config.debug) {
         cout << "[f] " << destFile.path << endl;
       }
     }
 
-    ShabackOutputStream os(config, compressionAlgorithm, encryptionAlgorithm);
+    ShabackOutputStream os = createOutputStream();
     os.open(destFile);
 
-    while (true) {
-      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1)
-        break;
-      os.write(readBuffer, bytesRead);
+    if (split) {
+      storeSplitFile(run, hashValue, in, os);
+    } else {
+      while (true) {
+        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+        if (bytesRead == -1)
+          break;
+        os.write(readBuffer, bytesRead);
+        run->numBytesStored += bytesRead;
+      }
     }
 
+    os.finish();
+
     run->numFilesStored++;
-    run->numBytesStored += srcFile.getSize();
   } else {
     if (config.debug) {
       cout << "[ ] " << srcFile.path << endl;
     }
   }
 
-  cache.put(hashValue);
+  writeCache.put(hashValue);
 
   return hashValue;
 }
 
+void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
+    ShabackOutputStream &blockFileOut)
+{
+  Sha1 totalSha1;
+  int blockCount = 0;
+
+  while (true) {
+    Sha1 blockSha1;
+    const int bytesRead = in.read(readBuffer, splitBlockSize);
+    if (bytesRead == -1)
+      break;
+
+    blockSha1.update(readBuffer, bytesRead);
+    blockSha1.finalize();
+    string blockHashValue = blockSha1.toString();
+
+    blockCount ++;
+
+    if (config.verbose) {
+      printf("  Storing block: %8d", blockCount);
+      cout << "\r";
+    }
+
+    if (!contains(blockHashValue)) {
+      File blockDestFile = hashValueToFile(blockHashValue);
+
+      ShabackOutputStream os = createOutputStream();
+      os.open(blockDestFile);
+
+      os.write(readBuffer, bytesRead);
+      os.finish();
+
+      writeCache.put(blockHashValue);
+      run->numBytesStored += bytesRead;
+    }
+
+    blockFileOut.write(blockHashValue);
+    blockFileOut.write("\n");
+
+    totalSha1.update(readBuffer, bytesRead);
+  }
+
+  if (config.verbose) cout << endl;
+
+  totalSha1.finalize();
+  string totalHashValue = totalSha1.toString();
+
+  if (fileHashValue.compare(0, totalHashValue.size(), totalHashValue) != 0) {
+    // TODO: throw exception if hash value has changed
+//    cerr << "File changed while being backed up: " << fileSha1.toString() << " <> " << fileHashValue << endl;
+  }
+}
+
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
-  File file = hashValueToFile(treeId);
-  ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
-  in.open(file);
-
   string content;
-  in.readAll(content);
+  bool fromCache;
+
+  if (readCache.contains(treeId)) {
+    content = readCache.get(treeId);
+    fromCache = true;
+  } else {
+    File file = hashValueToFile(treeId);
+    ShabackInputStream in = createInputStream();
+    in.open(file);
+
+    in.readAll(content);
+    fromCache = false;
+  }
 
   vector<TreeFileEntry> list;
   int from = 0;
@@ -328,6 +383,10 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
     from = until + 1;
   }
 
+  if (!fromCache) {
+    readCache.put(treeId, content);
+  }
+
   return list;
 }
 
@@ -339,12 +398,14 @@ void Repository::exportCacheFile()
   File file(config.cacheDir, filename);
   FileOutputStream os(file);
   BufferedWriter writer(&os);
-  cache.exportCache(writer);
+  writeCache.exportCache(writer);
 }
 
 void Repository::importCacheFile()
 {
   vector<File> files = config.cacheDir.listFiles("*.scache");
+
+  sort(files.begin(), files.end(), filePathComparator);
 
   if (!files.empty()) {
     File& file = files.back();
@@ -352,7 +413,7 @@ void Repository::importCacheFile()
       cout << "Preloading cache from: " << file.path << endl;
     FileInputStream is(file);
     BufferedReader reader(&is);
-    int count = cache.importCache(reader);
+    int count = writeCache.importCache(reader);
     if (config.verbose)
       cout << "Cache contains " << count << " entries." << endl;
   }
@@ -381,6 +442,7 @@ void Repository::restore()
   }
 
   open();
+  openReadCache();
 
   string treeSpec = config.cliArgs.at(0);
 
@@ -418,10 +480,27 @@ void Repository::restoreByTreeId(string& treeId)
   }
 }
 
+void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
+{
+  if (entry.isSplitFile) {
+    SplitFileIndexReader reader(*this, entry.id);
+    string hashValue;
+    while (reader.next(hashValue)) {
+      ShabackInputStream in = createInputStream();
+      File blockFile = hashValueToFile(hashValue);
+      in.open(blockFile);
+      in.copyTo(out);
+    }
+    out.close();
+  } else {
+    exportFile(entry.id, out);
+  }
+}
+
 void Repository::exportFile(string& id, OutputStream& out)
 {
   File inFile = hashValueToFile(id);
-  ShabackInputStream in(config, compressionAlgorithm, encryptionAlgorithm);
+  ShabackInputStream in = createInputStream();
   in.open(inFile);
 
   in.copyTo(out);
@@ -478,6 +557,18 @@ int Repository::compressionByName(string name)
 {
   if (name == "Deflate") {
     return COMPRESSION_DEFLATE;
+  } else if (name == "BZ" || name == "Bz" || name == "BZip" || name == "BZip-5") {
+    return COMPRESSION_BZip5;
+  } else if (name == "BZ1" || name == "Bz1" || name == "BZip-1" || name == "BZip1") {
+    return COMPRESSION_BZip1;
+  } else if (name == "BZ9" || name == "Bz9" || name == "BZip-9" || name == "BZip9") {
+    return COMPRESSION_BZip9;
+  } else if (name == "LZMA0" || name == "LZMA-0" || name == "Lzma0" || name == "Lzma-0") {
+    return COMPRESSION_LZMA0;
+  } else if (name == "LZMA" || name == "LZMA-5" || name == "Lzma" || name == "Lzma-5") {
+    return COMPRESSION_LZMA5;
+  } else if (name == "LZMA9" || name == "LZMA-9" || name == "Lzma9" || name == "Lzma-9") {
+    return COMPRESSION_LZMA9;
   } else if (name == "None" || name.empty()) {
     return COMPRESSION_NONE;
   } else {
@@ -487,9 +578,21 @@ int Repository::compressionByName(string name)
 
 string Repository::compressionToName(int compression)
 {
-  switch(compression) {
+  switch (compression) {
     case COMPRESSION_DEFLATE:
       return "Deflate";
+    case COMPRESSION_BZip5:
+      return "BZip";
+    case COMPRESSION_BZip1:
+      return "BZip-1";
+    case COMPRESSION_BZip9:
+      return "BZip-9";
+    case COMPRESSION_LZMA0:
+      return "Lzma-0";
+    case COMPRESSION_LZMA5:
+      return "Lzma-5";
+    case COMPRESSION_LZMA9:
+      return "Lzma-9";
     default:
       return "None";
   }
@@ -497,7 +600,7 @@ string Repository::compressionToName(int compression)
 
 string Repository::encryptionToName(int encryption)
 {
-  switch(encryption) {
+  switch (encryption) {
     case ENCRYPTION_BLOWFISH:
       return "Blowfish";
     default:
@@ -523,4 +626,14 @@ void Repository::removeAllCacheFiles()
     File cacheFile(*it);
     cacheFile.remove();
   }
+}
+
+ShabackInputStream Repository::createInputStream()
+{
+  return ShabackInputStream(config, compressionAlgorithm, encryptionAlgorithm);
+}
+
+ShabackOutputStream Repository::createOutputStream()
+{
+  return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
 }

@@ -16,39 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_FileOutputStream_H
-#define SHABACK_FileOutputStream_H
+#include "SplitFileIndexReader.h"
 
-#include <string.h>
-#ifdef WIN32
-# include <windows.h>
-#endif
-#include "File.h"
-#include "OutputStream.h"
+using namespace std;
 
-/**
- * This classes allows a stream of data to be written to a disk file.
- *
- * @class FileOutputStream
- */
-class FileOutputStream: public OutputStream
+SplitFileIndexReader::SplitFileIndexReader(Repository& repository, string id)
+: file(repository.hashValueToFile(id)), in(repository.createInputStream())
 {
-  public:
-    FileOutputStream(File& file);
-    FileOutputStream(const char* filename);
-    FileOutputStream(std::string& filename);
-    ~FileOutputStream();
+  in.open(file);
+  reader = new BufferedReader(&in);
+}
 
-    void write(int b);
-    void write(const char* b, int len);
-    void close();
+SplitFileIndexReader::~SplitFileIndexReader()
+{
+  delete reader;
+  in.close();
+}
 
-  protected:
-#ifdef WIN32
-    HANDLE handle;
-#else
-    FILE* handle;
-#endif
-    void init(std::string& filename);
-};
-#endif // SHABACK_FileOutputStream_H
+bool SplitFileIndexReader::next(string& hashValue)
+{
+  if (reader->readLine(hashValue)) {
+    return (hashValue.size() >= 20);
+  } else {
+    return false;
+  }
+}

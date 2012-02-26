@@ -27,6 +27,7 @@
 
 #include "GarbageCollection.h"
 #include "ShabackException.h"
+#include "SplitFileIndexReader.h"
 
 using namespace std;
 
@@ -45,20 +46,20 @@ void GarbageCollection::run()
   repository.lock(true);
   repository.open();
 
-  if (config.localCacheFile.empty()) {
-    throw GarbageCollectionException("A local cache file is needed for garbage collection.");
-  } else {
-    repository.openCache();
-  }
+  repository.openWriteCache();
+  repository.openReadCache();
 
   vector<File> rootFiles = config.indexDir.listFiles("*.sroot");
 
   for (vector<File>::iterator it = rootFiles.begin(); it < rootFiles.end(); it++) {
     File rootFile(*it);
     if (config.verbose)
-      cout << "reading root file: " << rootFile.path << endl;
+      cout << "Reading root file: " << rootFile.path << "\r";
     processRootFile(rootFile);
   }
+
+  if (config.verbose)
+    cout << endl;
 
   if (numErrors > 0 && !config.force)
     throw GarbageCollectionException(
@@ -76,7 +77,7 @@ void GarbageCollection::processRootFile(File& rootFile)
   FileInputStream in(rootFile);
   string hashValue;
   if (in.readLine(hashValue)) {
-    repository.cache.put(hashValue);
+    repository.writeCache.put(hashValue);
     processTreeFile(hashValue);
   } else {
     throw GarbageCollectionException(string("Root index file is empty: ").append(rootFile.path));
@@ -91,12 +92,15 @@ void GarbageCollection::processTreeFile(std::string id)
       TreeFileEntry entry(*it);
       switch (entry.type) {
         case TREEFILEENTRY_DIRECTORY:
-          repository.cache.put(entry.id);
+          repository.writeCache.put(entry.id);
           processTreeFile(entry.id);
           break;
 
         case TREEFILEENTRY_FILE:
-          repository.cache.put(entry.id);
+          repository.writeCache.put(entry.id);
+          if (entry.isSplitFile) {
+            keepSplitFileBlocks(entry);
+          }
           break;
 
         case TREEFILEENTRY_SYMLINK:
@@ -106,6 +110,16 @@ void GarbageCollection::processTreeFile(std::string id)
     }
   } catch (Exception& ex) {
     reportError(ex);
+  }
+}
+
+void GarbageCollection::keepSplitFileBlocks(TreeFileEntry& entry)
+{
+  SplitFileIndexReader reader(repository, entry.id);
+  string hashValue;
+
+  while (reader.next(hashValue)) {
+    repository.writeCache.put(hashValue);
   }
 }
 
@@ -132,7 +146,7 @@ void GarbageCollection::removeUnusedFiles()
     File dirLevel0(config.filesDir, dirname);
 
     if (config.verbose)
-      cout << dirLevel0.path << endl;
+      cout << "Removing garbage from: " << dirLevel0.path << "\r";
 
     for (int level1 = 0; level1 <= 0xff; level1++) {
       sprintf(dirname, "%02x", level1);
@@ -153,15 +167,18 @@ void GarbageCollection::removeUnusedFiles()
               cout << "[d] " << f.path << endl;
             tmpFilesDeleted++;
           }
-        } else if (!repository.cache.contains(id)) {
+        } else if (!repository.writeCache.contains(id)) {
           // Delete unreferenced files:
           if (f.remove()) {
             if (config.debug)
               cout << "[d] " << f.path << endl;
             filesDeleted++;
+            repository.readCache.remove(id);
           }
         }
       }
     }
   }
+  if (config.verbose)
+    cout << endl;
 }

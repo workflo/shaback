@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <string.h>
+#include <bzlib.h>
+#include <lzma.h>
 #ifdef WIN32
 # include <windows.h>
 #endif
@@ -121,3 +123,64 @@ DeflateException::DeflateException(string msg) :
   Exception(msg)
 {
 }
+
+BzException::BzException(string msg) :
+  Exception(msg)
+{
+}
+
+BzException::BzException(string msg, int err)
+{
+  switch (err) {
+    case BZ_PARAM_ERROR:
+      this->msg = msg.append(": BZ_PARAM_ERROR");
+      break;
+
+    case BZ_MEM_ERROR:
+      this->msg = msg.append(": BZ_MEM_ERROR");
+      break;
+
+    case BZ_DATA_ERROR:
+      this->msg = msg.append(": BZ_DATA_ERROR");
+      break;
+
+    case BZ_IO_ERROR:
+      this->msg = msg.append(": BZ_IO_ERROR");
+      break;
+
+    default: {
+      char buf[10];
+      sprintf(buf, "%i", err);
+      this->msg = msg.append(": error code=").append(buf);
+    }
+  }
+}
+
+LzmaException::LzmaException(string msg) :
+  Exception(msg)
+{
+}
+
+LzmaException::LzmaException(string msg, int err)
+{
+  switch (err) {
+    case LZMA_OPTIONS_ERROR:
+      this->msg = msg.append(": LZMA_OPTIONS_ERROR");
+      break;
+
+    case LZMA_MEM_ERROR:
+      this->msg = msg.append(": LZMA_MEM_ERROR");
+      break;
+
+    case LZMA_DATA_ERROR:
+      this->msg = msg.append(": LZMA_DATA_ERROR");
+      break;
+
+    default: {
+      char buf[10];
+      sprintf(buf, "%i", err);
+      this->msg = msg.append(": error code=").append(buf);
+    }
+  }
+}
+

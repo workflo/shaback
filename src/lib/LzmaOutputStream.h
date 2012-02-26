@@ -16,40 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_GarbageCollection_H
-#define SHABACK_GarbageCollection_H
+#ifndef SHABACK_LzmaOutputStream_H
+#define SHABACK_LzmaOutputStream_H
 
-#include <string>
-#include "Repository.h"
-#include "lib/File.h"
-#include "lib/Exception.h"
+#include <string.h>
+#include <lzma.h>
+#include "OutputStream.h"
 
-class GarbageCollection
+#define LZMA_CHUNK_SIZE (1024 * 16)
+
+/**
+ * An OutputStream that performs LZMA data compression.
+ *
+ * @class LzmaOutputStream
+ */
+class LzmaOutputStream: public OutputStream
 {
   public:
-    GarbageCollection(RuntimeConfig& config, Repository& Repository);
-    ~GarbageCollection();
+    LzmaOutputStream(OutputStream* out, int compressionLevel = 5);
+    ~LzmaOutputStream();
 
-    void run();
-    void showTotals();
+    void write(int b);
+    void write(const char* b, int len);
+    void finish();
+    void close();
 
   protected:
-    void processRootFile(File& rootFile);
-    void processTreeFile(std::string id);
-    void reportError(Exception& ex);
-    void removeUnusedFiles();
-
-    /**
-     * Adds all blocks of a split file to the list
-     * of files to be kept.
-     */
-    void keepSplitFileBlocks(TreeFileEntry& entry);
-
-    Repository& repository;
-    RuntimeConfig& config;
-    int numErrors;
-    int tmpFilesDeleted;
-    int filesDeleted;
+    OutputStream* out;
+    lzma_stream zipStream;
+    char* outputBuffer;
+    lzma_ret ret;
 };
-
-#endif // SHABACK_GarbageCollection_H
+#endif // SHABACK_LzmaOutputStream_H

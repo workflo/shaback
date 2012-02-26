@@ -43,16 +43,10 @@ RestoreRun::~RestoreRun()
 
 void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 {
-  //  if (config.verbose)
-  //    cout << "Restoring tree " << treeId << " to " << destinationDir.path << endl;
-
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
 
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
-
-    //    printf("RestoreRun: %40s  %-40s  %7o %5d %5d %11d %11d\n", entry.id.c_str(), entry.path.c_str(), entry.fileMode,
-    //        entry.uid, entry.gid, entry.mtime, entry.ctime);
 
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
@@ -77,7 +71,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         file.remove();
 
         FileOutputStream out(file);
-        repository.exportFile(entry.id, out);
+        repository.exportFile(entry, out);
         out.close();
 
         restoreMetaData(file, entry);

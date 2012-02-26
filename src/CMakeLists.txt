@@ -6,6 +6,8 @@ set (CMAKE_VERBOSE_MAKEFILE true)
 
 cmake_minimum_required(VERSION 2.8)
 find_package(ZLIB REQUIRED)
+find_package(BZip2 REQUIRED)
+find_package(Lzma REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
@@ -18,17 +20,25 @@ add_executable(shaback
 		Cache.cpp 
 		GarbageCollection.cpp
 		main.cpp 
-		Repository.cpp 
+		Repository.cpp
 		RestoreRun.cpp
 		RuntimeConfig.cpp 
 		shaback.cpp 
 		ShabackException.cpp
 		ShabackInputStream.cpp
 		ShabackOutputStream.cpp
+		SplitFileIndexReader.cpp
 		TreeFileEntry.cpp
 		)
 
-target_link_libraries(shaback ${ZLIB_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${LUA_LIBRARIES} ${GDBM_LIBRARY} shabacklib)
+target_link_libraries(shaback 
+  ${ZLIB_LIBRARY}
+  ${OPENSSL_CRYPTO_LIBRARIES}
+  ${LUA_LIBRARIES}
+  ${GDBM_LIBRARY}
+  ${BZIP2_LIBRARIES}
+  ${LZMA_LIBRARY}
+  shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
 install(PROGRAMS shaback DESTINATION bin)

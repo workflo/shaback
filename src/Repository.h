@@ -24,6 +24,8 @@
 #include "RuntimeConfig.h"
 #include "Cache.h"
 #include "lib/Date.h"
+#include "ShabackOutputStream.h"
+#include "ShabackInputStream.h"
 #include "TreeFileEntry.h"
 
 class BackupRun;
@@ -80,14 +82,41 @@ class Repository
     void exportCacheFile();
 
     std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
+    void exportFile(TreeFileEntry& entry, OutputStream& out);
+
+    /**
+     * Reads the backup file represented by the given ID to the given
+     * \c OutputStream.
+     */
     void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
-    void openCache();
+
+    /**
+     * Lazily creates a new write cache.
+     */
+    void openWriteCache();
+
+    /**
+     * Lazily opens the read cache.
+     */
+    void openReadCache();
 
     /**
      * Removes all files from the repository's cache/ directory.
      */
     void removeAllCacheFiles();
+
+    /**
+     * Returns a new \c ShabackInputStream configured to read a file from this
+     * repository.
+     */
+    ShabackInputStream createInputStream();
+
+    /**
+     * Returns a new \c ShabackOutputStream configured to write a file to this
+     * repository.
+     */
+    ShabackOutputStream createOutputStream();
 
     /**
      * Maps the given name of an encryption algorithm to its respective
@@ -120,22 +149,43 @@ class Repository
      */
     static std::string encryptionToName(int encryption);
 
-    Cache cache;
+    /** The temporary write cache. Used to speed up backup. */
+    Cache writeCache;
+
+    /** The (persistent) read cache. Used to speed up traversing tree files. */
+    Cache readCache;
 
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
     int encryptionAlgorithm;
     int compressionAlgorithm;
+    int splitBlockSize;
+    int splitMinBlocks;
     Date startDate;
 
     void restoreByRootFile(File& rootFile);
     void restoreByTreeId(std::string& treeId);
     void checkPassword();
+
+  private:
+    /**
+     * Splits the input stream into chunks and stores them
+     * individually.
+     */
+    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
+
+    char* readBuffer;
 };
 
 #define COMPRESSION_NONE    0
 #define COMPRESSION_DEFLATE 1
+#define COMPRESSION_BZip5   10
+#define COMPRESSION_BZip1   11
+#define COMPRESSION_BZip9   12
+#define COMPRESSION_LZMA0   20
+#define COMPRESSION_LZMA5   21
+#define COMPRESSION_LZMA9   22
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_BLOWFISH 1
@@ -148,5 +198,8 @@ class Repository
 
 // Don't touch me!
 #define PASSWORDFILE_SALT "This salt makes the hashed password useless for decryption"
+
+#define SPLITFILE_ID_INDICATOR_STR "_s"
+#define SPLITFILE_ID_INDICATOR 's'
 
 #endif // SHABACK_Repository_H

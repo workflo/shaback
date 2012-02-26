@@ -16,39 +16,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_FileOutputStream_H
-#define SHABACK_FileOutputStream_H
+#ifndef SHABACK_BzInputStream_H
+#define SHABACK_BzInputStream_H
 
 #include <string.h>
-#ifdef WIN32
-# include <windows.h>
-#endif
-#include "File.h"
-#include "OutputStream.h"
+#include <bzlib.h>
+#include "InputStream.h"
+
+#define BZ_CHUNK_SIZE (16 * 1024)
 
 /**
- * This classes allows a stream of data to be written to a disk file.
+ * An InputStream that performs BZip data compression.
  *
- * @class FileOutputStream
+ * @class BzInputStream
  */
-class FileOutputStream: public OutputStream
+class BzInputStream: public InputStream
 {
   public:
-    FileOutputStream(File& file);
-    FileOutputStream(const char* filename);
-    FileOutputStream(std::string& filename);
-    ~FileOutputStream();
+    BzInputStream(InputStream* in);
+    ~BzInputStream();
 
-    void write(int b);
-    void write(const char* b, int len);
+    int read();
+    int read(char* b, int len);
     void close();
 
+    void setBlocking(bool on)
+    {
+    }
+    ;
+
   protected:
-#ifdef WIN32
-    HANDLE handle;
-#else
-    FILE* handle;
-#endif
-    void init(std::string& filename);
+    InputStream* in;
+    bz_stream zipStream;
+    char readBuffer[BZ_CHUNK_SIZE];
+    int ret;
 };
-#endif // SHABACK_FileOutputStream_H
+#endif// SHABACK_BzInputStream_H

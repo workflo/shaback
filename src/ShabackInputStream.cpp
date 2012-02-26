@@ -20,11 +20,13 @@
 #include <fcntl.h>
 
 #include "ShabackInputStream.h"
-#include "lib/FileInputStream.h"
-#include "lib/DeflateInputStream.h"
-#include "lib/BlowfishInputStream.h"
 //#include "lib/AesInputStream.h"
+#include "lib/BlowfishInputStream.h"
+#include "lib/BzInputStream.h"
+#include "lib/DeflateInputStream.h"
 #include "lib/Exception.h"
+#include "lib/FileInputStream.h"
+#include "lib/LzmaInputStream.h"
 #include "Repository.h"
 
 using namespace std;
@@ -74,6 +76,20 @@ void ShabackInputStream::open(File& file)
   switch (compressionAlgorithm) {
     case COMPRESSION_DEFLATE:
       compressionInputStream = new DeflateInputStream(inputStream);
+      inputStream = compressionInputStream;
+      break;
+
+    case COMPRESSION_BZip5:
+    case COMPRESSION_BZip1:
+    case COMPRESSION_BZip9:
+      compressionInputStream = new BzInputStream(inputStream);
+      inputStream = compressionInputStream;
+      break;
+
+    case COMPRESSION_LZMA0:
+    case COMPRESSION_LZMA5:
+    case COMPRESSION_LZMA9:
+      compressionInputStream = new LzmaInputStream(inputStream);
       inputStream = compressionInputStream;
       break;
 

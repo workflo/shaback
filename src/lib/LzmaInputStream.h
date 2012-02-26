@@ -16,39 +16,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_FileOutputStream_H
-#define SHABACK_FileOutputStream_H
+#ifndef SHABACK_LzmaInputStream_H
+#define SHABACK_LzmaInputStream_H
 
 #include <string.h>
-#ifdef WIN32
-# include <windows.h>
-#endif
-#include "File.h"
-#include "OutputStream.h"
+#include <lzma.h>
+#include "InputStream.h"
+
+#define LZMA_CHUNK_SIZE (16 * 1024)
 
 /**
- * This classes allows a stream of data to be written to a disk file.
+ * An InputStream that performs Lzmaip data compression.
  *
- * @class FileOutputStream
+ * @class LzmaInputStream
  */
-class FileOutputStream: public OutputStream
+class LzmaInputStream: public InputStream
 {
   public:
-    FileOutputStream(File& file);
-    FileOutputStream(const char* filename);
-    FileOutputStream(std::string& filename);
-    ~FileOutputStream();
+    LzmaInputStream(InputStream* in);
+    ~LzmaInputStream();
 
-    void write(int b);
-    void write(const char* b, int len);
+    int read();
+    int read(char* b, int len);
     void close();
 
+    void setBlocking(bool on)
+    {
+    }
+    ;
+
   protected:
-#ifdef WIN32
-    HANDLE handle;
-#else
-    FILE* handle;
-#endif
-    void init(std::string& filename);
+    InputStream* in;
+    lzma_stream zipStream;
+    char readBuffer[LZMA_CHUNK_SIZE];
+    int ret;
 };
-#endif // SHABACK_FileOutputStream_H
+#endif // SHABACK_LzmaInputStream_H

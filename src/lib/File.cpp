@@ -50,11 +50,30 @@ char File::separatorChar = '/';
 string File::separator = "/";
 #endif
 
-File::File() :
-  path(""), initialized(false)
+File::File() : path("."), initialized(false) {}
+
+File::File(string path) :
+  path(path), initialized(false)
 {
-  // TODO: Default constructor should point to CWD rather than $HOME
-  // TODO: Static method to retreive File object representing $HOME
+  canonicalize();
+  fname = path.substr(path.rfind("/") + 1);
+}
+
+File::File(File parent, string filename) : initialized(false)
+{
+  path = parent.path;
+  path.append("/").append(filename);
+  canonicalize();
+  fname = path.substr(path.rfind("/") + 1);
+}
+
+File::~File()
+{
+}
+
+File File::home()
+{
+  string path;
 
 #ifdef WIN32
   char tmpbuf[MAX_PATH];
@@ -72,26 +91,29 @@ File::File() :
     path = pw->pw_dir;
   }
 #endif
-  canonicalize();
+
+  return File(path);
 }
 
-File::File(string path) :
-  path(path), initialized(false)
+File File::tmpdir()
 {
-  canonicalize();
-  fname = path.substr(path.rfind("/") + 1);
-}
+  string path;
 
-File::File(File& parent, string filename) : initialized(false)
-{
-  path = parent.path;
-  path.append("/").append(filename);
-  canonicalize();
-  fname = path.substr(path.rfind("/") + 1);
-}
+#ifdef WIN32
 
-File::~File()
-{
+  // TODO: WIN32: File::tmpdir
+
+#else
+
+  char* p = getenv("SHABACK_TMP");
+  if (!p) p = getenv("TMPDIR");
+  if (!p) p = getenv("TMP");
+  if (!p) p = getenv("TEMP");
+  if (!p) p = "/tmp";
+
+  return File(p);
+
+#endif
 }
 
 void File::assertInitialized()
@@ -334,8 +356,6 @@ void File::canonicalize()
   while ((pos = path.find("//")) != string::npos) {
     path.erase(pos, 1);
   }
-
-  // TODO: Remove "../"
 }
 
 void File::chmod(int mode)
@@ -368,4 +388,9 @@ void File::utime(int mtime)
   int ret = ::utime(path.c_str(), &tm);
   if (ret != 0)
     throw Exception::errnoToException(path);
+}
+
+bool filePathComparator(File a,File b)
+{
+  return (a.path < b.path);
 }

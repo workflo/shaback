@@ -31,6 +31,7 @@ class RuntimeConfig
 {
   public:
     RuntimeConfig();
+    ~RuntimeConfig();
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
@@ -44,11 +45,25 @@ class RuntimeConfig
 
     std::string operation;
     std::string repository;
-    std::string localCacheFile;
+
+    /** The temporary write cache file. */
+    File writeCacheFile;
+
+    /** The persistent read cache file. */
+    File readCacheFile;
+
     std::string backupName;
     lua_State* luaState;
     std::vector<std::string> excludePatterns;
+
+    /** Filename/path patterns of files to be split into blocks. */
     std::vector<std::string> splitPatterns;
+
+    /** Split only files that are at least this size. */
+    long long splitFileMinSize;
+
+    /** Block size for splitting large files. */
+    int splitFileBlockSize;
 
     /** List of directories to be backed up. */
     std::vector<std::string> dirs;
@@ -93,7 +108,16 @@ class RuntimeConfig
      */
     File passwordCheckFile;
 
+    /**
+     * Determines whether this file should be excluded from the backup set.
+     */
     bool excludeFile(File& file);
+
+    /**
+     * Determines whether this file should be split into blocks
+     * according to its name and size.
+     */
+    bool splitFile(File& file);
 
     void finalize();
 

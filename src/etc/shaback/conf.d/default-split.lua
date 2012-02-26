@@ -1,5 +1,9 @@
--- VmWare
+-- General
+addSplitPattern('*.log');
+
+-- VmWare, VirtualBox
 addSplitPattern('*.vmdk');
+addSplitPattern('*.vdi');
 
 -- Oracle
 addSplitPattern('*.dbf')
@@ -9,6 +13,3 @@ addSplitPattern('*/oradata/*.log')
 addSplitPattern('*.MYI')
 addSplitPattern('*.MYD')
 addSplitPattern('*/ibdata*')
-
--- CVS
-addSplitPattern('*,v')

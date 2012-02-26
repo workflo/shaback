@@ -35,10 +35,20 @@ class Cache
     ~Cache();
 
     void open(int openMode = GDBM_WRCREAT);
+
+    /**
+     * Closes the cache if necessary. Does nothing otherwise.
+     */
     void close();
     bool contains(std::string& key);
     void put(std::string& key, std::string& value);
     void put(std::string& key);
+
+    /**
+     * Returns the value if existing, the empty string otherwise.
+     */
+    std::string get(std::string& key);
+
     void remove(std::string& key);
     void exportCache(OutputStream& out);
     int importCache(InputStream& in);

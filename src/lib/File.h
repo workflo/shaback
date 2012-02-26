@@ -40,8 +40,21 @@ class File
   public:
     File();
     File(std::string path);
-    File(File& parent, std::string filename);
+    File(File parent, std::string filename);
     ~File();
+
+    /**
+     * Returns a new File instance representing the user's
+     * home directory.
+     */
+    static File home();
+
+    /**
+     * Returns a new File instance representing the user's
+     * TMP directory.
+     */
+    static File tmpdir();
+
     void refresh();
     bool isFile();
     bool isDir();
@@ -154,6 +167,8 @@ class File
     struct stat statBuffer;
 #endif
 };
+
+bool filePathComparator(File a,File b);
 
 #endif // SHABACK_File_H
 

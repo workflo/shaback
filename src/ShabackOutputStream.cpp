@@ -20,11 +20,13 @@
 #include <fcntl.h>
 
 #include "ShabackOutputStream.h"
-#include "lib/FileOutputStream.h"
-#include "lib/DeflateOutputStream.h"
-#include "lib/BlowfishOutputStream.h"
 #include "lib/AesOutputStream.h"
+#include "lib/BlowfishOutputStream.h"
+#include "lib/BzOutputStream.h"
+#include "lib/DeflateOutputStream.h"
 #include "lib/Exception.h"
+#include "lib/FileOutputStream.h"
+#include "lib/LzmaOutputStream.h"
 #include "Repository.h"
 
 using namespace std;
@@ -82,6 +84,36 @@ void ShabackOutputStream::open(File& file)
       outputStream = compressionOutputStream;
       break;
 
+    case COMPRESSION_BZip5:
+      compressionOutputStream = new BzOutputStream(outputStream);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_BZip1:
+      compressionOutputStream = new BzOutputStream(outputStream, 1);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_BZip9:
+      compressionOutputStream = new BzOutputStream(outputStream, 9);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_LZMA0:
+      compressionOutputStream = new LzmaOutputStream(outputStream, 0);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_LZMA5:
+      compressionOutputStream = new LzmaOutputStream(outputStream, 5);
+      outputStream = compressionOutputStream;
+      break;
+
+    case COMPRESSION_LZMA9:
+      compressionOutputStream = new LzmaOutputStream(outputStream, 9);
+      outputStream = compressionOutputStream;
+      break;
+
     case COMPRESSION_NONE:
       break;
   }
@@ -89,14 +121,26 @@ void ShabackOutputStream::open(File& file)
 
 void ShabackOutputStream::close()
 {
-  if (outputStream)
+  if (outputStream) {
     outputStream->close();
+    outputStream = 0;
+  }
+}
+
+void ShabackOutputStream::finish()
+{
+  close();
   tmpFile.move(file);
 }
 
 void ShabackOutputStream::write(string& s)
 {
   write(s.data(), s.size());
+}
+
+void ShabackOutputStream::write(const char* s)
+{
+  write(s, strlen(s));
 }
 
 void ShabackOutputStream::write(const char* data, int numBytes)

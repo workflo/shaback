@@ -22,6 +22,7 @@
 
 #include "ShabackException.h"
 #include "TreeFileEntry.h"
+#include "Repository.h"
 
 using namespace std;
 
@@ -44,6 +45,9 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file ID");
   id = line.substr(from, until - from);
   from = until +1;
+
+  // isSplitFile
+  isSplitFile = (id.find_first_of(SPLITFILE_ID_INDICATOR) != string::npos);
 
   // Filename
   if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing filename");
