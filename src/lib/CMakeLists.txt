@@ -1,3 +1,4 @@
+set (CMAKE_MODULE_PATH CMakeModules)
 
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
