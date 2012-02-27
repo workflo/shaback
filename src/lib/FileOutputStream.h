@@ -47,7 +47,7 @@ class FileOutputStream: public OutputStream
 #ifdef WIN32
     HANDLE handle;
 #else
-    FILE* handle;
+    int handle;
 #endif
     void init(std::string& filename);
 };

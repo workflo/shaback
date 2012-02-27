@@ -63,9 +63,9 @@ void FileOutputStream::init(string& filename)
 
 #else
 
-  handle = ::fopen(filename.c_str(), "w");
+  handle = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP);
 
-  if (handle == 0) {
+  if (handle == -1) {
     throw Exception::errnoToException(filename);
   }
 
@@ -103,7 +103,7 @@ void FileOutputStream::write(const char* b, int len)
 
 #else
 
-  if (::fwrite(b, len, 1, handle) != 1) {
+  if (::write(handle, b, len) != len) {
     throw Exception::errnoToException();
   }
 
@@ -124,9 +124,9 @@ void FileOutputStream::close()
 
 #else
 
-  if (handle != 0) {
-    ::fclose(handle);
-    handle = 0;
+  if (handle != -1) {
+    ::close(handle);
+    handle = -1;
   }
 
 #endif
