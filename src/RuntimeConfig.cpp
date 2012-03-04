@@ -79,9 +79,9 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         "totals", no_argument, 0, 't' }, { "config", required_argument, 0, 'c' }, { "repository", required_argument, 0,
         'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { "name", required_argument,
         0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, { "compression",
-        required_argument, 0, 'C' }, { 0, 0, 0, 0 } };
+        required_argument, 0, 'C' }, {"ignore-error", required_argument, 0, 'i'}, { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:i:", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -104,6 +104,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'c':
         loadConfigFile(optarg);
+        break;
+
+      case 'i':
+        ignoreErrors.insert(optarg);
         break;
 
       case 'r':
@@ -293,6 +297,16 @@ static int l_backupName(lua_State *L)
   return 0;
 }
 
+static int l_ignoreError(lua_State *L)
+{
+  const char* error = lua_tostring(L, 1);
+
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->ignoreErrors.insert(error);
+
+  return 0;
+}
+
 void RuntimeConfig::initLua()
 {
   this->luaState = luaL_newstate();
@@ -330,6 +344,9 @@ void RuntimeConfig::initLua()
 
   lua_pushcfunction(this->luaState, l_backupName);
   lua_setglobal(this->luaState, "backupName");
+
+  lua_pushcfunction(this->luaState, l_ignoreError);
+  lua_setglobal(this->luaState, "ignoreError");
 
   lua_pushlightuserdata(this->luaState, this);
   lua_setglobal(this->luaState, LUA_RUNTIMECONFIG);

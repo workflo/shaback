@@ -104,20 +104,23 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
   try {
     file.chmod(entry.fileMode);
   } catch (Exception& ex) {
-    reportError(string("chmod: ").append(ex.getMessage()));
+    if (!config.ignoreErrors.count("chmod"))
+      reportError(string("chmod: ").append(ex.getMessage()));
   }
 
   try {
     file.chown(entry.uid, entry.gid);
   } catch (Exception& ex) {
-    reportError(string("chown: ").append(ex.getMessage()));
+    if (!config.ignoreErrors.count("chown"))
+      reportError(string("chown: ").append(ex.getMessage()));
   }
 
   if (entry.type != TREEFILEENTRY_SYMLINK) {
     try {
       file.utime(entry.mtime);
     } catch (Exception& ex) {
-      reportError(string("utime: ").append(ex.getMessage()));
+      if (!config.ignoreErrors.count("utime"))
+        reportError(string("utime: ").append(ex.getMessage()));
     }
   }
 }

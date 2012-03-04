@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include "lib/File.h"
 
 extern "C" {
@@ -85,6 +86,9 @@ class RuntimeConfig
     File repoDir;
     bool haveExclusiveLock;
     
+    /** Set of errors to be ignored. */
+    std::set<std::string> ignoreErrors;
+
     /**
      * Out non-exclusive lock file.
      */
