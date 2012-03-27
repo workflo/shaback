@@ -190,13 +190,13 @@ void BackupRun::showTotals()
 #ifdef __APPLE__
   printf("Bytes inspected:  %12jd\n", (intmax_t) numBytesRead);
 #else
-  printf("Bytes inspected:  %12jd\n", numBytesRead);
+  printf("Bytes inspected:  %12lu\n", numBytesRead);
 #endif
   printf("Files stored:     %12d\n", numFilesStored);
 #ifdef __APPLE__
   printf("Bytes stored:     %12jd\n", (intmax_t) numBytesStored);
 #else
-  printf("Bytes stored:     %12jd\n", numBytesStored);
+  printf("Bytes stored:     %12lu\n", numBytesStored);
 #endif
   printf("Errors:           %12d\n", numErrors);
 }
