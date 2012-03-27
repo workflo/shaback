@@ -20,6 +20,7 @@
 #define SHABACK_GarbageCollection_H
 
 #include <string>
+#include <set>
 #include "Repository.h"
 #include "lib/File.h"
 #include "lib/Exception.h"
@@ -50,6 +51,7 @@ class GarbageCollection
     int numErrors;
     int tmpFilesDeleted;
     int filesDeleted;
+    std::set<std::string> blocksToKeep;
 };
 
 #endif // SHABACK_GarbageCollection_H
