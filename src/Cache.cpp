@@ -125,33 +125,3 @@ void Cache::remove(string& key)
     gdbm_delete(gdbmFile, k);
   }
 }
-
-void Cache::exportCache(OutputStream& out)
-{
-  if (opened) {
-    datum key = gdbm_firstkey(gdbmFile);
-    while (key.dptr) {
-      out.write(key.dptr, key.dsize);
-      out.write("\n", 1);
-
-      datum nextkey = gdbm_nextkey(gdbmFile, key);
-      free(key.dptr);
-      key = nextkey;
-    }
-  }
-}
-
-int Cache::importCache(InputStream& in)
-{
-  int count = 0;
-
-  if (opened) {
-    string str;
-    while (in.readLine(str)) {
-      put(str);
-      count++;
-    }
-  }
-
-  return count;
-}

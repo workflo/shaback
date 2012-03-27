@@ -92,11 +92,6 @@ class Repository
     void exportSymlink(TreeFileEntry& entry, File& outFile);
 
     /**
-     * Lazily creates a new write cache.
-     */
-    void openWriteCache();
-
-    /**
      * Lazily opens the read cache.
      */
     void openReadCache();
@@ -150,7 +145,7 @@ class Repository
     static std::string encryptionToName(int encryption);
 
     /** The temporary write cache. Used to speed up backup. */
-    Cache writeCache;
+    std::set<std::string> writeCache;
 
     /** The (persistent) read cache. Used to speed up traversing tree files. */
     Cache readCache;

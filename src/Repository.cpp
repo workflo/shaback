@@ -49,15 +49,13 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-    config(config), writeCache(config.writeCacheFile), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(
-        config.readCacheFile)
+    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile)
 {
   readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
 {
-  writeCache.close();
   readCache.close();
   free(readBuffer);
 }
@@ -144,11 +142,6 @@ void Repository::unlock()
   }
 }
 
-void Repository::openWriteCache()
-{
-  writeCache.open(GDBM_NEWDB);
-}
-
 void Repository::openReadCache()
 {
   try {
@@ -161,7 +154,6 @@ void Repository::openReadCache()
 int Repository::backup()
 {
   open();
-  openWriteCache();
   importCacheFile();
 
   BackupRun run(config, *this);
@@ -189,7 +181,7 @@ File Repository::hashValueToFile(string hashValue)
 
 bool Repository::contains(string& hashValue)
 {
-  return writeCache.contains(hashValue) || hashValueToFile(hashValue).isFile();
+  return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
@@ -214,7 +206,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
     run->numBytesStored += treeFile.size();
   }
 
-  writeCache.put(hashValue);
+  writeCache.insert(hashValue);
 
   return sha1.toString();
 }
@@ -286,7 +278,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     }
   }
 
-  writeCache.put(hashValue);
+  writeCache.insert(hashValue);
 
   return hashValue;
 }
@@ -307,7 +299,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     blockSha1.finalize();
     string blockHashValue = blockSha1.toString();
 
-    blockCount ++;
+    blockCount++;
 
     if (config.verbose) {
       printf("  Storing block: %8d", blockCount);
@@ -323,7 +315,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
       os.write(readBuffer, bytesRead);
       os.finish();
 
-      writeCache.put(blockHashValue);
+      writeCache.insert(blockHashValue);
       run->numBytesStored += bytesRead;
     }
 
@@ -333,7 +325,8 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     totalSha1.update(readBuffer, bytesRead);
   }
 
-  if (config.verbose) cout << endl;
+  if (config.verbose)
+    cout << endl;
 
   totalSha1.finalize();
   string totalHashValue = totalSha1.toString();
@@ -398,7 +391,14 @@ void Repository::exportCacheFile()
   File file(config.cacheDir, filename);
   FileOutputStream os(file);
   BufferedWriter writer(&os);
-  writeCache.exportCache(writer);
+
+  set<string>::iterator it;
+
+  for (it = writeCache.begin(); it != writeCache.end(); it++) {
+    string s(*it);
+    writer.write(s);
+    writer.newLine();
+  }
 }
 
 void Repository::importCacheFile()
@@ -411,9 +411,17 @@ void Repository::importCacheFile()
     File& file = files.back();
     if (config.verbose)
       cout << "Preloading cache from: " << file.path << endl;
+
     FileInputStream is(file);
     BufferedReader reader(&is);
-    int count = writeCache.importCache(reader);
+    int count = 0;
+    string str;
+
+    while (reader.readLine(str)) {
+      writeCache.insert(str);
+      count++;
+    }
+
     if (config.verbose)
       cout << "Cache contains " << count << " entries." << endl;
   }

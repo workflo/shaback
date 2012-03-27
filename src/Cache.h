@@ -50,8 +50,6 @@ class Cache
     std::string get(std::string& key);
 
     void remove(std::string& key);
-    void exportCache(OutputStream& out);
-    int importCache(InputStream& in);
 
   private:
     File file;
