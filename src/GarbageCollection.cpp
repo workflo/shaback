@@ -53,7 +53,7 @@ void GarbageCollection::run()
   for (vector<File>::iterator it = rootFiles.begin(); it < rootFiles.end(); it++) {
     File rootFile(*it);
     if (config.verbose)
-      cout << "Reading root file: " << rootFile.path << "\r";
+      cout << "Reading root file: " << rootFile.path << endl;
     processRootFile(rootFile);
   }
 
