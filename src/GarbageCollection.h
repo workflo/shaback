@@ -51,7 +51,6 @@ class GarbageCollection
     int numErrors;
     int tmpFilesDeleted;
     int filesDeleted;
-    std::set<std::string> blocksToKeep;
 };
 
 #endif // SHABACK_GarbageCollection_H

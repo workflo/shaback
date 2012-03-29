@@ -76,7 +76,7 @@ void GarbageCollection::processRootFile(File& rootFile)
   FileInputStream in(rootFile);
   string hashValue;
   if (in.readLine(hashValue)) {
-    blocksToKeep.insert(hashValue);
+    repository.writeCache.insert(hashValue);
     processTreeFile(hashValue);
   } else {
     throw GarbageCollectionException(string("Root index file is empty: ").append(rootFile.path));
@@ -91,12 +91,12 @@ void GarbageCollection::processTreeFile(std::string id)
       TreeFileEntry entry(*it);
       switch (entry.type) {
         case TREEFILEENTRY_DIRECTORY:
-          blocksToKeep.insert(entry.id);
+          repository.writeCache.insert(entry.id);
           processTreeFile(entry.id);
           break;
 
         case TREEFILEENTRY_FILE:
-          blocksToKeep.insert(entry.id);
+          repository.writeCache.insert(entry.id);
           if (entry.isSplitFile) {
             keepSplitFileBlocks(entry);
           }
@@ -118,7 +118,7 @@ void GarbageCollection::keepSplitFileBlocks(TreeFileEntry& entry)
   string hashValue;
 
   while (reader.next(hashValue)) {
-    blocksToKeep.insert(hashValue);
+    repository.writeCache.insert(hashValue);
   }
 }
 
@@ -166,7 +166,7 @@ void GarbageCollection::removeUnusedFiles()
               cout << "[d] " << f.path << endl;
             tmpFilesDeleted++;
           }
-        } else if (!blocksToKeep.count(id)) {
+        } else if (!repository.writeCache.count(id)) {
           // Delete unreferenced files:
           if (f.remove()) {
             if (config.debug)
