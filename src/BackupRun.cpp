@@ -83,6 +83,8 @@ int BackupRun::run()
 
   repository.storeRootTreeFile(rootFileHashValue);
 
+  deleteOldIndexFiled();
+
   return (numErrors == 0 ? 0 : 1);
 }
 
@@ -205,4 +207,18 @@ void BackupRun::reportError(Exception& ex)
 {
   numErrors++;
   cerr << "[E] " << ex.getMessage() << endl;
+}
+
+void BackupRun::deleteOldIndexFiled()
+{
+  string pattern(config.backupName);
+  pattern.append("_????""-??""-??_??????.sroot");
+
+  vector<File> indexFiles = config.indexDir.listFiles(pattern);
+  sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+
+  for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    File file(*it);
+    cout << file.path << endl;
+  }
 }
