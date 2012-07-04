@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "FileOutputStream.h"
 #include "Exception.h"

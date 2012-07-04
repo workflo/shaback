@@ -33,6 +33,7 @@
 # include <fnmatch.h>
 # include <sys/xattr.h>
 # include <utime.h>
+# include <unistd.h>
 #endif
 
 #include "File.h"
