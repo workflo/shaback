@@ -203,6 +203,8 @@ bool File::mkdir()
 
 bool File::mkdirs()
 {
+  if (this->path == ".") return false;
+
   initialized = false;
   File parent = getParent();
 
