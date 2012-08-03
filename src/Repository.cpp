@@ -208,7 +208,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
 
   writeCache.insert(hashValue);
 
-  return hashValue
+  return hashValue;
 }
 
 string Repository::storeFile(BackupRun* run, File& srcFile)
