@@ -33,6 +33,7 @@
 # include <fnmatch.h>
 # include <sys/xattr.h>
 # include <utime.h>
+# include <unistd.h>
 #endif
 
 #include "File.h"
@@ -202,6 +203,8 @@ bool File::mkdir()
 
 bool File::mkdirs()
 {
+  if (this->path == ".") return false;
+
   initialized = false;
   File parent = getParent();
 

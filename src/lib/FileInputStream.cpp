@@ -18,6 +18,7 @@
 
 #include <fcntl.h>
 #include <iostream>
+#include <unistd.h>
 
 #include "FileInputStream.h"
 #include "Exception.h"
