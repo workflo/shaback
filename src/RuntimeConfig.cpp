@@ -200,7 +200,7 @@ static int l_repository(lua_State *L)
   return 0;
 }
 
-static int l_oneFileSystem(lua_State *L)
+static int l_setOneFileSystem(lua_State *L)
 {
   bool b = (bool) lua_toboolean(L, 1);
 
@@ -210,7 +210,7 @@ static int l_oneFileSystem(lua_State *L)
   return 0;
 }
 
-static int l_verbose(lua_State *L)
+static int l_setVerbose(lua_State *L)
 {
   bool b = (bool) lua_toboolean(L, 1);
 
@@ -220,7 +220,7 @@ static int l_verbose(lua_State *L)
   return 0;
 }
 
-static int l_showTotals(lua_State *L)
+static int l_setShowTotals(lua_State *L)
 {
   bool b = (bool) lua_toboolean(L, 1);
 
@@ -277,7 +277,7 @@ static int l_addSplitPattern(lua_State *L)
   return 0;
 }
 
-static int l_cryptoPassword(lua_State *L)
+static int l_setCryptoPassword(lua_State *L)
 {
   const char* pw = lua_tostring(L, 1);
 
@@ -287,7 +287,7 @@ static int l_cryptoPassword(lua_State *L)
   return 0;
 }
 
-static int l_backupName(lua_State *L)
+static int l_setBackupName(lua_State *L)
 {
   const char* n = lua_tostring(L, 1);
 
@@ -318,14 +318,20 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_localCache);
   lua_setglobal(this->luaState, "localCache");
 
-  lua_pushcfunction(this->luaState, l_oneFileSystem);
+  lua_pushcfunction(this->luaState, l_setOneFileSystem);
   lua_setglobal(this->luaState, "oneFileSystem");
+  lua_pushcfunction(this->luaState, l_setOneFileSystem);
+  lua_setglobal(this->luaState, "setOneFileSystem");
 
-  lua_pushcfunction(this->luaState, l_verbose);
+  lua_pushcfunction(this->luaState, l_setVerbose);
   lua_setglobal(this->luaState, "verbose");
+  lua_pushcfunction(this->luaState, l_setVerbose);
+  lua_setglobal(this->luaState, "setVerbose");
 
-  lua_pushcfunction(this->luaState, l_showTotals);
+  lua_pushcfunction(this->luaState, l_setShowTotals);
   lua_setglobal(this->luaState, "showTotals");
+  lua_pushcfunction(this->luaState, l_setShowTotals);
+  lua_setglobal(this->luaState, "setShowTotals");
 
   lua_pushcfunction(this->luaState, l_addDir);
   lua_setglobal(this->luaState, "addDir");
@@ -339,11 +345,15 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_addSplitPattern);
   lua_setglobal(this->luaState, "addSplitPattern");
 
-  lua_pushcfunction(this->luaState, l_cryptoPassword);
+  lua_pushcfunction(this->luaState, l_setCryptoPassword);
   lua_setglobal(this->luaState, "cryptoPassword");
+  lua_pushcfunction(this->luaState, l_setCryptoPassword);
+  lua_setglobal(this->luaState, "setCryptoPassword");
 
-  lua_pushcfunction(this->luaState, l_backupName);
+  lua_pushcfunction(this->luaState, l_setBackupName);
   lua_setglobal(this->luaState, "backupName");
+  lua_pushcfunction(this->luaState, l_setBackupName);
+  lua_setglobal(this->luaState, "setBackupName");
 
   lua_pushcfunction(this->luaState, l_ignoreError);
   lua_setglobal(this->luaState, "ignoreError");
@@ -399,4 +409,11 @@ bool RuntimeConfig::splitFile(File& file)
   }
 
   return false;
+}
+
+
+void RuntimeConfig::runPreBackupCallbacks()
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPreBackupCallbacks");
+  lua_call(this->luaState, 0, 0);
 }

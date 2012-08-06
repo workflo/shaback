@@ -56,6 +56,8 @@ int BackupRun::run()
     return 5;
   }
 
+  config.runPreBackupCallbacks();
+
   string rootFile(TREEFILE_HEADER);
   rootFile.append("\n\n");
 

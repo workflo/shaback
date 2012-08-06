@@ -125,6 +125,11 @@ class RuntimeConfig
 
     void finalize();
 
+    /**
+     * Calls all pre-backup callbacks.
+     */
+    void runPreBackupCallbacks();
+
   protected:
     void initLua();
     void tryToLoadFrom(std::string dir);
