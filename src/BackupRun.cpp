@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -85,7 +86,7 @@ int BackupRun::run()
 
   repository.storeRootTreeFile(rootFileHashValue);
 
-  deleteOldIndexFiled();
+  deleteOldIndexFiles();
 
   return (numErrors == 0 ? 0 : 1);
 }
@@ -211,7 +212,7 @@ void BackupRun::reportError(Exception& ex)
   cerr << "[E] " << ex.getMessage() << endl;
 }
 
-void BackupRun::deleteOldIndexFiled()
+void BackupRun::deleteOldIndexFiles()
 {
   string pattern(config.backupName);
   pattern.append("_????""-??""-??_??????.sroot");

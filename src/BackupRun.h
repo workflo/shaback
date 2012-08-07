@@ -50,7 +50,7 @@ class BackupRun
      * Removes old index files. Keeps all index files from within the past week,
      * one file per week for the last month and one file per month for older files.
      */
-    void deleteOldIndexFiled();
+    void deleteOldIndexFiles();
 
     Repository& repository;
     RuntimeConfig& config;
