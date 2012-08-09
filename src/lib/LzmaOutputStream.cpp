@@ -18,6 +18,7 @@
 
 #include <iostream>
 
+#include "config.h"
 #include "LzmaOutputStream.h"
 #include "Exception.h"
 
