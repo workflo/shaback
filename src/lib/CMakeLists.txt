@@ -30,7 +30,10 @@ set(shaback_lib_SRCS
 		     StandardInputStream.cpp
 		     )
 
-include_directories(${LZMA_INCLUDE_DIR})
+IF (LZMA_FOUND)
+    include_directories(${LZMA_INCLUDE_DIR})
+ENDIF (LZMA_FOUND)
+
 add_library(shabacklib STATIC ${shaback_lib_SRCS})
 
 # configure a header file to pass some of the CMake settings

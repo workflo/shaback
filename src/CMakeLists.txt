@@ -37,7 +37,7 @@ target_link_libraries(shaback
   ${LUA_LIBRARIES}
   ${GDBM_LIBRARY}
   ${BZIP2_LIBRARIES}
-  ${LZMA_LIBRARY}
+  ${LZMA_LIBRARIES}
   shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
