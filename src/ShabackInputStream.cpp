@@ -18,8 +18,8 @@
 
 #include <iostream>
 #include <fcntl.h>
-
 #include "ShabackInputStream.h"
+
 //#include "lib/AesInputStream.h"
 #include "lib/BlowfishInputStream.h"
 #include "lib/BzInputStream.h"
@@ -86,12 +86,14 @@ void ShabackInputStream::open(File& file)
       inputStream = compressionInputStream;
       break;
 
+#if defined(LZMA_FOUND)
     case COMPRESSION_LZMA0:
     case COMPRESSION_LZMA5:
     case COMPRESSION_LZMA9:
       compressionInputStream = new LzmaInputStream(inputStream);
       inputStream = compressionInputStream;
       break;
+#endif
 
     case COMPRESSION_NONE:
       break;
@@ -113,3 +115,4 @@ int ShabackInputStream::read(char* b, int len)
 {
   return inputStream->read(b, len);
 }
+

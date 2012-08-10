@@ -26,6 +26,7 @@ extern "C" {
 
 #include "shaback.h"
 #include "RuntimeConfig.h"
+#include "lib/config.h"
 #include "lib/Sha1.h"
 #include "lib/Exception.h"
 
@@ -82,8 +83,12 @@ void showUsage(string& op)
       "\t-C=<comp>, --compression=<comp>\n"
       "\t    Enable data compression for this repository. You cannot alter this setting\n"
       "\t    after the repository has been created!\n"
-      "\t    <comp> must be one of: `None', `BZip', `BZip-1', `BZip-9', `LZMA',\n"
-      "\t    `LZMA-0', `LZMA-5', `LZMA-9' or `Deflate'.\n"
+      "\t    <comp> must be one of: `None', `BZip', `BZip-1', `BZip-9'"
+#if defined(LZMA_FOUND)
+           ", `LZMA',\n"
+      "\t    `LZMA-0', `LZMA-5', `LZMA-9'"
+#endif
+           " or `Deflate'.\n"
       "\t    Defaults to `Deflate'.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n");

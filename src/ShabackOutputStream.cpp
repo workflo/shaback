@@ -99,6 +99,7 @@ void ShabackOutputStream::open(File& file)
       outputStream = compressionOutputStream;
       break;
 
+#if defined(LZMA_FOUND)
     case COMPRESSION_LZMA0:
       compressionOutputStream = new LzmaOutputStream(outputStream, 0);
       outputStream = compressionOutputStream;
@@ -113,6 +114,7 @@ void ShabackOutputStream::open(File& file)
       compressionOutputStream = new LzmaOutputStream(outputStream, 9);
       outputStream = compressionOutputStream;
       break;
+#endif
 
     case COMPRESSION_NONE:
       break;

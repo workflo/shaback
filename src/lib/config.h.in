@@ -1,1 +1,6 @@
+#if !defined(SHABACK_lib_config_H)
+
 #cmakedefine LZMA_FOUND
+#define SHABACK_lib_config_H
+
+#endif // SHABACK_lib_config_H

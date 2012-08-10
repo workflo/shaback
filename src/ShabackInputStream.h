@@ -23,6 +23,7 @@
 #include <zlib.h>
 #include "lib/File.h"
 #include "lib/InputStream.h"
+#include "lib/config.h"
 #include "RuntimeConfig.h"
 
 class ShabackInputStream : public InputStream

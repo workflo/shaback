@@ -16,7 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_LzmaInputStream_H
+#include "config.h"
+#if !defined(SHABACK_LzmaInputStream_H) && defined(LZMA_FOUND)
 #define SHABACK_LzmaInputStream_H
 
 #include <string.h>

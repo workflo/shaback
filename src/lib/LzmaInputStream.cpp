@@ -17,8 +17,10 @@
  */
 
 #include <iostream>
-
 #include "LzmaInputStream.h"
+
+#if defined(LZMA_FOUND)
+
 #include "Exception.h"
 
 using namespace std;
@@ -85,3 +87,4 @@ void LzmaInputStream::close()
   }
 }
 
+#endif

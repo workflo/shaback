@@ -17,9 +17,10 @@
  */
 
 #include <iostream>
-
-#include "config.h"
 #include "LzmaOutputStream.h"
+
+#if defined(LZMA_FOUND)
+
 #include "Exception.h"
 
 using namespace std;
@@ -105,3 +106,4 @@ void LzmaOutputStream::close()
   }
 }
 
+#endif

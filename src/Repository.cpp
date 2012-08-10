@@ -571,12 +571,14 @@ int Repository::compressionByName(string name)
     return COMPRESSION_BZip1;
   } else if (name == "BZ9" || name == "Bz9" || name == "BZip-9" || name == "BZip9") {
     return COMPRESSION_BZip9;
+#if defined(LZMA_FOUND)
   } else if (name == "LZMA0" || name == "LZMA-0" || name == "Lzma0" || name == "Lzma-0") {
     return COMPRESSION_LZMA0;
   } else if (name == "LZMA" || name == "LZMA-5" || name == "Lzma" || name == "Lzma-5") {
     return COMPRESSION_LZMA5;
   } else if (name == "LZMA9" || name == "LZMA-9" || name == "Lzma9" || name == "Lzma-9") {
     return COMPRESSION_LZMA9;
+#endif
   } else if (name == "None" || name.empty()) {
     return COMPRESSION_NONE;
   } else {
@@ -595,12 +597,14 @@ string Repository::compressionToName(int compression)
       return "BZip-1";
     case COMPRESSION_BZip9:
       return "BZip-9";
+#if defined(LZMA_FOUND)
     case COMPRESSION_LZMA0:
       return "Lzma-0";
     case COMPRESSION_LZMA5:
       return "Lzma-5";
     case COMPRESSION_LZMA9:
       return "Lzma-9";
+#endif
     default:
       return "None";
   }
