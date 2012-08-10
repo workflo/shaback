@@ -19,7 +19,9 @@
 #include <iostream>
 #include <string.h>
 #include <bzlib.h>
-#include <lzma.h>
+#if defined(LZMA_FOUND)
+# include <lzma.h>
+#endif
 #ifdef WIN32
 # include <windows.h>
 #endif
@@ -164,6 +166,7 @@ LzmaException::LzmaException(string msg) :
 LzmaException::LzmaException(string msg, int err)
 {
   switch (err) {
+#if defined(LZMA_FOUND)
     case LZMA_OPTIONS_ERROR:
       this->msg = msg.append(": LZMA_OPTIONS_ERROR");
       break;
@@ -175,6 +178,7 @@ LzmaException::LzmaException(string msg, int err)
     case LZMA_DATA_ERROR:
       this->msg = msg.append(": LZMA_DATA_ERROR");
       break;
+#endif
 
     default: {
       char buf[10];
