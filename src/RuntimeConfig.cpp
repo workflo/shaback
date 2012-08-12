@@ -34,6 +34,7 @@ extern "C" {
 #include "RuntimeConfig.h"
 #include "ShabackConfig.h"
 #include "Repository.h"
+#include "BackupRun.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
 
@@ -416,4 +417,16 @@ void RuntimeConfig::runPreBackupCallbacks()
 {
   lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPreBackupCallbacks");
   lua_call(this->luaState, 0, 0);
+}
+
+
+void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPostBackupCallbacks");
+  lua_pushinteger(this->luaState, run->numFilesRead);
+  lua_pushinteger(this->luaState, run->numBytesRead);
+  lua_pushinteger(this->luaState, run->numFilesStored);
+  lua_pushinteger(this->luaState, run->numBytesStored);
+  lua_pushinteger(this->luaState, run->numErrors);
+  lua_call(this->luaState, 5, 0);
 }

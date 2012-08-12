@@ -86,7 +86,8 @@ int BackupRun::run()
 
   repository.storeRootTreeFile(rootFileHashValue);
 
-  deleteOldIndexFiles();
+//  deleteOldIndexFiles();
+  config.runPostBackupCallbacks(this);
 
   return (numErrors == 0 ? 0 : 1);
 }

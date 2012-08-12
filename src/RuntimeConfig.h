@@ -27,6 +27,7 @@
 extern "C" {
 # include <lua.h>
 }
+class BackupRun;
 
 class RuntimeConfig
 {
@@ -129,6 +130,11 @@ class RuntimeConfig
      * Calls all pre-backup callbacks.
      */
     void runPreBackupCallbacks();
+
+    /**
+     * Calls all post-backup callbacks.
+     */
+    void runPostBackupCallbacks(BackupRun *run);
 
   protected:
     void initLua();
