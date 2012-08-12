@@ -430,3 +430,19 @@ void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
   lua_pushinteger(this->luaState, run->numErrors);
   lua_call(this->luaState, 5, 0);
 }
+
+
+void RuntimeConfig::runEnterDirCallbacks(File &dir)
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runEnterDirCallbacks");
+  lua_pushstring(this->luaState, dir.path.c_str());
+  lua_call(this->luaState, 1, 0);
+}
+
+
+void RuntimeConfig::runLeaveDirCallbacks(File &dir)
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runLeaveDirCallbacks");
+  lua_pushstring(this->luaState, dir.path.c_str());
+  lua_call(this->luaState, 1, 0);
+}

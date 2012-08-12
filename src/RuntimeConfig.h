@@ -136,6 +136,16 @@ class RuntimeConfig
      */
     void runPostBackupCallbacks(BackupRun *run);
 
+    /**
+     * Calls all enter-directory callbacks.
+     */
+    void runEnterDirCallbacks(File &dir);
+
+    /**
+     * Calls all leave-directory callbacks.
+     */
+    void runLeaveDirCallbacks(File &dir);
+
   protected:
     void initLua();
     void tryToLoadFrom(std::string dir);

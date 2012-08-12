@@ -165,6 +165,8 @@ int Repository::backup()
 
   exportCacheFile();
 
+  config.runPostBackupCallbacks(&run);
+
   return rc;
 }
 

@@ -87,7 +87,6 @@ int BackupRun::run()
   repository.storeRootTreeFile(rootFileHashValue);
 
 //  deleteOldIndexFiles();
-  config.runPostBackupCallbacks(this);
 
   return (numErrors == 0 ? 0 : 1);
 }
@@ -96,6 +95,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
 {
   string treeFile(TREEFILE_HEADER);
   treeFile.append("\n").append(dir.path).append("\n");
+
+  config.runEnterDirCallbacks(dir);
 
   if (!skipChildren) {
     vector<File> files = dir.listFiles("*");
@@ -139,6 +140,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
       dir.getPosixMtime(), dir.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append("\n");
+
+  config.runLeaveDirCallbacks(dir);
 
   return treeFileLine;
 }
