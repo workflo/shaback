@@ -1,14 +1,18 @@
 -- Logs
 addExcludePattern('/var/log/dmesg*')
-addExcludePattern('/var/log/debug')
-addExcludePattern('/var/log/aptitude')
-addExcludePattern('/var/log/lastlog')
-addExcludePattern('/var/log/messages')
+addExcludePattern('/var/log/debug*')
+addExcludePattern('/var/log/aptitude*')
+addExcludePattern('/var/log/lastlog*')
+addExcludePattern('/var/log/messages*')
 addExcludePattern('/var/log/mail.*')
 addExcludePattern('/var/log/Xorg.*')
-addExcludePattern('/var/log/syslog')
+addExcludePattern('/var/log/syslog*')
 addExcludePattern('/var/log/*.gz')
 addExcludePattern('/var/log/*.log*')
+addExcludePattern('/var/log/wtmp*')
+addExcludePattern('/var/log/fsck/*')
+addExcludePattern('/var/log/faillog*')
+addExcludePattern('/var/log/vmware-tools-guestd*')
 
 -- Temp
 addExcludePattern('/tmp/*')
