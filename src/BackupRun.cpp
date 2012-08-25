@@ -86,7 +86,7 @@ int BackupRun::run()
 
   repository.storeRootTreeFile(rootFileHashValue);
 
-//  deleteOldIndexFiles();
+  deleteOldIndexFiles();
 
   return (numErrors == 0 ? 0 : 1);
 }
@@ -223,6 +223,7 @@ void BackupRun::deleteOldIndexFiles()
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+  reverse(indexFiles.begin(), indexFiles.end());
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
