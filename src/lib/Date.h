@@ -33,12 +33,19 @@ class Date
     inline int getHour() { return hour; }
     inline int getMinute() { return minute; }
     inline int getSecond() { return second; }
+    void addHours(int x);
+    void addMinutes(int x);
+    void addSeconds(int x);
+    void addDays(int x);
+    void addMonths(int x);
+    void addYears(int x);
 
     std::string toFilename();
 
   private:
     time_t rawtime;
     int year, month, day, hour, minute, second;
+    void internalize();
 };
 
 #endif // SHABACK_Date_H

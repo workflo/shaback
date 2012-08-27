@@ -229,5 +229,6 @@ void BackupRun::deleteOldIndexFiles()
     File file(*it);
     Date d(file.fname.substr(config.backupName.size() +1));
     cout << file.path << " ... " << d.toFilename() << endl;
+    cout << file.path << " ... " << d.toFilename() << endl;
   }
 }
