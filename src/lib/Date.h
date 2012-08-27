@@ -39,6 +39,7 @@ class Date
     void addDays(int x);
     void addMonths(int x);
     void addYears(int x);
+    int compareTo(Date other);
 
     std::string toFilename();
 

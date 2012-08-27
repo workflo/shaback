@@ -119,3 +119,10 @@ void Date::internalize()
   minute = ptm->tm_min;
   second = ptm->tm_sec;
 }
+
+int Date::compareTo(Date other)
+{
+  if (rawtime > other.rawtime) return 1;
+  else if (rawtime < other.rawtime) return -1;
+  else return 0;
+}

@@ -31,7 +31,7 @@
 using namespace std;
 
 BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
-    repository(repository), config(config)
+  repository(repository), config(config)
 {
   numFilesRead = 0;
   numFilesStored = 0;
@@ -219,15 +219,81 @@ void BackupRun::reportError(Exception& ex)
 void BackupRun::deleteOldIndexFiles()
 {
   string pattern(config.backupName);
-  pattern.append("_????""-??""-??_??????.sroot");
+  pattern.append("_????" "-??" "-??_??????.sroot");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
   reverse(indexFiles.begin(), indexFiles.end());
+  vector<Date> dates;
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
-    Date d(file.fname.substr(config.backupName.size() +1));
-    cout << file.path << " ... " << d.toFilename() << endl;
+    Date d(file.fname.substr(config.backupName.size() + 1));
+    dates.push_back(d);
+    //    cout << file.path << " ... " << d.toFilename() << endl;
+  }
+
+  int limits[] = { 1, 14, 30 };
+
+  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+    Date date(*it);
+    cout << date.toFilename() << endl;
+  }
+  cout << endl;
+
+  deleteOldIndexFiles(&dates, 1, limits[0]);
+  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+    Date date(*it);
+    cout << date.toFilename() << endl;
+  }
+  cout << endl;
+
+  deleteOldIndexFiles(&dates, 7, limits[1]);
+  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+    Date date(*it);
+    cout << date.toFilename() << endl;
+  }
+  cout << endl;
+
+  deleteOldIndexFiles(&dates, 30, limits[2]);
+  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+    Date date(*it);
+    cout << date.toFilename() << endl;
+  }
+  cout << endl;
+}
+
+void BackupRun::deleteOldIndexFiles(vector<Date>* dates, int keepOnePer, int fromAge)
+{
+  Date left;
+  left.addDays(-fromAge);
+  Date right(left);
+
+  cout << "Keep one per " << keepOnePer << " days from " << left.toFilename() << endl;
+
+  int leftIdx = 0;
+  while (leftIdx < dates->size() && dates->at(leftIdx).compareTo(left) > 0) leftIdx++;
+
+  cout << "   Start with index " << leftIdx << endl;
+
+  for (int idx = 0; idx < 100; idx++) {
+    right.addDays(-keepOnePer);
+    cout << "   - " << left.toFilename() << " .. " << right.toFilename() << endl;
+
+    int found = 0;
+    for (vector<Date>::iterator it = dates->begin(); it < dates->end(); it++) {
+      Date date(*it);
+      if (date.compareTo(right) > 0 && date.compareTo(left) <= 0) {
+        found ++;
+        if (found > 1) {
+          cout << "            XX " << date.toFilename() << endl;
+          dates->erase(it);
+        } else {
+          cout << "            -> " << date.toFilename() << endl;
+        }
+      }
+    }
+
+    left.addDays(-keepOnePer);
   }
 }
