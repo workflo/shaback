@@ -37,6 +37,16 @@ Date::Date()
   second = ptm->tm_sec;
 }
 
+Date::Date(string str)
+{
+  year = strtol(str.substr(0, 4).c_str(), 0, 10);
+  month = strtol(str.substr(5, 2).c_str(), 0, 10);
+  day = strtol(str.substr(8, 2).c_str(), 0, 10);
+  hour = strtol(str.substr(11, 2).c_str(), 0, 10);
+  minute = strtol(str.substr(13, 2).c_str(), 0, 10);
+  second = strtol(str.substr(15, 2).c_str(), 0, 10);
+}
+
 string Date::toFilename()
 {
   char filename[100];

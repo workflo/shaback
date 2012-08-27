@@ -227,6 +227,7 @@ void BackupRun::deleteOldIndexFiles()
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
-    cout << file.path << endl;
+    Date d(file.fname.substr(config.backupName.size() +1));
+    cout << file.path << " ... " << d.toFilename() << endl;
   }
 }

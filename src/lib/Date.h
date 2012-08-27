@@ -26,6 +26,7 @@ class Date
 {
   public:
     Date();
+    Date(std::string str);
     inline int getYear() { return year; }
     inline int getMonth() { return month; }
     inline int getDay() { return day; }
