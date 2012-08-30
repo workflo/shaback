@@ -126,3 +126,8 @@ int Date::compareTo(Date other)
   else if (rawtime < other.rawtime) return -1;
   else return 0;
 }
+
+double Date::diff(Date other)
+{
+  return difftime(rawtime, other.rawtime) / (60 * 60 * 24);
+}

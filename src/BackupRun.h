@@ -52,8 +52,6 @@ class BackupRun
      */
     void deleteOldIndexFiles();
 
-    void deleteOldIndexFiles(std::vector<Date>* dates, int keepOnePer, int fromAge);
-
     Repository& repository;
     RuntimeConfig& config;
 };

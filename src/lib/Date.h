@@ -43,6 +43,12 @@ class Date
 
     std::string toFilename();
 
+    /**
+     * Returns the difference between this Date and \c other in fractions of
+     * a day.
+     */
+    double diff(Date other);
+
   private:
     time_t rawtime;
     int year, month, day, hour, minute, second;

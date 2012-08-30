@@ -235,65 +235,39 @@ void BackupRun::deleteOldIndexFiles()
 
   int limits[] = { 1, 14, 30 };
 
-  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
-    Date date(*it);
-    cout << date.toFilename() << endl;
-  }
-  cout << endl;
+  int idx = 0;
+  Date now;
+  Date date(now);
+  date.addDays(-limits[0]);
 
-  deleteOldIndexFiles(&dates, 1, limits[0]);
-  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
-    Date date(*it);
-    cout << date.toFilename() << endl;
-  }
-  cout << endl;
+  while (idx < dates.size()) {
+    if (date.compareTo(dates[idx]) <= 0) {
+      // Keep and continue with next:
+      cout << "    Keeping " << dates[idx].toFilename() << endl;
+      idx++;
+      continue;
+    } else {
+      if (now.diff(date) >= limits[2])
+        date.addDays(-30);
+      else if (now.diff(date) >= limits[1])
+        date.addDays(-7);
+      else if (now.diff(date) >= limits[0])
+        date.addDays(-1);
+      cout << "  next boundary " << date.toFilename() << "   diff=" << (now.diff(date)) << endl;
 
-  deleteOldIndexFiles(&dates, 7, limits[1]);
-  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
-    Date date(*it);
-    cout << date.toFilename() << endl;
-  }
-  cout << endl;
+      if (date.compareTo(dates[idx]) > 0)
+        continue;
 
-  deleteOldIndexFiles(&dates, 30, limits[2]);
-  for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
-    Date date(*it);
-    cout << date.toFilename() << endl;
-  }
-  cout << endl;
-}
+      // Keep first from next block:
+      cout << "    Keeping " << dates[idx].toFilename() << endl;
+      idx++;
 
-void BackupRun::deleteOldIndexFiles(vector<Date>* dates, int keepOnePer, int fromAge)
-{
-  Date left;
-  left.addDays(-fromAge);
-  Date right(left);
-
-  cout << "Keep one per " << keepOnePer << " days from " << left.toFilename() << endl;
-
-  int leftIdx = 0;
-  while (leftIdx < dates->size() && dates->at(leftIdx).compareTo(left) > 0) leftIdx++;
-
-  cout << "   Start with index " << leftIdx << endl;
-
-  for (int idx = 0; idx < 100; idx++) {
-    right.addDays(-keepOnePer);
-    cout << "   - " << left.toFilename() << " .. " << right.toFilename() << endl;
-
-    int found = 0;
-    for (vector<Date>::iterator it = dates->begin(); it < dates->end(); it++) {
-      Date date(*it);
-      if (date.compareTo(right) > 0 && date.compareTo(left) <= 0) {
-        found ++;
-        if (found > 1) {
-          cout << "            XX " << date.toFilename() << endl;
-          dates->erase(it);
-        } else {
-          cout << "            -> " << date.toFilename() << endl;
-        }
+      // Delete until next boundary:
+      while (idx < dates.size() && date.compareTo(dates[idx]) < 0) {
+        if (config.verbose)
+          cout << "    Deleting old index file for " << dates[idx].toFilename() << endl;
+        idx++;
       }
     }
-
-    left.addDays(-keepOnePer);
   }
 }
