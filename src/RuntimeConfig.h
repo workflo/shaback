@@ -120,7 +120,7 @@ class RuntimeConfig
      * - keep weekly backup for n[2] days
      * - and keep monthly backup for the remainder.
      */
-    int keepOldBackupsBoundaries[];
+    int keepOldBackupsBoundaries[3];
 
     /**
      * Determines whether this file should be excluded from the backup set.
