@@ -25,8 +25,91 @@ using namespace std;
 
 Date::Date()
 {
-  struct tm * ptm;
   time(&rawtime);
+  internalize();
+}
+
+Date::Date(string str)
+{
+  year = strtol(str.substr(0, 4).c_str(), 0, 10);
+  month = strtol(str.substr(5, 2).c_str(), 0, 10);
+  day = strtol(str.substr(8, 2).c_str(), 0, 10);
+  hour = strtol(str.substr(11, 2).c_str(), 0, 10);
+  minute = strtol(str.substr(13, 2).c_str(), 0, 10);
+  second = strtol(str.substr(15, 2).c_str(), 0, 10);
+
+  struct tm ptm;
+  ptm.tm_isdst = 0;
+  ptm.tm_zone = 0;
+  ptm.tm_gmtoff = 0;
+  ptm.tm_year = year - 1900;
+  ptm.tm_mon = month -1;
+  ptm.tm_mday = day;
+  ptm.tm_hour = hour;
+  ptm.tm_min = minute;
+  ptm.tm_sec = second;
+
+  // If timegm should not be available: http://linux.die.net/man/3/timegm
+  rawtime = timegm(&ptm);
+  internalize();
+}
+
+string Date::toFilename()
+{
+  char filename[100];
+  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d", getYear(), getMonth(), getDay(), getHour(), getMinute(), getSecond());
+
+  return filename;
+}
+
+void Date::addYears(int x)
+{
+  struct tm * ptm;
+  ptm = gmtime(&rawtime);
+
+  ptm->tm_year += x;
+
+  rawtime = timegm(ptm);
+  internalize();
+}
+
+void Date::addMonths(int x)
+{
+  struct tm * ptm;
+  ptm = gmtime(&rawtime);
+
+  ptm->tm_mon += x;
+
+  rawtime = timegm(ptm);
+  internalize();
+}
+
+void Date::addDays(int x)
+{
+  struct tm * ptm;
+  ptm = gmtime(&rawtime);
+
+  ptm->tm_mday += x;
+
+  rawtime = timegm(ptm);
+  internalize();
+}
+
+void Date::addHours(int x)
+{
+  rawtime += x * 60LL * 60LL;
+  internalize();
+}
+
+void Date::addMinutes(int x)
+{
+  rawtime += x * 60LL;
+  internalize();
+}
+
+void Date::internalize()
+{
+  struct tm * ptm;
   ptm = gmtime(&rawtime);
 
   year = ptm->tm_year + 1900;
@@ -37,10 +120,14 @@ Date::Date()
   second = ptm->tm_sec;
 }
 
-string Date::toFilename()
+int Date::compareTo(Date other)
 {
-  char filename[100];
-  sprintf(filename, "%04d-%02d-%02d_%02d%02d%02d", getYear(), getMonth(), getDay(), getHour(), getMinute(), getSecond());
+  if (rawtime > other.rawtime) return 1;
+  else if (rawtime < other.rawtime) return -1;
+  else return 0;
+}
 
-  return filename;
+double Date::diff(Date other)
+{
+  return difftime(rawtime, other.rawtime) / (60 * 60 * 24);
 }

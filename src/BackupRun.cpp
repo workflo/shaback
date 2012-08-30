@@ -31,7 +31,7 @@
 using namespace std;
 
 BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
-    repository(repository), config(config)
+  repository(repository), config(config)
 {
   numFilesRead = 0;
   numFilesStored = 0;
@@ -96,6 +96,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
   string treeFile(TREEFILE_HEADER);
   treeFile.append("\n").append(dir.path).append("\n");
 
+  config.runEnterDirCallbacks(dir);
+
   if (!skipChildren) {
     vector<File> files = dir.listFiles("*");
 
@@ -138,6 +140,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
       dir.getPosixMtime(), dir.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append("\n");
+
+  config.runLeaveDirCallbacks(dir);
 
   return treeFileLine;
 }
@@ -215,13 +219,57 @@ void BackupRun::reportError(Exception& ex)
 void BackupRun::deleteOldIndexFiles()
 {
   string pattern(config.backupName);
-  pattern.append("_????""-??""-??_??????.sroot");
+  pattern.append("_????" "-??" "-??_??????.sroot");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+  reverse(indexFiles.begin(), indexFiles.end());
+  vector<Date> dates;
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
-    cout << file.path << endl;
+    Date d(file.fname.substr(config.backupName.size() + 1));
+    dates.push_back(d);
+    //    cout << file.path << " ... " << d.toFilename() << endl;
+  }
+
+  int idx = 0;
+  Date now;
+  Date date(now);
+  date.addDays(-config.keepOldBackupsBoundaries[0]);
+
+  while (idx < dates.size()) {
+    if (date.compareTo(dates[idx]) <= 0) {
+      // Keep and continue with next:
+//      cout << "    Keeping " << dates[idx].toFilename() << endl;
+      idx++;
+      continue;
+    } else {
+      if (now.diff(date) >= config.keepOldBackupsBoundaries[2])
+        date.addDays(-30);
+      else if (now.diff(date) >= config.keepOldBackupsBoundaries[1])
+        date.addDays(-7);
+      else if (now.diff(date) >= config.keepOldBackupsBoundaries[0])
+        date.addDays(-1);
+//      cout << "  next boundary " << date.toFilename() << "   diff=" << (now.diff(date)) << endl;
+
+      if (date.compareTo(dates[idx]) > 0)
+        continue;
+
+      // Keep first from next block:
+//      cout << "    Keeping " << dates[idx].toFilename() << endl;
+      idx++;
+
+      // Delete until next boundary:
+      while (idx < dates.size() && date.compareTo(dates[idx]) < 0) {
+        string fname(config.backupName);
+        fname.append("_").append(dates[idx].toFilename()).append(".sroot");
+        File file(config.indexDir, fname);
+        if (config.verbose)
+          cout << "Deleting old index file " << file.path.c_str() << endl;
+        file.remove();
+        idx++;
+      }
+    }
   }
 }

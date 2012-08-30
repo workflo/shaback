@@ -26,18 +26,33 @@ class Date
 {
   public:
     Date();
+    Date(std::string str);
     inline int getYear() { return year; }
     inline int getMonth() { return month; }
     inline int getDay() { return day; }
     inline int getHour() { return hour; }
     inline int getMinute() { return minute; }
     inline int getSecond() { return second; }
+    void addHours(int x);
+    void addMinutes(int x);
+    void addSeconds(int x);
+    void addDays(int x);
+    void addMonths(int x);
+    void addYears(int x);
+    int compareTo(Date other);
 
     std::string toFilename();
+
+    /**
+     * Returns the difference between this Date and \c other in fractions of
+     * a day.
+     */
+    double diff(Date other);
 
   private:
     time_t rawtime;
     int year, month, day, hour, minute, second;
+    void internalize();
 };
 
 #endif // SHABACK_Date_H

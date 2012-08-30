@@ -34,6 +34,7 @@ extern "C" {
 #include "RuntimeConfig.h"
 #include "ShabackConfig.h"
 #include "Repository.h"
+#include "BackupRun.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
 
@@ -54,6 +55,9 @@ RuntimeConfig::RuntimeConfig()
   backupName = "noname";
   splitFileBlockSize = 1024 * 1024 * 5;
   splitFileMinSize = splitFileBlockSize * 5;
+  keepOldBackupsBoundaries[0] = 1;    // Keep all backups for n days
+  keepOldBackupsBoundaries[1] = 14;   // Keep daily backup for n days
+  keepOldBackupsBoundaries[2] = 30;   // Keep weekly backup for n days
 
   // Temporary write cache:
   char cacheFileName[40];
@@ -190,7 +194,7 @@ static RuntimeConfig* getRuntimeConfig(lua_State *L, int stackPos)
   return (RuntimeConfig*) lua_touserdata(L, stackPos);
 }
 
-static int l_repository(lua_State *L)
+static int l_setRepository(lua_State *L)
 {
   const char* dir = lua_tostring(L, 1);
 
@@ -307,13 +311,26 @@ static int l_ignoreError(lua_State *L)
   return 0;
 }
 
+static int l_setKeepOldBackupsBoundaries(lua_State *L)
+{
+  RuntimeConfig* config = getRuntimeConfig(L, 4);
+  config->keepOldBackupsBoundaries[0] = lua_tointeger(L, 1);
+  config->keepOldBackupsBoundaries[1] = lua_tointeger(L, 2);
+  config->keepOldBackupsBoundaries[2] = lua_tointeger(L, 3);
+
+  return 0;
+
+}
+
 void RuntimeConfig::initLua()
 {
   this->luaState = luaL_newstate();
   luaL_openlibs(this->luaState);
 
-  lua_pushcfunction(this->luaState, l_repository);
+  lua_pushcfunction(this->luaState, l_setRepository);
   lua_setglobal(this->luaState, "repository");
+  lua_pushcfunction(this->luaState, l_setRepository);
+  lua_setglobal(this->luaState, "setRepository");
 
   lua_pushcfunction(this->luaState, l_localCache);
   lua_setglobal(this->luaState, "localCache");
@@ -355,8 +372,8 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_setBackupName);
   lua_setglobal(this->luaState, "setBackupName");
 
-  lua_pushcfunction(this->luaState, l_ignoreError);
-  lua_setglobal(this->luaState, "ignoreError");
+  lua_pushcfunction(this->luaState, l_setKeepOldBackupsBoundaries);
+  lua_setglobal(this->luaState, "setKeepOldBackupsBoundaries");
 
   lua_pushlightuserdata(this->luaState, this);
   lua_setglobal(this->luaState, LUA_RUNTIMECONFIG);
@@ -416,4 +433,32 @@ void RuntimeConfig::runPreBackupCallbacks()
 {
   lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPreBackupCallbacks");
   lua_call(this->luaState, 0, 0);
+}
+
+
+void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPostBackupCallbacks");
+  lua_pushinteger(this->luaState, run->numFilesRead);
+  lua_pushinteger(this->luaState, run->numBytesRead);
+  lua_pushinteger(this->luaState, run->numFilesStored);
+  lua_pushinteger(this->luaState, run->numBytesStored);
+  lua_pushinteger(this->luaState, run->numErrors);
+  lua_call(this->luaState, 5, 0);
+}
+
+
+void RuntimeConfig::runEnterDirCallbacks(File &dir)
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runEnterDirCallbacks");
+  lua_pushstring(this->luaState, dir.path.c_str());
+  lua_call(this->luaState, 1, 0);
+}
+
+
+void RuntimeConfig::runLeaveDirCallbacks(File &dir)
+{
+  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runLeaveDirCallbacks");
+  lua_pushstring(this->luaState, dir.path.c_str());
+  lua_call(this->luaState, 1, 0);
 }

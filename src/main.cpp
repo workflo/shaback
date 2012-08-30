@@ -170,6 +170,7 @@ int main(int argc, char** argv)
     }
   } catch (Exception& ex) {
     cerr << ex.getMessage() << endl;
+//    config.runErrorCallbacks(ex.getMessage());
     return 10;
   }
 }

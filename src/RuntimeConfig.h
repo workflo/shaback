@@ -27,6 +27,7 @@
 extern "C" {
 # include <lua.h>
 }
+class BackupRun;
 
 class RuntimeConfig
 {
@@ -113,6 +114,15 @@ class RuntimeConfig
     File passwordCheckFile;
 
     /**
+     * Boundaries for keeping old backups:
+     * - Keep all backups for n[0] days,
+     * - keep daily backup for n[1] days,
+     * - keep weekly backup for n[2] days
+     * - and keep monthly backup for the remainder.
+     */
+    int keepOldBackupsBoundaries[3];
+
+    /**
      * Determines whether this file should be excluded from the backup set.
      */
     bool excludeFile(File& file);
@@ -129,6 +139,21 @@ class RuntimeConfig
      * Calls all pre-backup callbacks.
      */
     void runPreBackupCallbacks();
+
+    /**
+     * Calls all post-backup callbacks.
+     */
+    void runPostBackupCallbacks(BackupRun *run);
+
+    /**
+     * Calls all enter-directory callbacks.
+     */
+    void runEnterDirCallbacks(File &dir);
+
+    /**
+     * Calls all leave-directory callbacks.
+     */
+    void runLeaveDirCallbacks(File &dir);
 
   protected:
     void initLua();
