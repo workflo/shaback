@@ -241,7 +241,7 @@ void BackupRun::deleteOldIndexFiles()
   while (idx < dates.size()) {
     if (date.compareTo(dates[idx]) <= 0) {
       // Keep and continue with next:
-      cout << "    Keeping " << dates[idx].toFilename() << endl;
+//      cout << "    Keeping " << dates[idx].toFilename() << endl;
       idx++;
       continue;
     } else {
@@ -251,19 +251,23 @@ void BackupRun::deleteOldIndexFiles()
         date.addDays(-7);
       else if (now.diff(date) >= config.keepOldBackupsBoundaries[0])
         date.addDays(-1);
-      cout << "  next boundary " << date.toFilename() << "   diff=" << (now.diff(date)) << endl;
+//      cout << "  next boundary " << date.toFilename() << "   diff=" << (now.diff(date)) << endl;
 
       if (date.compareTo(dates[idx]) > 0)
         continue;
 
       // Keep first from next block:
-      cout << "    Keeping " << dates[idx].toFilename() << endl;
+//      cout << "    Keeping " << dates[idx].toFilename() << endl;
       idx++;
 
       // Delete until next boundary:
       while (idx < dates.size() && date.compareTo(dates[idx]) < 0) {
+        string fname(config.backupName);
+        fname.append("_").append(dates[idx].toFilename()).append(".sroot");
+        File file(config.indexDir, fname);
         if (config.verbose)
-          cout << "    Deleting old index file for " << dates[idx].toFilename() << endl;
+          cout << "Deleting old index file " << file.path.c_str() << endl;
+        file.remove();
         idx++;
       }
     }

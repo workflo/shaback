@@ -311,6 +311,17 @@ static int l_ignoreError(lua_State *L)
   return 0;
 }
 
+static int l_setKeepOldBackupsBoundaries(lua_State *L)
+{
+  RuntimeConfig* config = getRuntimeConfig(L, 4);
+  config->keepOldBackupsBoundaries[0] = lua_tointeger(L, 1);
+  config->keepOldBackupsBoundaries[1] = lua_tointeger(L, 2);
+  config->keepOldBackupsBoundaries[2] = lua_tointeger(L, 3);
+
+  return 0;
+
+}
+
 void RuntimeConfig::initLua()
 {
   this->luaState = luaL_newstate();
@@ -359,8 +370,11 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_setBackupName);
   lua_setglobal(this->luaState, "setBackupName");
 
-  lua_pushcfunction(this->luaState, l_ignoreError);
-  lua_setglobal(this->luaState, "ignoreError");
+  lua_pushcfunction(this->luaState, l_setBackupName);
+  lua_setglobal(this->luaState, "setBackupName");
+
+  lua_pushcfunction(this->luaState, l_setKeepOldBackupsBoundaries);
+  lua_setglobal(this->luaState, "setKeepOldBackupsBoundaries");
 
   lua_pushlightuserdata(this->luaState, this);
   lua_setglobal(this->luaState, LUA_RUNTIMECONFIG);
