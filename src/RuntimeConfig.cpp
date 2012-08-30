@@ -194,7 +194,7 @@ static RuntimeConfig* getRuntimeConfig(lua_State *L, int stackPos)
   return (RuntimeConfig*) lua_touserdata(L, stackPos);
 }
 
-static int l_repository(lua_State *L)
+static int l_setRepository(lua_State *L)
 {
   const char* dir = lua_tostring(L, 1);
 
@@ -327,8 +327,10 @@ void RuntimeConfig::initLua()
   this->luaState = luaL_newstate();
   luaL_openlibs(this->luaState);
 
-  lua_pushcfunction(this->luaState, l_repository);
+  lua_pushcfunction(this->luaState, l_setRepository);
   lua_setglobal(this->luaState, "repository");
+  lua_pushcfunction(this->luaState, l_setRepository);
+  lua_setglobal(this->luaState, "setRepository");
 
   lua_pushcfunction(this->luaState, l_localCache);
   lua_setglobal(this->luaState, "localCache");
@@ -367,9 +369,6 @@ void RuntimeConfig::initLua()
 
   lua_pushcfunction(this->luaState, l_setBackupName);
   lua_setglobal(this->luaState, "backupName");
-  lua_pushcfunction(this->luaState, l_setBackupName);
-  lua_setglobal(this->luaState, "setBackupName");
-
   lua_pushcfunction(this->luaState, l_setBackupName);
   lua_setglobal(this->luaState, "setBackupName");
 
