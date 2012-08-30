@@ -114,6 +114,15 @@ class RuntimeConfig
     File passwordCheckFile;
 
     /**
+     * Boundaries for keeping old backups:
+     * - Keep all backups for n[0] days,
+     * - keep daily backup for n[1] days,
+     * - keep weekly backup for n[2] days
+     * - and keep monthly backup for the remainder.
+     */
+    int keepOldBackupsBoundaries[];
+
+    /**
      * Determines whether this file should be excluded from the backup set.
      */
     bool excludeFile(File& file);

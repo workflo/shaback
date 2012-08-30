@@ -233,12 +233,10 @@ void BackupRun::deleteOldIndexFiles()
     //    cout << file.path << " ... " << d.toFilename() << endl;
   }
 
-  int limits[] = { 1, 14, 30 };
-
   int idx = 0;
   Date now;
   Date date(now);
-  date.addDays(-limits[0]);
+  date.addDays(-config.keepOldBackupsBoundaries[0]);
 
   while (idx < dates.size()) {
     if (date.compareTo(dates[idx]) <= 0) {
@@ -247,11 +245,11 @@ void BackupRun::deleteOldIndexFiles()
       idx++;
       continue;
     } else {
-      if (now.diff(date) >= limits[2])
+      if (now.diff(date) >= config.keepOldBackupsBoundaries[2])
         date.addDays(-30);
-      else if (now.diff(date) >= limits[1])
+      else if (now.diff(date) >= config.keepOldBackupsBoundaries[1])
         date.addDays(-7);
-      else if (now.diff(date) >= limits[0])
+      else if (now.diff(date) >= config.keepOldBackupsBoundaries[0])
         date.addDays(-1);
       cout << "  next boundary " << date.toFilename() << "   diff=" << (now.diff(date)) << endl;
 

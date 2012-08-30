@@ -55,6 +55,9 @@ RuntimeConfig::RuntimeConfig()
   backupName = "noname";
   splitFileBlockSize = 1024 * 1024 * 5;
   splitFileMinSize = splitFileBlockSize * 5;
+  keepOldBackupsBoundaries[0] = 1;    // Keep all backups for n days
+  keepOldBackupsBoundaries[1] = 14;   // Keep daily backup for n days
+  keepOldBackupsBoundaries[2] = 30;   // Keep weekly backup for n days
 
   // Temporary write cache:
   char cacheFileName[40];
