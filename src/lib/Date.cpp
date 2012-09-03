@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include <stdio.h>
-
+#include <stdlib.h>
 #include "Date.h"
 
 using namespace std;
