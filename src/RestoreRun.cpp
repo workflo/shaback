@@ -102,13 +102,6 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
 {
   try {
-    file.chmod(entry.fileMode);
-  } catch (Exception& ex) {
-    if (!config.ignoreErrors.count("chmod"))
-      reportError(string("chmod: ").append(ex.getMessage()));
-  }
-
-  try {
     file.chown(entry.uid, entry.gid);
   } catch (Exception& ex) {
     if (!config.ignoreErrors.count("chown"))
@@ -122,6 +115,13 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
       if (!config.ignoreErrors.count("utime"))
         reportError(string("utime: ").append(ex.getMessage()));
     }
+  }
+
+  try {
+    file.chmod(entry.fileMode);
+  } catch (Exception& ex) {
+    if (!config.ignoreErrors.count("chmod"))
+      reportError(string("chmod: ").append(ex.getMessage()));
   }
 }
 
