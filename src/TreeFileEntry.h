@@ -48,6 +48,7 @@ class TreeFileEntry
     int mtime;
     int ctime;
     std::string symLinkDest;
+    std::string acl;
 
     /** Indicates whether this file is split into blocks. */
     bool isSplitFile;

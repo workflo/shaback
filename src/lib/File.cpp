@@ -419,3 +419,20 @@ string File::getAclString()
 
   return "";
 }
+
+void File::setAcl(string aclString)
+{
+  acl_t acl = acl_from_text(aclString.c_str());
+
+  if (acl == 0)
+    throw Exception::errnoToException(aclString);
+
+  cout << "File::setAcl: file=" << path << ", acl=" << aclString << endl;
+
+  int ret = acl_set_file(path.c_str(), ACL_TYPE_ACCESS, acl);
+
+  acl_free(acl);
+
+  if (ret != 0)
+    throw Exception::errnoToException(path);
+}

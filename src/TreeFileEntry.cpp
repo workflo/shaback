@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 
 #include "lib/File.h"
 
@@ -90,17 +91,25 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   from = until +1;
   ctime = strtol(n.c_str(), 0, 10);
 
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing ...");
+  // Size
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file size");
   from = until +1;
 
+  // Symlink destination
+  until = line.find('\t', from);
   if (type == TREEFILEENTRY_SYMLINK) {
-    // Symlink destination
-    if ((until = line.find('\t', from)) == string::npos) {
+    if (until == string::npos) {
       symLinkDest = line.substr(from);
     } else {
       symLinkDest = line.substr(from, until - from);
     }
     if (symLinkDest.empty()) throw InvalidTreeFile("Missing symlink destination");
-    from = until +1;
   }
+  from = until +1;
+
+  // ACL
+  if (until == string::npos || (until = line.find('\t', from)) == string::npos) return; // No ACL, ignore.
+  acl = line.substr(from, until - from);
+  std::replace(acl.begin(), acl.end(), '|', '\n');
+  from = until +1;
 }

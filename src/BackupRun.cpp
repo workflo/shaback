@@ -144,6 +144,7 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
   string acl = dir.getAclString();
   std::replace(acl.begin(), acl.end(), '\n', '|');
   treeFileLine.append(acl);
+  treeFileLine.append("\t");
 
   treeFileLine.append("\n");
 
@@ -180,6 +181,7 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
   string acl = file.getAclString();
   std::replace(acl.begin(), acl.end(), '\n', '|');
   treeFileLine.append(acl);
+  treeFileLine.append("\t");
 
   treeFileLine.append("\n");
 
@@ -196,10 +198,18 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
       file.getPosixMtime(), file.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append(file.readlink());
+  treeFileLine.append("\t");
+
+  // Access Control Lists:
+  string acl = file.getAclString();
+  std::replace(acl.begin(), acl.end(), '\n', '|');
+  treeFileLine.append(acl);
+  treeFileLine.append("\t");
+
   treeFileLine.append("\n");
 
   return treeFileLine;

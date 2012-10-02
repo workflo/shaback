@@ -30,7 +30,7 @@
 using namespace std;
 
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0)
+    repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0)
 {
   // TODO Move out of constructor!!
   repository.lock();
@@ -54,7 +54,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         if (config.verbose)
           cout << "[d] " << dir.path << endl;
         dir.mkdirs();
-        restore(entry.id, destinationDir, depth +1);
+        restore(entry.id, destinationDir, depth + 1);
 
         restoreMetaData(dir, entry);
         break;
@@ -106,6 +106,11 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
   } catch (Exception& ex) {
     if (!config.ignoreErrors.count("chown"))
       reportError(string("chown: ").append(ex.getMessage()));
+  }
+
+  if (!entry.acl.empty()) {
+    // ACL:
+    file.setAcl(entry.acl);
   }
 
   try {

@@ -81,6 +81,11 @@ class File
      */
     std::string getAclString();
 
+    /**
+     * Sets ACLs for this file.
+     */
+    void setAcl(std::string acl);
+
     std::string path;
     std::string fname;
 
