@@ -34,6 +34,7 @@
 # include <sys/xattr.h>
 # include <utime.h>
 # include <unistd.h>
+# include <sys/acl.h>
 #endif
 
 #include "File.h"
@@ -396,4 +397,25 @@ void File::utime(int mtime)
 bool filePathComparator(File a,File b)
 {
   return (a.path < b.path);
+}
+
+
+string File::getAclString()
+{
+  acl_t acl = acl_get_file(path.c_str(), ACL_TYPE_ACCESS);
+
+  if (acl != 0) {
+    char* _text = acl_to_text(acl, 0);
+    if (_text != 0) {
+      string text(_text);
+
+      acl_free(_text);
+      acl_free(acl);
+      return text;
+    }
+
+    acl_free(acl);
+  }
+
+  return "";
 }

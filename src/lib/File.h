@@ -75,6 +75,12 @@ class File
     void chown(int uid, int gid);
     void utime(int mtime);
 
+    /**
+     * Returns the text representation of this File's ACL as returned by
+     * acl_to_text.
+     */
+    std::string getAclString();
+
     std::string path;
     std::string fname;
 

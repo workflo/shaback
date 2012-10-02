@@ -31,7 +31,7 @@
 using namespace std;
 
 BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config)
+    repository(repository), config(config)
 {
   numFilesRead = 0;
   numFilesStored = 0;
@@ -136,9 +136,15 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t\t", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
       dir.getPosixMtime(), dir.getPosixCtime());
   treeFileLine.append(buf);
+
+  // Access Control Lists:
+  string acl = dir.getAclString();
+  std::replace(acl.begin(), acl.end(), '\n', '|');
+  treeFileLine.append(acl);
+
   treeFileLine.append("\n");
 
   config.runLeaveDirCallbacks(dir);
@@ -160,7 +166,7 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
       file.getPosixMtime(), file.getPosixCtime(),
 #ifdef __APPLE__
       (intmax_t) file.getSize()
@@ -169,6 +175,12 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
 #endif
       );
   treeFileLine.append(buf);
+
+  // Access Control Lists:
+  string acl = file.getAclString();
+  std::replace(acl.begin(), acl.end(), '\n', '|');
+  treeFileLine.append(acl);
+
   treeFileLine.append("\n");
 
   return treeFileLine;
@@ -184,7 +196,7 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
       file.getPosixMtime(), file.getPosixCtime());
   treeFileLine.append(buf);
   treeFileLine.append(file.readlink());
