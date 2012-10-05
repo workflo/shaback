@@ -174,8 +174,8 @@ File Repository::hashValueToFile(string hashValue)
 {
   string path(config.filesDir.path);
 
-  path.append("/").append(hashValue.substr(0, 2));
-  path.append("/").append(hashValue.substr(2));
+  path.append("/").append(hashValue.substr(0, 3));
+  path.append("/").append(hashValue.substr(3));
 
   return File(path);
 }
@@ -305,7 +305,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     if (config.verbose) {
       printf("  Storing block: %8d", blockCount);
       cout << "\r";
-      // FIXME: Missing a flush here, ouput is not updated in time
+      cout << flush;
     }
 
     if (!contains(blockHashValue)) {

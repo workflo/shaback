@@ -86,8 +86,8 @@ void Shaback::createRepository()
   }
 
   char dirname[20];
-  for (int level0 = 0; level0 <= 0xff; level0++) {
-    sprintf(dirname, "%02x", level0);
+  for (int level0 = 0; level0 <= 0xfff; level0++) {
+    sprintf(dirname, "%03x", level0);
     File dirLevel0(config.filesDir, dirname);
     dirLevel0.mkdir();
   }
