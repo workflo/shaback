@@ -69,7 +69,10 @@ void showUsage(string& op)
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
   } else if (op == "init") {
     printf("usage: shaback init [<general_options>] [-f | --force]\n"
-      "                      [-E <enc> | --encryption=<enc>] [-p <pw> | --password=<pw>]\n\n"
+      "                      [-E <enc> | --encryption=<enc>]\n"
+      "                      [-C <comp> | --compression=<comp>]\n"
+      "                      [-F <fmt> | --repo-format=<fmt>]\n"
+      "                      [-p <pw> | --password=<pw>]\n\n"
       "\tCreates a new repository at the location specified in one of the config files\n"
       "\tor via the --repository option. Defaults to the current working directory.\n\n"
       "Options:\n"
@@ -90,6 +93,9 @@ void showUsage(string& op)
 #endif
            " or `Deflate'.\n"
       "\t    Defaults to `Deflate'.\n\n"
+      "\t-F=<fmt>, --repo-format=<fmt>\n"
+      "\t    Select an alternative repository format.\n"
+      "\t    <fmt> must be one of: `2-2' or `3', where `2-2' is the default.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n");
   } else if (op == "deflate") {

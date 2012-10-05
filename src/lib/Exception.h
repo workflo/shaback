@@ -73,6 +73,12 @@ class UnsupportedEncryptionAlgorithm: public Exception
     UnsupportedEncryptionAlgorithm(std::string algo);
 };
 
+class UnsupportedRepositoryFormat: public Exception
+{
+  public:
+    UnsupportedRepositoryFormat(std::string algo);
+};
+
 class UnsupportedOperation: public Exception
 {
   public:

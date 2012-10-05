@@ -76,6 +76,7 @@ void Repository::open()
 
   compressionAlgorithm = compressionByName(props.getProperty("compression"));
   encryptionAlgorithm = encryptionByName(props.getProperty("encryption"));
+  repoFormat = repoFormatByName(props.getProperty("repoFormat"));
 
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
@@ -174,8 +175,17 @@ File Repository::hashValueToFile(string hashValue)
 {
   string path(config.filesDir.path);
 
-  path.append("/").append(hashValue.substr(0, 3));
-  path.append("/").append(hashValue.substr(3));
+  switch (repoFormat) {
+    case REPOFORMAT_3:
+      path.append("/").append(hashValue.substr(0, 3));
+      path.append("/").append(hashValue.substr(3));
+      break;
+    default:
+      path.append("/").append(hashValue.substr(0, 2));
+      path.append("/").append(hashValue.substr(2, 2));
+      path.append("/").append(hashValue.substr(4));
+      break;
+  }
 
   return File(path);
 }
@@ -588,6 +598,17 @@ int Repository::compressionByName(string name)
   }
 }
 
+int Repository::repoFormatByName(string name)
+{
+  if (name == "default" || name == "standard" || name == "2-2") {
+    return REPOFORMAT_2_2;
+  } else if (name == "3") {
+    return REPOFORMAT_3;
+  } else {
+    throw UnsupportedRepositoryFormat(name);
+  }
+}
+
 string Repository::compressionToName(int compression)
 {
   switch (compression) {
@@ -619,6 +640,16 @@ string Repository::encryptionToName(int encryption)
       return "Blowfish";
     default:
       return "None";
+  }
+}
+
+string Repository::repoFormatToName(int fmt)
+{
+  switch (fmt) {
+    case REPOFORMAT_3:
+      return "3";
+    default:
+      return "2-2";
   }
 }
 

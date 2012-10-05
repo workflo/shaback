@@ -32,7 +32,7 @@
 using namespace std;
 
 GarbageCollection::GarbageCollection(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config), numErrors(0), tmpFilesDeleted(0), filesDeleted(0)
+    repository(repository), config(config), numErrors(0), tmpFilesDeleted(0), filesDeleted(0)
 {
 }
 
@@ -137,47 +137,86 @@ void GarbageCollection::showTotals()
 
 void GarbageCollection::removeUnusedFiles()
 {
-  char dirname[3];
+  char dirname[4];
   char idPrefix[5];
 
-  for (int level0 = 0; level0 <= 0xff; level0++) {
-    sprintf(dirname, "%02x", level0);
-    File dirLevel0(config.filesDir, dirname);
+  switch (repository.repoFormat) {
+    case REPOFORMAT_3:
+      for (int level0 = 0; level0 <= 0xfff; level0++) {
+        sprintf(dirname, "%03x", level0);
+        File dirLevel0(config.filesDir, dirname);
 
-    if (config.verbose)
-      cout << "Removing garbage from: " << dirLevel0.path << "\r";
+        if (config.verbose)
+          cout << "Removing garbage from: " << dirLevel0.path << "\r" << flush;
 
-    for (int level1 = 0; level1 <= 0xff; level1++) {
-      sprintf(dirname, "%02x", level1);
-      sprintf(idPrefix, "%02x%02x", level0, level1);
-      File dirLevel1(dirLevel0, dirname);
+        vector<File> tmpFiles = dirLevel0.listFiles("*");
+        for (vector<File>::iterator it = tmpFiles.begin(); it < tmpFiles.end(); it++) {
+          File f(*it);
 
-      vector<File> tmpFiles = dirLevel1.listFiles("*");
-      for (vector<File>::iterator it = tmpFiles.begin(); it < tmpFiles.end(); it++) {
-        File f(*it);
+          string id = dirname;
+          id.append(f.fname);
 
-        string id = idPrefix;
-        id.append(f.fname);
-
-        if (f.fname.find(".tmp") != string::npos) {
-          // Delete all tmp files:
-          if (f.remove()) {
-            if (config.debug)
-              cout << "[d] " << f.path << endl;
-            tmpFilesDeleted++;
-          }
-        } else if (!repository.writeCache.count(id)) {
-          // Delete unreferenced files:
-          if (f.remove()) {
-            if (config.debug)
-              cout << "[d] " << f.path << endl;
-            filesDeleted++;
-            repository.readCache.remove(id);
+          if (f.fname.find(".tmp") != string::npos) {
+            // Delete all tmp files:
+            if (f.remove()) {
+              if (config.debug)
+                cout << "[d] " << f.path << endl;
+              tmpFilesDeleted++;
+            }
+          } else if (!repository.writeCache.count(id)) {
+            // Delete unreferenced files:
+            if (f.remove()) {
+              if (config.debug)
+                cout << "[d] " << f.path << endl;
+              filesDeleted++;
+              repository.readCache.remove(id);
+            }
           }
         }
       }
-    }
+      break;
+
+    default:
+      for (int level0 = 0; level0 <= 0xff; level0++) {
+        sprintf(dirname, "%02x", level0);
+        File dirLevel0(config.filesDir, dirname);
+
+        if (config.verbose)
+          cout << "Removing garbage from: " << dirLevel0.path << "\r" << flush;
+
+        for (int level1 = 0; level1 <= 0xff; level1++) {
+          sprintf(dirname, "%02x", level1);
+          sprintf(idPrefix, "%02x%02x", level0, level1);
+          File dirLevel1(dirLevel0, dirname);
+
+          vector<File> tmpFiles = dirLevel1.listFiles("*");
+          for (vector<File>::iterator it = tmpFiles.begin(); it < tmpFiles.end(); it++) {
+            File f(*it);
+
+            string id = idPrefix;
+            id.append(f.fname);
+
+            if (f.fname.find(".tmp") != string::npos) {
+              // Delete all tmp files:
+              if (f.remove()) {
+                if (config.debug)
+                  cout << "[d] " << f.path << endl;
+                tmpFilesDeleted++;
+              }
+            } else if (!repository.writeCache.count(id)) {
+              // Delete unreferenced files:
+              if (f.remove()) {
+                if (config.debug)
+                  cout << "[d] " << f.path << endl;
+                filesDeleted++;
+                repository.readCache.remove(id);
+              }
+            }
+          }
+        }
+      }
   }
+
   if (config.verbose)
     cout << endl;
 }

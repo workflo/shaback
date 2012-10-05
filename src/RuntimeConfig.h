@@ -80,6 +80,9 @@ class RuntimeConfig
     /** Compression algorithm to be used when creating a new repository. */
     int init_compressionAlgorithm;
 
+    /** Repository format */
+    int init_repoFormat;
+
     File filesDir;
     File indexDir;
     File locksDir;
