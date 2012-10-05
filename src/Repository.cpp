@@ -306,7 +306,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     if (config.verbose) {
       printf("  Storing block: %8d", blockCount);
       cout << "\r";
-      // FIXME: Missing a flush here, ouput is not updated in time
+      cout << flush;
     }
 
     if (!contains(blockHashValue)) {
