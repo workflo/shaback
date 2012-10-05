@@ -175,8 +175,7 @@ File Repository::hashValueToFile(string hashValue)
   string path(config.filesDir.path);
 
   path.append("/").append(hashValue.substr(0, 2));
-  path.append("/").append(hashValue.substr(2, 2));
-  path.append("/").append(hashValue.substr(4));
+  path.append("/").append(hashValue.substr(2));
 
   return File(path);
 }

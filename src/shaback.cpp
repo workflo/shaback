@@ -90,12 +90,6 @@ void Shaback::createRepository()
     sprintf(dirname, "%02x", level0);
     File dirLevel0(config.filesDir, dirname);
     dirLevel0.mkdir();
-
-    for (int level1 = 0; level1 <= 0xff; level1++) {
-      sprintf(dirname, "%02x", level1);
-      File dirLevel1(dirLevel0, dirname);
-      dirLevel1.mkdir();
-    }
   }
 
   // Write default config:
