@@ -600,7 +600,7 @@ int Repository::compressionByName(string name)
 
 int Repository::repoFormatByName(string name)
 {
-  if (name == "default" || name == "standard" || name == "2-2") {
+  if (name == "default" || name == "standard" || name == "2-2" || name == "") {
     return REPOFORMAT_2_2;
   } else if (name == "3") {
     return REPOFORMAT_3;
