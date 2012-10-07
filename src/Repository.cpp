@@ -462,7 +462,7 @@ void Repository::restore()
   }
 
   open();
-  openReadCache();
+  // openReadCache();
 
   string treeSpec = config.cliArgs.at(0);
 
