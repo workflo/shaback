@@ -155,7 +155,7 @@ void Repository::openReadCache()
 int Repository::backup()
 {
   open();
-  importCacheFile();
+  if (config.useWriteCache) importCacheFile();
 
   BackupRun run(config, *this);
   int rc = run.run();
@@ -164,7 +164,7 @@ int Repository::backup()
     run.showTotals();
   }
 
-  exportCacheFile();
+  if (config.useWriteCache) exportCacheFile();
 
   config.runPostBackupCallbacks(&run);
 

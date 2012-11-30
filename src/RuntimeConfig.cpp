@@ -50,6 +50,7 @@ RuntimeConfig::RuntimeConfig()
   help = false;
   force = false;
   haveExclusiveLock = false;
+  useWriteCache = true;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -87,9 +88,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, { "compression",
         required_argument, 0, 'C' }, {"ignore-error", required_argument, 0, 'i'},
         {"repo-format", required_argument, 0, 'F'},
+        {"no-write-cache", no_argument, 0, 'W'},
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:W", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -144,6 +146,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'F':
         init_repoFormat = Repository::repoFormatByName(optarg);
+        break;
+
+      case 'W':
+        useWriteCache = false;
         break;
 
       default:

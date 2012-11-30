@@ -37,6 +37,7 @@ void showUsage(string& op)
   if (op == "backup") {
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-t | --totals] [-p <pw> | --password=<pw>]\n"
+      "                      [-W | --no-write-cache]\n"
       "                      [<file> ...]\n\n"
       "\tPerforms backup run. If no filenames are specified on the command line,\n"
       "\tfiles and directories are backed up as specified in the config file\n"
@@ -49,6 +50,8 @@ void showUsage(string& op)
       "\t    Give summary report at the end of the backup run.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n"
+      "\t-W, --no-write-cache\n"
+      "\t    For systems with insufficient RAM: Don't populate write cache.\n\n"
       "\t<file>...\n"
       "\t    An arbitrary number of files and directories to be backed up.\n"
       "\t    If no files are specified here, the directory list from the config\n"

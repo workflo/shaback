@@ -44,6 +44,7 @@ class RuntimeConfig
     bool oneFileSystem;
     bool showTotals;
     bool help;
+    bool useWriteCache;
 
     std::string operation;
     std::string repository;
