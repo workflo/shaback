@@ -294,8 +294,6 @@ void BackupRun::deleteOldIndexFiles()
   while (true) {
     Date lower(upper);
     lower.addDays(-30);
-    if (lower.compareTo(monthlyLimit) <= 0)
-      break;
     int n = 0;
 //    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
     for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
@@ -308,6 +306,8 @@ void BackupRun::deleteOldIndexFiles()
       }
     }
     upper = lower;
+    if (lower.compareTo(monthlyLimit) <= 0)
+      break;
   }
 
   // Actually delete files:
