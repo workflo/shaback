@@ -164,7 +164,7 @@ class File
 #ifdef WIN32
     WIN32_FIND_DATAA ffblk;
 #else
-    struct stat statBuffer;
+    struct stat64 statBuffer;
 #endif
 };
 

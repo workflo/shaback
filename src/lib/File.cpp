@@ -147,7 +147,7 @@ void File::refresh()
     fileExists = false;
   }
 #else
-  if (lstat(path.c_str(), &statBuffer) == -1) {
+  if (lstat64(path.c_str(), &statBuffer) == -1) {
     fileExists = false;
   } else {
     fileExists = true;

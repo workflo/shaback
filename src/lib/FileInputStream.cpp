@@ -66,7 +66,7 @@ void FileInputStream::init(string& filename)
 
 #else
 
-  handle = ::open(filename.c_str(), O_RDONLY);
+  handle = ::open(filename.c_str(), O_RDONLY | O_LARGEFILE);
 
   if (handle == -1) {
     throw Exception::errnoToException(filename);
