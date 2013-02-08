@@ -162,7 +162,7 @@ int main(int argc, char** argv)
       } else if (config.operation == "backup") {
         return shaback.repository.backup();
       } else if (config.operation == "restore") {
-        shaback.repository.restore();
+        return shaback.repository.restore();
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {

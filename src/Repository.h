@@ -37,7 +37,7 @@ class Repository
     ~Repository();
 
     int backup();
-    void restore();
+    int restore();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -174,8 +174,8 @@ class Repository
     int splitMinBlocks;
     Date startDate;
 
-    void restoreByRootFile(File& rootFile);
-    void restoreByTreeId(std::string& treeId);
+    int restoreByRootFile(File& rootFile);
+    int restoreByTreeId(std::string& treeId);
     void checkPassword();
 
   private:

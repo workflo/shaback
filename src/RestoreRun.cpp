@@ -54,9 +54,12 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         if (config.verbose)
           cout << "[d] " << dir.path << endl;
         dir.mkdirs();
-        restore(entry.id, destinationDir, depth +1);
-
-        restoreMetaData(dir, entry);
+        if (dir.isDir()) {
+          restore(entry.id, destinationDir, depth +1);
+          restoreMetaData(dir, entry);
+        } else {
+          reportError(string("Cannot create destination directory: ").append(dir.path));
+        }
         break;
       }
 
@@ -66,16 +69,24 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         if (config.verbose)
           cout << "[f] " << file.path << endl;
 
-        if (depth == 0)
+        // Create base directory:
+        if (depth == 0) {
           file.getParent().mkdirs();
+          if (!file.getParent().isDir()) {
+            reportError(string("Cannot create destination directory: ").append(file.getParent().path));
+          }
+        }
         file.remove();
 
-        FileOutputStream out(file);
-        repository.exportFile(entry, out);
-        out.close();
-
-        restoreMetaData(file, entry);
-        numFilesRestored++;
+        try {
+          FileOutputStream out(file);
+          repository.exportFile(entry, out);
+          out.close();
+          restoreMetaData(file, entry);
+          numFilesRestored++;
+        } catch (Exception &ex) {
+          reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
+        }
         break;
       }
 

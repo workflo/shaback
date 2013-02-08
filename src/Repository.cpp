@@ -455,7 +455,7 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   cout << "Index file: " << file.path << endl;
 }
 
-void Repository::restore()
+int Repository::restore()
 {
   if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
@@ -467,29 +467,29 @@ void Repository::restore()
   string treeSpec = config.cliArgs.at(0);
 
   if (Digest::looksLikeDigest(treeSpec)) {
-    restoreByTreeId(treeSpec);
+    return restoreByTreeId(treeSpec);
   } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
     string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
     File rootFile(config.indexDir, fname);
 
-    restoreByRootFile(rootFile);
+    return restoreByRootFile(rootFile);
   } else {
     throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
   }
 }
 
-void Repository::restoreByRootFile(File& rootFile)
+int Repository::restoreByRootFile(File& rootFile)
 {
   FileInputStream in(rootFile);
   string hashValue;
   if (in.readLine(hashValue)) {
-    restoreByTreeId(hashValue);
+    return restoreByTreeId(hashValue);
   } else {
     throw RestoreException(string("Root index file is empty: ").append(rootFile.path));
   }
 }
 
-void Repository::restoreByTreeId(string& treeId)
+int Repository::restoreByTreeId(string& treeId)
 {
   RestoreRun run(config, *this);
   File destinationDir(".");
@@ -498,6 +498,8 @@ void Repository::restoreByTreeId(string& treeId)
   if (config.showTotals) {
     run.showTotals();
   }
+
+  return (run.numErrors > 0 ? 1 : 0);
 }
 
 void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
