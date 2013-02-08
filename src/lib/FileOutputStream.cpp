@@ -64,7 +64,7 @@ void FileOutputStream::init(string& filename)
 
 #else
 
-  handle = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | O_LARGEFILE);
+  handle = ::open64(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP);
 
   if (handle == -1) {
     throw Exception::errnoToException(filename);
