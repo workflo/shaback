@@ -69,7 +69,7 @@ void FileInputStream::init(string& filename)
 #if defined(__APPLE__)
   handle = ::open(filename.c_str(), O_RDONLY);
 #else
-  handle = ::open64(filename.c_str(), O_RDONLY | O_LARGEFILE);
+  handle = ::open64(filename.c_str(), O_RDONLY);
 #endif
 
   if (handle == -1) {
