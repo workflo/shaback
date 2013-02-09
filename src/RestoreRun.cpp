@@ -69,6 +69,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         if (config.verbose)
           cout << "[f] " << file.path << endl;
 
+        if (config.skipExisting && file.isFile()) break;
+
         // Create base directory:
         if (depth == 0) {
           file.getParent().mkdirs();

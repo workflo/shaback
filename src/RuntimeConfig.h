@@ -45,6 +45,7 @@ class RuntimeConfig
     bool showTotals;
     bool help;
     bool useWriteCache;
+    bool skipExisting;
 
     std::string operation;
     std::string repository;
