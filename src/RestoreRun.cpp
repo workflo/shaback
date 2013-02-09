@@ -51,12 +51,20 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
         File dir(destinationDir, entry.path);
-        if (config.verbose)
-          cout << "[d] " << dir.path << endl;
-        dir.mkdirs();
+
+        bool skip = (config.skipExisting && dir.isDir());
+
+        if (!skip) {
+          if (config.verbose)
+            cout << "[d] " << dir.path << endl;
+
+          dir.mkdirs();
+        }
         if (dir.isDir()) {
           restore(entry.id, destinationDir, depth +1);
-          restoreMetaData(dir, entry);
+          if (!skip) {
+            restoreMetaData(dir, entry);
+          }
         } else {
           reportError(string("Cannot create destination directory: ").append(dir.path));
         }
@@ -66,10 +74,10 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       case TREEFILEENTRY_FILE: {
         File file(destinationDir, entry.path);
 
+        if (config.skipExisting && file.isFile()) break;
+
         if (config.verbose)
           cout << "[f] " << file.path << endl;
-
-        if (config.skipExisting && file.isFile()) break;
 
         // Create base directory:
         if (depth == 0) {
@@ -94,6 +102,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 
       case TREEFILEENTRY_SYMLINK: {
         File file(destinationDir, entry.path);
+
+        if (config.skipExisting && file.isSymlink()) break;
 
         if (config.verbose)
           cout << "[s] " << file.path << endl;
