@@ -98,9 +98,10 @@ void BzOutputStream::finish()
 
 void BzOutputStream::close()
 {
-  if (ret != BZ_STREAM_END) {
+  if (out) {
     finish();
     out->close();
+    out = 0;
     ret = BZ_STREAM_END;
   }
 }

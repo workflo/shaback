@@ -95,9 +95,10 @@ void DeflateOutputStream::finish()
 
 void DeflateOutputStream::close()
 {
-  if (ret != Z_STREAM_END) {
+  if (out) {
     finish();
     out->close();
+    out = 0;
     ret = Z_STREAM_END;
   }
 }

@@ -80,9 +80,10 @@ int LzmaInputStream::read(char* b, int len)
 
 void LzmaInputStream::close()
 {
-  if (ret != LZMA_STREAM_END) {
+  if (in) {
     lzma_end(&zipStream);
     in->close();
+    in = 0;
     ret = LZMA_STREAM_END;
   }
 }

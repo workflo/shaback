@@ -78,9 +78,10 @@ int DeflateInputStream::read(char* b, int len)
 
 void DeflateInputStream::close()
 {
-  if (ret != Z_STREAM_END) {
+  if (in) {
     inflateEnd(&zipStream);
     in->close();
+    in = 0;
     ret = Z_STREAM_END;
   }
 }
