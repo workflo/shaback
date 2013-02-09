@@ -112,6 +112,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
           file.getParent().mkdirs();
 
         repository.exportSymlink(entry, file);
+        restoreMetaData(file, entry);
         numFilesRestored++;
         break;
       }
@@ -125,14 +126,14 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
 {
   try {
-    file.chown(entry.uid, entry.gid);
+    file.lchown(entry.uid, entry.gid);
   } catch (Exception& ex) {
     if (!config.ignoreErrors.count("chown"))
       reportError(string("chown: ").append(ex.getMessage()));
   }
 
   try {
-    file.chmod(entry.fileMode);
+    file.lchmod(entry.fileMode);
   } catch (Exception& ex) {
     if (!config.ignoreErrors.count("chmod"))
       reportError(string("chmod: ").append(ex.getMessage()));
