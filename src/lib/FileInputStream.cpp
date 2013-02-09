@@ -66,7 +66,11 @@ void FileInputStream::init(string& filename)
 
 #else
 
+#if defined(__APPLE__)
+  handle = ::open(filename.c_str(), O_RDONLY);
+#else
   handle = ::open64(filename.c_str(), O_RDONLY | O_LARGEFILE);
+#endif
 
   if (handle == -1) {
     throw Exception::errnoToException(filename);
