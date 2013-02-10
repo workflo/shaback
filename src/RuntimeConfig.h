@@ -44,6 +44,8 @@ class RuntimeConfig
     bool oneFileSystem;
     bool showTotals;
     bool help;
+    bool useWriteCache;
+    bool skipExisting;
 
     std::string operation;
     std::string repository;
@@ -79,6 +81,9 @@ class RuntimeConfig
 
     /** Compression algorithm to be used when creating a new repository. */
     int init_compressionAlgorithm;
+
+    /** Repository format */
+    int init_repoFormat;
 
     File filesDir;
     File indexDir;

@@ -37,7 +37,7 @@ class Repository
     ~Repository();
 
     int backup();
-    void restore();
+    int restore();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -130,6 +130,14 @@ class Repository
     static int compressionByName(std::string name);
 
     /**
+     * Maps the given name of a repository format to its respective
+     * constant.
+     *
+     * @throws UnsupportedRepositoryFormat If the given format is not known.
+     */
+    static int repoFormatByName(std::string name);
+
+    /**
      * Returns the hash digest for the given password as a hex string.
      */
     static std::string hashPassword(std::string password);
@@ -144,11 +152,18 @@ class Repository
      */
     static std::string encryptionToName(int encryption);
 
+    /**
+     * Maps the internal repository format's number to a human-readable name.
+     */
+    static std::string repoFormatToName(int fmt);
+
     /** The temporary write cache. Used to speed up backup. */
     std::set<std::string> writeCache;
 
     /** The (persistent) read cache. Used to speed up traversing tree files. */
     Cache readCache;
+
+    int repoFormat;
 
   protected:
     RuntimeConfig config;
@@ -159,8 +174,8 @@ class Repository
     int splitMinBlocks;
     Date startDate;
 
-    void restoreByRootFile(File& rootFile);
-    void restoreByTreeId(std::string& treeId);
+    int restoreByRootFile(File& rootFile);
+    int restoreByTreeId(std::string& treeId);
     void checkPassword();
 
   private:
@@ -190,6 +205,9 @@ class Repository
 
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2
+
+#define REPOFORMAT_2_2      0
+#define REPOFORMAT_3        1
 
 // Don't touch me!
 #define PASSWORDFILE_SALT "This salt makes the hashed password useless for decryption"

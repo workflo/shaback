@@ -174,7 +174,7 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
 #else
       file.getSize()
 #endif
-      );
+  );
   treeFileLine.append(buf);
 
   // Access Control Lists:
@@ -244,54 +244,103 @@ void BackupRun::deleteOldIndexFiles()
   pattern.append("_????" "-??" "-??_??????.sroot");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
+
+  if (indexFiles.size() <= 2) return; // Don't delete latest two backups
+
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
   reverse(indexFiles.begin(), indexFiles.end());
   vector<Date> dates;
+  vector<Date> toDelete;
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
     Date d(file.fname.substr(config.backupName.size() + 1));
     dates.push_back(d);
-    //    cout << file.path << " ... " << d.toFilename() << endl;
   }
 
   int idx = 0;
   Date now;
-  Date date(now);
-  date.addDays(-config.keepOldBackupsBoundaries[0]);
 
-  while (idx < dates.size()) {
-    if (date.compareTo(dates[idx]) <= 0) {
-      // Keep and continue with next:
-//      cout << "    Keeping " << dates[idx].toFilename() << endl;
-      idx++;
-      continue;
-    } else {
-      if (now.diff(date) >= config.keepOldBackupsBoundaries[2])
-        date.addDays(-30);
-      else if (now.diff(date) >= config.keepOldBackupsBoundaries[1])
-        date.addDays(-7);
-      else if (now.diff(date) >= config.keepOldBackupsBoundaries[0])
-        date.addDays(-1);
-//      cout << "  next boundary " << date.toFilename() << "   diff=" << (now.diff(date)) << endl;
+  Date upper(now);
+  upper.addDays(-config.keepOldBackupsBoundaries[0]);
+  upper.setTimeOfDay(0, 0, 0);
 
-      if (date.compareTo(dates[idx]) > 0)
-        continue;
+//  cout << "   upper: " << upper.toFilename() << endl;
 
-      // Keep first from next block:
-//      cout << "    Keeping " << dates[idx].toFilename() << endl;
-      idx++;
-
-      // Delete until next boundary:
-      while (idx < dates.size() && date.compareTo(dates[idx]) < 0) {
-        string fname(config.backupName);
-        fname.append("_").append(dates[idx].toFilename()).append(".sroot");
-        File file(config.indexDir, fname);
-        if (config.verbose)
-          cout << "Deleting old index file " << file.path.c_str() << endl;
-        file.remove();
-        idx++;
+  // Keep daily backups:
+  Date dailyLimit(upper);
+  dailyLimit.addDays(-config.keepOldBackupsBoundaries[1]);
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-1);
+    if (lower.compareTo(dailyLimit) <= 0)
+      break;
+    int n = 0;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        n++;
+        if (n > 1) {
+          toDelete.push_back(d);
+        }
       }
     }
+    upper = lower;
+  }
+
+  // Keep weekly backups:
+  Date weeklyLimit(upper);
+  weeklyLimit.addDays(-config.keepOldBackupsBoundaries[2]);
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-7);
+    if (lower.compareTo(weeklyLimit) <= 0)
+      break;
+    int n = 0;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        n++;
+        if (n > 1) {
+          toDelete.push_back(d);
+        }
+      }
+    }
+    upper = lower;
+  }
+
+  // Keep monthly backups:
+  Date monthlyLimit(dates.back());
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-30);
+    int n = 0;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        n++;
+        if (n > 1) {
+          toDelete.push_back(d);
+        }
+      }
+    }
+    upper = lower;
+    if (lower.compareTo(monthlyLimit) <= 0)
+      break;
+  }
+
+  // Actually delete files:
+  for (vector<Date>::iterator it = toDelete.begin(); it < toDelete.end(); it++) {
+    Date d(*it);
+    string fname(config.backupName);
+    fname.append("_").append(d.toFilename()).append(".sroot");
+    File file(config.indexDir, fname);
+    if (config.verbose) {
+      cout << "Deleting old index file " << file.path.c_str() << endl;
+    }
+    file.remove();
   }
 }

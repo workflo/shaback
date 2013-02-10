@@ -51,36 +51,59 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
         File dir(destinationDir, entry.path);
-        if (config.verbose)
-          cout << "[d] " << dir.path << endl;
-        dir.mkdirs();
-        restore(entry.id, destinationDir, depth + 1);
 
-        restoreMetaData(dir, entry);
+        bool skip = (config.skipExisting && dir.isDir());
+
+        if (!skip) {
+          if (config.verbose)
+            cout << "[d] " << dir.path << endl;
+
+          dir.mkdirs();
+        }
+        if (dir.isDir()) {
+          restore(entry.id, destinationDir, depth +1);
+          if (!skip) {
+            restoreMetaData(dir, entry);
+          }
+        } else {
+          reportError(string("Cannot create destination directory: ").append(dir.path));
+        }
         break;
       }
 
       case TREEFILEENTRY_FILE: {
         File file(destinationDir, entry.path);
 
+        if (config.skipExisting && file.isFile()) break;
+
         if (config.verbose)
           cout << "[f] " << file.path << endl;
 
-        if (depth == 0)
+        // Create base directory:
+        if (depth == 0) {
           file.getParent().mkdirs();
+          if (!file.getParent().isDir()) {
+            reportError(string("Cannot create destination directory: ").append(file.getParent().path));
+          }
+        }
         file.remove();
 
-        FileOutputStream out(file);
-        repository.exportFile(entry, out);
-        out.close();
-
-        restoreMetaData(file, entry);
-        numFilesRestored++;
+        try {
+          FileOutputStream out(file);
+          repository.exportFile(entry, out);
+          out.close();
+          restoreMetaData(file, entry);
+          numFilesRestored++;
+        } catch (Exception &ex) {
+          reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
+        }
         break;
       }
 
       case TREEFILEENTRY_SYMLINK: {
         File file(destinationDir, entry.path);
+
+        if (config.skipExisting && file.isSymlink()) break;
 
         if (config.verbose)
           cout << "[s] " << file.path << endl;
@@ -89,6 +112,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
           file.getParent().mkdirs();
 
         repository.exportSymlink(entry, file);
+        restoreMetaData(file, entry);
         numFilesRestored++;
         break;
       }
@@ -102,7 +126,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
 {
   try {
-    file.chown(entry.uid, entry.gid);
+    file.lchown(entry.uid, entry.gid);
   } catch (Exception& ex) {
     if (!config.ignoreErrors.count("chown"))
       reportError(string("chown: ").append(ex.getMessage()));
@@ -114,7 +138,7 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
   }
 
   try {
-    file.chmod(entry.fileMode);
+    file.lchmod(entry.fileMode);
   } catch (Exception& ex) {
     if (!config.ignoreErrors.count("chmod"))
       reportError(string("chmod: ").append(ex.getMessage()));

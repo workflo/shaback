@@ -79,9 +79,10 @@ int BzInputStream::read(char* b, int len)
 
 void BzInputStream::close()
 {
-  if (ret != BZ_STREAM_END) {
+  if (in) {
     BZ2_bzDecompressEnd(&zipStream);
     in->close();
+    in = 0;
     ret = BZ_STREAM_END;
   }
 }

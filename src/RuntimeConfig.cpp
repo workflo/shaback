@@ -50,8 +50,12 @@ RuntimeConfig::RuntimeConfig()
   help = false;
   force = false;
   haveExclusiveLock = false;
+  useWriteCache = true;
+  skipExisting = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
+  init_repoFormat = REPOFORMAT_2_2;
+
   backupName = "noname";
   splitFileBlockSize = 1024 * 1024 * 5;
   splitFileMinSize = splitFileBlockSize * 5;
@@ -83,9 +87,13 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         "totals", no_argument, 0, 't' }, { "config", required_argument, 0, 'c' }, { "repository", required_argument, 0,
         'r' }, { "force", no_argument, 0, 'f' }, { "password", required_argument, 0, 'p' }, { "name", required_argument,
         0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, { "compression",
-        required_argument, 0, 'C' }, {"ignore-error", required_argument, 0, 'i'}, { 0, 0, 0, 0 } };
+        required_argument, 0, 'C' }, {"ignore-error", required_argument, 0, 'i'},
+        {"repo-format", required_argument, 0, 'F'},
+        {"no-write-cache", no_argument, 0, 'W'},
+        {"skip-existing", no_argument, 0, 'S'},
+        { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:i:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WS", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -136,6 +144,18 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'C':
         init_compressionAlgorithm = Repository::compressionByName(optarg);
+        break;
+
+      case 'F':
+        init_repoFormat = Repository::repoFormatByName(optarg);
+        break;
+
+      case 'W':
+        useWriteCache = false;
+        break;
+
+      case 'S':
+        skipExisting = true;
         break;
 
       default:

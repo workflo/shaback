@@ -99,9 +99,10 @@ void LzmaOutputStream::finish()
 
 void LzmaOutputStream::close()
 {
-  if (ret != LZMA_STREAM_END) {
+  if (out) {
     finish();
     out->close();
+    out = 0;
     ret = LZMA_STREAM_END;
   }
 }

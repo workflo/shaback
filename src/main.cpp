@@ -37,6 +37,7 @@ void showUsage(string& op)
   if (op == "backup") {
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-t | --totals] [-p <pw> | --password=<pw>]\n"
+      "                      [-W | --no-write-cache]\n"
       "                      [<file> ...]\n\n"
       "\tPerforms backup run. If no filenames are specified on the command line,\n"
       "\tfiles and directories are backed up as specified in the config file\n"
@@ -49,16 +50,23 @@ void showUsage(string& op)
       "\t    Give summary report at the end of the backup run.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n"
+      "\t-W, --no-write-cache\n"
+      "\t    For systems with insufficient RAM: Don't populate write cache.\n\n"
       "\t<file>...\n"
       "\t    An arbitrary number of files and directories to be backed up.\n"
       "\t    If no files are specified here, the directory list from the config\n"
       "\t    file takes effect.\n\n");
   } else if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
-      "                      [-t | --totals] <rootfile> | <dir-id>\n\n");
+      "                      [-t | --totals] [-S | --skip-existing]\n"
+      "                      <rootfile> | <dir-id>\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
       "\t<rootfile> is a filename from the repository's index/ directory.\n"
-      "\t<dir-id> is the ID of the directory file to be restored.\n"
+      "\t<dir-id> is the ID of the directory file to be restored.\n\n"
+      "\t-S, --skip-existing\n"
+      "\t    Skip files already existing in destination directory.\n\n"
+      "\t-t, --totals\n"
+      "\t    Give summary report at the end of the recovery run.\n\n"
       "\n"
       "\tFiles will always be restored into the CWD.\n");
   } else if (op == "gc") {
@@ -69,7 +77,10 @@ void showUsage(string& op)
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
   } else if (op == "init") {
     printf("usage: shaback init [<general_options>] [-f | --force]\n"
-      "                      [-E <enc> | --encryption=<enc>] [-p <pw> | --password=<pw>]\n\n"
+      "                      [-E <enc> | --encryption=<enc>]\n"
+      "                      [-C <comp> | --compression=<comp>]\n"
+      "                      [-F <fmt> | --repo-format=<fmt>]\n"
+      "                      [-p <pw> | --password=<pw>]\n\n"
       "\tCreates a new repository at the location specified in one of the config files\n"
       "\tor via the --repository option. Defaults to the current working directory.\n\n"
       "Options:\n"
@@ -90,6 +101,9 @@ void showUsage(string& op)
 #endif
            " or `Deflate'.\n"
       "\t    Defaults to `Deflate'.\n\n"
+      "\t-F=<fmt>, --repo-format=<fmt>\n"
+      "\t    Select an alternative repository format.\n"
+      "\t    <fmt> must be one of: `2-2' or `3', where `2-2' is the default.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n");
   } else if (op == "deflate") {
@@ -153,7 +167,7 @@ int main(int argc, char** argv)
       } else if (config.operation == "backup") {
         return shaback.repository.backup();
       } else if (config.operation == "restore") {
-        shaback.repository.restore();
+        return shaback.repository.restore();
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {

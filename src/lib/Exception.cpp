@@ -111,6 +111,11 @@ UnsupportedEncryptionAlgorithm::UnsupportedEncryptionAlgorithm(string algo) :
 {
 }
 
+UnsupportedRepositoryFormat::UnsupportedRepositoryFormat(string fmt) :
+  Exception(string("Unsupported repository format: ").append(fmt))
+{
+}
+
 UnsupportedOperation::UnsupportedOperation(string op) :
   Exception(string("Unsupported operation: ").append(op))
 {

@@ -63,8 +63,11 @@ void FileOutputStream::init(string& filename)
   }
 
 #else
-
+#if defined(__APPLE__)
   handle = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP);
+#else
+  handle = ::open64(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP);
+#endif
 
   if (handle == -1) {
     throw Exception::errnoToException(filename);

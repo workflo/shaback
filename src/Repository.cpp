@@ -76,6 +76,7 @@ void Repository::open()
 
   compressionAlgorithm = compressionByName(props.getProperty("compression"));
   encryptionAlgorithm = encryptionByName(props.getProperty("encryption"));
+  repoFormat = repoFormatByName(props.getProperty("repoFormat"));
 
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
@@ -154,7 +155,7 @@ void Repository::openReadCache()
 int Repository::backup()
 {
   open();
-  importCacheFile();
+  if (config.useWriteCache) importCacheFile();
 
   BackupRun run(config, *this);
   int rc = run.run();
@@ -163,7 +164,7 @@ int Repository::backup()
     run.showTotals();
   }
 
-  exportCacheFile();
+  if (config.useWriteCache) exportCacheFile();
 
   config.runPostBackupCallbacks(&run);
 
@@ -174,9 +175,17 @@ File Repository::hashValueToFile(string hashValue)
 {
   string path(config.filesDir.path);
 
-  path.append("/").append(hashValue.substr(0, 2));
-  path.append("/").append(hashValue.substr(2, 2));
-  path.append("/").append(hashValue.substr(4));
+  switch (repoFormat) {
+    case REPOFORMAT_3:
+      path.append("/").append(hashValue.substr(0, 3));
+      path.append("/").append(hashValue.substr(3));
+      break;
+    default:
+      path.append("/").append(hashValue.substr(0, 2));
+      path.append("/").append(hashValue.substr(2, 2));
+      path.append("/").append(hashValue.substr(4));
+      break;
+  }
 
   return File(path);
 }
@@ -306,7 +315,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
     if (config.verbose) {
       printf("  Storing block: %8d", blockCount);
       cout << "\r";
-      // FIXME: Missing a flush here, ouput is not updated in time
+      cout << flush;
     }
 
     if (!contains(blockHashValue)) {
@@ -446,41 +455,41 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   cout << "Index file: " << file.path << endl;
 }
 
-void Repository::restore()
+int Repository::restore()
 {
   if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   }
 
   open();
-  openReadCache();
+  // openReadCache();
 
   string treeSpec = config.cliArgs.at(0);
 
   if (Digest::looksLikeDigest(treeSpec)) {
-    restoreByTreeId(treeSpec);
+    return restoreByTreeId(treeSpec);
   } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
     string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
     File rootFile(config.indexDir, fname);
 
-    restoreByRootFile(rootFile);
+    return restoreByRootFile(rootFile);
   } else {
     throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
   }
 }
 
-void Repository::restoreByRootFile(File& rootFile)
+int Repository::restoreByRootFile(File& rootFile)
 {
   FileInputStream in(rootFile);
   string hashValue;
   if (in.readLine(hashValue)) {
-    restoreByTreeId(hashValue);
+    return restoreByTreeId(hashValue);
   } else {
     throw RestoreException(string("Root index file is empty: ").append(rootFile.path));
   }
 }
 
-void Repository::restoreByTreeId(string& treeId)
+int Repository::restoreByTreeId(string& treeId)
 {
   RestoreRun run(config, *this);
   File destinationDir(".");
@@ -489,6 +498,8 @@ void Repository::restoreByTreeId(string& treeId)
   if (config.showTotals) {
     run.showTotals();
   }
+
+  return (run.numErrors > 0 ? 1 : 0);
 }
 
 void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
@@ -589,6 +600,17 @@ int Repository::compressionByName(string name)
   }
 }
 
+int Repository::repoFormatByName(string name)
+{
+  if (name == "default" || name == "standard" || name == "2-2" || name == "") {
+    return REPOFORMAT_2_2;
+  } else if (name == "3") {
+    return REPOFORMAT_3;
+  } else {
+    throw UnsupportedRepositoryFormat(name);
+  }
+}
+
 string Repository::compressionToName(int compression)
 {
   switch (compression) {
@@ -620,6 +642,16 @@ string Repository::encryptionToName(int encryption)
       return "Blowfish";
     default:
       return "None";
+  }
+}
+
+string Repository::repoFormatToName(int fmt)
+{
+  switch (fmt) {
+    case REPOFORMAT_3:
+      return "3";
+    default:
+      return "2-2";
   }
 }
 

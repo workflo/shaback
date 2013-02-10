@@ -73,6 +73,8 @@ class File
 
     void chmod(int mode);
     void chown(int uid, int gid);
+    void lchmod(int mode);
+    void lchown(int uid, int gid);
     void utime(int mtime);
 
     /**
@@ -175,7 +177,7 @@ class File
 #ifdef WIN32
     WIN32_FIND_DATAA ffblk;
 #else
-    struct stat statBuffer;
+    struct stat64 statBuffer;
 #endif
 };
 

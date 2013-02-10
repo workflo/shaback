@@ -86,16 +86,28 @@ void Shaback::createRepository()
   }
 
   char dirname[20];
-  for (int level0 = 0; level0 <= 0xff; level0++) {
-    sprintf(dirname, "%02x", level0);
-    File dirLevel0(config.filesDir, dirname);
-    dirLevel0.mkdir();
 
-    for (int level1 = 0; level1 <= 0xff; level1++) {
-      sprintf(dirname, "%02x", level1);
-      File dirLevel1(dirLevel0, dirname);
-      dirLevel1.mkdir();
-    }
+  switch (config.init_repoFormat) {
+    case REPOFORMAT_3:
+      for (int level0 = 0; level0 <= 0xfff; level0++) {
+        sprintf(dirname, "%03x", level0);
+        File dirLevel0(config.filesDir, dirname);
+        dirLevel0.mkdir();
+      }
+      break;
+
+    default:
+      for (int level0 = 0; level0 <= 0xff; level0++) {
+        sprintf(dirname, "%02x", level0);
+        File dirLevel0(config.filesDir, dirname);
+        dirLevel0.mkdir();
+        for (int level1 = 0; level1 <= 0xff; level1++) {
+          sprintf(dirname, "%02x", level1);
+          File dirLevel1(dirLevel0, dirname);
+          dirLevel1.mkdir();
+        }
+      }
+      break;
   }
 
   // Write default config:
@@ -107,6 +119,7 @@ void Shaback::createRepository()
     repoProperties.append(Repository::compressionToName(config.init_compressionAlgorithm)).append("\nencryption = ") .append(
         Repository::encryptionToName(config.init_encryptionAlgorithm)).append("\n"
       "digest = SHA1\n");
+    repoProperties.append("repoFormat = ").append(Repository::repoFormatToName(config.init_repoFormat)).append("\n");
     FileOutputStream os(config.repoPropertiesFile);
     os.write(repoProperties.data(), repoProperties.size());
   }

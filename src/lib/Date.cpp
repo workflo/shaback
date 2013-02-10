@@ -131,3 +131,16 @@ double Date::diff(Date other)
 {
   return difftime(rawtime, other.rawtime) / (60 * 60 * 24);
 }
+
+void Date::setTimeOfDay(int h, int m, int s)
+{
+  struct tm * ptm;
+  ptm = gmtime(&rawtime);
+
+  ptm->tm_hour = h;
+  ptm->tm_min = m;
+  ptm->tm_sec = s;
+
+  rawtime = timegm(ptm);
+  internalize();
+}

@@ -148,7 +148,7 @@ void File::refresh()
     fileExists = false;
   }
 #else
-  if (lstat(path.c_str(), &statBuffer) == -1) {
+  if (lstat64(path.c_str(), &statBuffer) == -1) {
     fileExists = false;
   } else {
     fileExists = true;
@@ -369,9 +369,23 @@ void File::chmod(int mode)
     throw Exception::errnoToException(path);
 }
 
+void File::lchmod(int mode)
+{
+  int ret = ::lchmod(path.c_str(), mode);
+  if (ret != 0)
+    throw Exception::errnoToException(path);
+}
+
 void File::chown(int uid, int gid)
 {
   int ret = ::chown(path.c_str(), uid, uid);
+  if (ret != 0)
+    throw Exception::errnoToException(path);
+}
+
+void File::lchown(int uid, int gid)
+{
+  int ret = ::lchown(path.c_str(), uid, uid);
   if (ret != 0)
     throw Exception::errnoToException(path);
 }
