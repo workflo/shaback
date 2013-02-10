@@ -33,7 +33,8 @@ extern "C" {
 
 #include "RuntimeConfig.h"
 #include "ShabackConfig.h"
-#include "Repository.h"
+#include "LocalRepository.h"
+//#include "RemoteSshRepository.h"
 #include "BackupRun.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
@@ -172,6 +173,16 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         cliArgs.push_back(argv[optind++]);
       }
     }
+  }
+}
+
+Repository* RuntimeConfig::getRepositoryInstance()
+{
+  switch (remoteType) {
+    case REMOTE_TYPE_SSH:
+//      return RemoteSshRepository(*this);
+    default:
+      return new LocalRepository(*this);
   }
 }
 
@@ -404,7 +415,19 @@ void RuntimeConfig::finalize()
   char pid[20];
   sprintf(pid, "%u", getpid());
 
-  repoDir = File(repository);
+  int colonPos = repository.find(":");
+  if (colonPos == string::npos) {
+    // Local repository:
+    repoDir = File(repository);
+    remoteType = REMOTE_TYPE_LOCAL;
+    remotePart = "";
+  } else {
+    // Remote repository:
+    repoDir = File(repository.substr(colonPos +1));
+    remoteType = REMOTE_TYPE_SSH;
+    remotePart = repository.substr(0, colonPos);
+  }
+
   filesDir = File(repoDir, "files");
   indexDir = File(repoDir, "index");
   locksDir = File(repoDir, "locks");

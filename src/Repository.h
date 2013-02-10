@@ -34,84 +34,84 @@ class Repository
 {
   public:
     Repository(RuntimeConfig& config);
-    ~Repository();
+    virtual ~Repository();
 
-    int backup();
-    int restore();
+    virtual int backup();
+    virtual int restore();
 
     /**
      * Checks whether all required directories and files can be found.
      * Lodas the repository's config file (repo.properties) to determine
      * compression and encryptions parameters.
      */
-    void open();
+    virtual void open() = 0;
 
     /**
      * Tries to acquire a read/write lock on the repository.
      *
      * @param exclusive Whether to acquire an exclusive write lock (for garbage collection etc.).
      */
-    void lock(bool exclusive = false);
+    virtual void lock(bool exclusive = false) = 0;
 
     /**
      * Releases the acquired lock.
      */
-    void unlock();
+    virtual void unlock() = 0;
 
     /**
      * 'show' command. Exports a file or tree file from the repository.
      */
-    void show();
+    virtual void show() = 0;
 
     /**
      * 'gc' command. Performs a garbage collection on the repository.
      */
-    void gc();
+    virtual void gc() = 0;
 
     File hashValueToFile(std::string hashValue);
-    bool contains(std::string& hashValue);
-    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
-    std::string storeFile(BackupRun* run, File& srcFile);
-    void storeRootTreeFile(std::string& rootHashValue);
-    void importCacheFile();
+//    bool contains(std::string& hashValue);
+    virtual std::string storeTreeFile(BackupRun* run, std::string& treeFile) = 0;
+    virtual std::string storeFile(BackupRun* run, File& srcFile) = 0;
+    virtual void storeRootTreeFile(std::string& rootHashValue) = 0;
+//    void importCacheFile();
+//
+//    /**
+//     * Exports all hash digests from the local cache file into
+//     * a new cache file in the repository's cache/ directory.
+//     */
+//    void exportCacheFile();
 
-    /**
-     * Exports all hash digests from the local cache file into
-     * a new cache file in the repository's cache/ directory.
-     */
-    void exportCacheFile();
-
-    std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
-    void exportFile(TreeFileEntry& entry, OutputStream& out);
+    virtual std::vector<TreeFileEntry> loadTreeFile(std::string& treeId) = 0;
+    virtual void exportFile(TreeFileEntry& entry, OutputStream& out) = 0;
 
     /**
      * Reads the backup file represented by the given ID to the given
      * \c OutputStream.
      */
-    void exportFile(std::string& id, OutputStream& out);
-    void exportSymlink(TreeFileEntry& entry, File& outFile);
+    virtual void exportFile(std::string& id, OutputStream& out) = 0;
+    virtual void exportSymlink(TreeFileEntry& entry, File& outFile) = 0;
 
-    /**
-     * Lazily opens the read cache.
-     */
-    void openReadCache();
+//    /**
+//     * Lazily opens the read cache.
+//     */
+//    void openReadCache();
 
-    /**
-     * Removes all files from the repository's cache/ directory.
-     */
-    void removeAllCacheFiles();
+//    /**
+//     * Removes all files from the repository's cache/ directory.
+//     */
+//    void removeAllCacheFiles();
 
     /**
      * Returns a new \c ShabackInputStream configured to read a file from this
      * repository.
      */
-    ShabackInputStream createInputStream();
+    virtual ShabackInputStream createInputStream() = 0;
 
-    /**
-     * Returns a new \c ShabackOutputStream configured to write a file to this
-     * repository.
-     */
-    ShabackOutputStream createOutputStream();
+//    /**
+//     * Returns a new \c ShabackOutputStream configured to write a file to this
+//     * repository.
+//     */
+//    ShabackOutputStream createOutputStream();
 
     /**
      * Maps the given name of an encryption algorithm to its respective
@@ -157,11 +157,11 @@ class Repository
      */
     static std::string repoFormatToName(int fmt);
 
-    /** The temporary write cache. Used to speed up backup. */
-    std::set<std::string> writeCache;
-
-    /** The (persistent) read cache. Used to speed up traversing tree files. */
-    Cache readCache;
+//    /** The temporary write cache. Used to speed up backup. */
+//    std::set<std::string> writeCache;
+//
+//    /** The (persistent) read cache. Used to speed up traversing tree files. */
+//    Cache readCache;
 
     int repoFormat;
 
@@ -170,22 +170,22 @@ class Repository
     int hashAlgorithm;
     int encryptionAlgorithm;
     int compressionAlgorithm;
-    int splitBlockSize;
-    int splitMinBlocks;
+//    int splitBlockSize;
+//    int splitMinBlocks;
     Date startDate;
-
+//
     int restoreByRootFile(File& rootFile);
     int restoreByTreeId(std::string& treeId);
-    void checkPassword();
-
-  private:
-    /**
-     * Splits the input stream into chunks and stores them
-     * individually.
-     */
-    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
-
-    char* readBuffer;
+//    void checkPassword();
+//
+//  private:
+//    /**
+//     * Splits the input stream into chunks and stores them
+//     * individually.
+//     */
+//    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
+//
+//    char* readBuffer;
 };
 
 #define COMPRESSION_NONE    0

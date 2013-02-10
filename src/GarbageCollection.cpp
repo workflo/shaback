@@ -31,7 +31,7 @@
 
 using namespace std;
 
-GarbageCollection::GarbageCollection(RuntimeConfig& config, Repository& repository) :
+GarbageCollection::GarbageCollection(RuntimeConfig& config, LocalRepository& repository) :
     repository(repository), config(config), numErrors(0), tmpFilesDeleted(0), filesDeleted(0)
 {
 }

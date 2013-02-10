@@ -21,14 +21,14 @@
 
 #include <string>
 #include <set>
-#include "Repository.h"
+#include "LocalRepository.h"
 #include "lib/File.h"
 #include "lib/Exception.h"
 
 class GarbageCollection
 {
   public:
-    GarbageCollection(RuntimeConfig& config, Repository& Repository);
+    GarbageCollection(RuntimeConfig& config, LocalRepository& Repository);
     ~GarbageCollection();
 
     void run();
@@ -46,7 +46,7 @@ class GarbageCollection
      */
     void keepSplitFileBlocks(TreeFileEntry& entry);
 
-    Repository& repository;
+    LocalRepository& repository;
     RuntimeConfig& config;
     int numErrors;
     int tmpFilesDeleted;

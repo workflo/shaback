@@ -165,13 +165,13 @@ int main(int argc, char** argv)
       if (config.operation == "init") {
         shaback.createRepository();
       } else if (config.operation == "backup") {
-        return shaback.repository.backup();
+        return shaback.repository->backup();
       } else if (config.operation == "restore") {
-        return shaback.repository.restore();
+        return shaback.repository->restore();
       } else if (config.operation == "show") {
-        shaback.repository.show();
+        shaback.repository->show();
       } else if (config.operation == "gc") {
-        shaback.repository.gc();
+        shaback.repository->gc();
       } else if (config.operation == "deflate") {
         return shaback.deflate();
       } else if (config.operation == "inflate") {

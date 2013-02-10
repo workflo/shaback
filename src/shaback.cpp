@@ -32,7 +32,7 @@
 using namespace std;
 
 Shaback::Shaback(RuntimeConfig& config) :
-  config(config), repository(Repository(config))
+  config(config), repository(config.getRepositoryInstance())
 {
 }
 

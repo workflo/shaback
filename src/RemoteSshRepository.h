@@ -16,25 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_H
-#define SHABACK_H
+#ifndef SHABACK_RemoteRepository_H
+#define SHABACK_RemoteRepository_H
 
-#include "RuntimeConfig.h"
 #include "Repository.h"
 
-class Shaback
+class RemoteRepository : public Repository
 {
-public:
-    Shaback(RuntimeConfig& config);
-    virtual ~Shaback();
-    virtual void createRepository();
-    static int deflate();
-    static int inflate();
+  public:
+    RemoteRepository(RuntimeConfig& config);
+    ~RemoteRepository();
 
-    Repository* repository;
-    
+
   protected:
-    RuntimeConfig& config;
-};
 
-#endif // SHABACK_H
+  private:
+};
+#endif // SHABACK_RemoteRepository_H

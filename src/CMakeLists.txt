@@ -21,6 +21,7 @@ add_executable(shaback
 		GarbageCollection.cpp
 		main.cpp 
 		Repository.cpp
+		LocalRepository.cpp
 		RestoreRun.cpp
 		RuntimeConfig.cpp 
 		shaback.cpp 

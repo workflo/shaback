@@ -28,12 +28,16 @@ extern "C" {
 # include <lua.h>
 }
 class BackupRun;
+class Repository;
 
 class RuntimeConfig
 {
   public:
     RuntimeConfig();
     ~RuntimeConfig();
+
+    Repository* getRepositoryInstance();
+
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
@@ -47,8 +51,16 @@ class RuntimeConfig
     bool useWriteCache;
     bool skipExisting;
 
+    /** Type of repository: \c REMOTE_TYPE_LOCAL or \c REMOTE_TYPE_SSH/ */
+    int remoteType;
+
     std::string operation;
+
+    /** Repository URL as given by config parameter or command line option. */
     std::string repository;
+
+    /** For remote repositories: The remote part of repo URL. */
+    std::string remotePart;
 
     /** The temporary write cache file. */
     File writeCacheFile;
@@ -164,5 +176,8 @@ class RuntimeConfig
     void initLua();
     void tryToLoadFrom(std::string dir);
 };
+
+#define REMOTE_TYPE_LOCAL     0
+#define REMOTE_TYPE_SSH       1
 
 #endif // SHABACK_RuntimeConfig_H
