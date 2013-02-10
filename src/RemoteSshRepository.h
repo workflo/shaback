@@ -16,20 +16,54 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_RemoteRepository_H
-#define SHABACK_RemoteRepository_H
+#ifndef SHABACK_RemoteSshRepository_H
+#define SHABACK_RemoteSshRepository_H
 
 #include "Repository.h"
+#include "lib/Process.h"
 
-class RemoteRepository : public Repository
+class RemoteSshRepository : public Repository
 {
   public:
-    RemoteRepository(RuntimeConfig& config);
-    ~RemoteRepository();
+    RemoteSshRepository(RuntimeConfig& config);
+    ~RemoteSshRepository();
 
+    void open();
+
+    void lock(bool exclusive = false);
+
+    void unlock();
+    void show();
+
+    File hashValueToFile(std::string hashValue);
+    bool contains(std::string& hashValue);
+    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
+    std::string storeFile(BackupRun* run, File& srcFile);
+    void storeRootTreeFile(std::string& rootHashValue);
+    void importCacheFile();
+
+    void exportCacheFile();
+
+    std::vector<TreeFileEntry> loadTreeFile(std::string& treeId);
+    void exportFile(TreeFileEntry& entry, OutputStream& out);
+
+    void exportFile(std::string& id, OutputStream& out);
+    void exportSymlink(TreeFileEntry& entry, File& outFile);
+
+    void openReadCache();
+
+    void removeAllCacheFiles();
+
+    ShabackInputStream createInputStream();
+
+    ShabackOutputStream createOutputStream();
 
   protected:
 
+    Process* sshProcess;
+
   private:
+    char* readBuffer;
+
 };
-#endif // SHABACK_RemoteRepository_H
+#endif // SHABACK_RemoteSshRepository_H

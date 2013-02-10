@@ -23,6 +23,7 @@ set(shaback_lib_SRCS
                      LzmaInputStream.cpp
                      LzmaOutputStream.cpp
 		     OutputStream.cpp
+		     Process.cpp
 		     Properties.cpp
 		     Sha1.cpp
 		     Sha256.cpp

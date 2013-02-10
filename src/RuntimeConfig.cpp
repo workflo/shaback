@@ -34,7 +34,7 @@ extern "C" {
 #include "RuntimeConfig.h"
 #include "ShabackConfig.h"
 #include "LocalRepository.h"
-//#include "RemoteSshRepository.h"
+#include "RemoteSshRepository.h"
 #include "BackupRun.h"
 
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
@@ -180,7 +180,7 @@ Repository* RuntimeConfig::getRepositoryInstance()
 {
   switch (remoteType) {
     case REMOTE_TYPE_SSH:
-//      return RemoteSshRepository(*this);
+      return new RemoteSshRepository(*this);
     default:
       return new LocalRepository(*this);
   }

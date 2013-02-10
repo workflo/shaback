@@ -22,6 +22,7 @@ add_executable(shaback
 		main.cpp 
 		Repository.cpp
 		LocalRepository.cpp
+		RemoteSshRepository.cpp
 		RestoreRun.cpp
 		RuntimeConfig.cpp 
 		shaback.cpp 

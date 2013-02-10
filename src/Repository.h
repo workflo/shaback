@@ -66,7 +66,7 @@ class Repository
     /**
      * 'gc' command. Performs a garbage collection on the repository.
      */
-    virtual void gc() = 0;
+    virtual void gc();
 
     File hashValueToFile(std::string hashValue);
 //    bool contains(std::string& hashValue);

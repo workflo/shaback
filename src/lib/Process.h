@@ -57,7 +57,7 @@ class Process
      * @param progname Filename of the program to be executed
      * @param ... <tt>null</tt>-terminated argument list
      */
-    Process(std::string progname, ...);
+    Process(const char *file, char *const argv[]);
 
     ~Process();
 
