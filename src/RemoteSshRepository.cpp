@@ -69,7 +69,7 @@ RemoteSshRepository::~RemoteSshRepository()
 void RemoteSshRepository::open()
 {
   char *args[] = {(char*) "ssh", (char*) config.remotePart.c_str(),
-      (char*) "shaback", (char*) "-r", (char*) config.repoDir.path.c_str(),
+      (char*) "/Users/florian/git/shaback/src/shaback", (char*) "-r", (char*) config.repoDir.path.c_str(),
       (char*) "remote", 0};
   sshProcess = new Process("ssh", args);
 }
@@ -138,6 +138,7 @@ void RemoteSshRepository::sendCommand(string command)
 
   out->write(command);
   out->write('\n');
+
 //  p.waitFor();
 //  printf("return code: %d\n\n", p.exitValue());
 //  exit(2);

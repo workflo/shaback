@@ -587,5 +587,30 @@ ShabackOutputStream LocalRepository::createOutputStream()
 int LocalRepository::remoteCommandListener()
 {
   cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << endl;
-  return 0;
+
+  string cmdline;
+
+  for (;;) {
+    cout.flush();
+    std::getline (cin, cmdline);
+
+    if (cin.eof()) return 0;
+    if (cin.fail()) return 2;
+
+    try {
+      if (cmdline == "lock") {
+        lock();
+        cout << "OK\n";
+      }
+
+      else if (cmdline == "unlock") {
+        unlock();
+        cout << "OK\n";
+      }
+
+      else if (cmdline == "close") return 0;
+    } catch (Exception &ex) {
+      cout << "ERROR " << ex.getMessage() << "\n";
+    }
+  }
 }

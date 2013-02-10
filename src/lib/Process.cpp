@@ -361,24 +361,6 @@ Process::Process(const char *file, char *const argv[])
   if (childPid == 0) {
     // Child process:
 
-    // Count the number of arguments given:
-//    va_list ptr;
-//    va_start(ptr, cmdline);
-//
-//    string* s;
-//    int num = 0;
-//    while ((s = va_arg(ptr, string*)) != 0)
-//      num++;
-//
-//    // Put all arguments in an array - element 0 is the program name, last element is null:
-//    char** argv = (char**) malloc(sizeof(char*) * (num + 2));
-//    num = 0;
-//    va_start(ptr, cmdline);
-//    argv[num++] = (char*) cmdline.c_str();
-//    while ((s = va_arg(ptr, string*)) != 0)
-//      argv[num++] = (char*) s->c_str();
-//    argv[num] = 0;
-//
     dup2(stdoutPipes[1], fileno(stdout));
     dup2(stderrPipes[1], fileno(stderr));
     dup2(stdinPipes[0], fileno(stdin));
