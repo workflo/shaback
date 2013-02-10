@@ -693,6 +693,11 @@ int LocalRepository::remoteCommandListener()
         cout << "OK " << (c ? "1" : "0") << "\n";
       }
 
+      else if (cmd == "storeTreeFile") {
+//        bool c = contains(args);
+//        cout << "OK " << (c ? "1" : "0") << "\n";
+      }
+
       else if (cmd == "close") {
         return 0;
       }
