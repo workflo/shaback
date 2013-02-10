@@ -69,10 +69,13 @@ class Repository
     virtual void gc();
 
     File hashValueToFile(std::string hashValue);
-//    bool contains(std::string& hashValue);
+    virtual bool contains(std::string& hashValue) = 0;
     virtual std::string storeTreeFile(BackupRun* run, std::string& treeFile) = 0;
-    virtual std::string storeFile(BackupRun* run, File& srcFile) = 0;
+    virtual std::string storeFile(BackupRun* run, File& srcFile);
     virtual void storeRootTreeFile(std::string& rootHashValue) = 0;
+
+    virtual void store(BackupRun* run, File& srcFile, InputStream& in, std::string& hashValue) = 0;
+
 //    void importCacheFile();
 //
 //    /**
@@ -170,13 +173,19 @@ class Repository
      */
     virtual int remoteCommandListener() = 0;
 
+    /**
+     * Removes old index files. Keeps all index files from within the past week,
+     * one file per week for the last month and one file per month for older files.
+     */
+    virtual void deleteOldIndexFiles() = 0;
+
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
     int encryptionAlgorithm;
     int compressionAlgorithm;
-//    int splitBlockSize;
-//    int splitMinBlocks;
+    int splitBlockSize;
+    int splitMinBlocks;
     Date startDate;
 //
     int restoreByRootFile(File& rootFile);
@@ -189,8 +198,8 @@ class Repository
 //     * individually.
 //     */
 //    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
-//
-//    char* readBuffer;
+
+    char* readBuffer;
 };
 
 #define COMPRESSION_NONE    0

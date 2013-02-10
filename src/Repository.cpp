@@ -51,10 +51,15 @@ using namespace std;
 Repository::Repository(RuntimeConfig& config) :
     config(config)
 {
+  splitBlockSize = 1024 * 1024 * 5;
+  splitMinBlocks = 5;
+
+  readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
 {
+  free(readBuffer);
 }
 
 //void Repository::open()
@@ -218,39 +223,40 @@ File Repository::hashValueToFile(string hashValue)
 //
 //  return hashValue;
 //}
-//
-//string Repository::storeFile(BackupRun* run, File& srcFile)
-//{
-//  run->numFilesRead++;
-//  run->numBytesRead += srcFile.getSize();
-//
-//  string hashValue = srcFile.getXAttr("user.shaback.sha1");
-//
-//  FileInputStream in(srcFile);
-//
-//  if (hashValue.empty() || strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) != srcFile.getPosixMtime()) {
-//    Sha1 sha1;
-//    while (true) {
-//      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-//      if (bytesRead == -1)
-//        break;
-//      sha1.update(readBuffer, bytesRead);
-//    }
-//
-//    sha1.finalize();
-//    hashValue = sha1.toString();
-//
-//    srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
-//    srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
-//  }
-//
-//  // Split this file?
-//  const bool split = config.splitFile(srcFile);
-//  if (split) {
-//    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
-//  }
-//
-//  if (!contains(hashValue)) {
+
+string Repository::storeFile(BackupRun* run, File& srcFile)
+{
+  run->numFilesRead++;
+  run->numBytesRead += srcFile.getSize();
+
+  string hashValue = srcFile.getXAttr("user.shaback.sha1");
+
+  FileInputStream in(srcFile);
+
+  if (hashValue.empty() || strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) != srcFile.getPosixMtime()) {
+    Sha1 sha1;
+    while (true) {
+      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      if (bytesRead == -1)
+        break;
+      sha1.update(readBuffer, bytesRead);
+    }
+
+    sha1.finalize();
+    hashValue = sha1.toString();
+
+    srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
+    srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  }
+
+  // Split this file?
+  const bool split = config.splitFile(srcFile);
+  if (split) {
+    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
+  }
+
+  if (!contains(hashValue)) {
+    store(run, srcFile, in, hashValue);
 //    in.reset();
 //
 //    File destFile = hashValueToFile(hashValue);
@@ -280,17 +286,17 @@ File Repository::hashValueToFile(string hashValue)
 //    os.finish();
 //
 //    run->numFilesStored++;
-//  } else {
-//    if (config.debug) {
-//      cout << "[ ] " << srcFile.path << endl;
-//    }
-//  }
-//
+  } else {
+    if (config.debug) {
+      cout << "[ ] " << srcFile.path << endl;
+    }
+  }
+
 //  writeCache.insert(hashValue);
-//
-//  return hashValue;
-//}
-//
+
+  return hashValue;
+}
+
 //void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
 //    ShabackOutputStream &blockFileOut)
 //{

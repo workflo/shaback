@@ -46,12 +46,6 @@ class BackupRun
     std::string handleSymlink(File& dir, bool absolutePaths);
     void handleSymlink(File& dir);
 
-    /**
-     * Removes old index files. Keeps all index files from within the past week,
-     * one file per week for the last month and one file per month for older files.
-     */
-    void deleteOldIndexFiles();
-
     Repository& repository;
     RuntimeConfig& config;
 };

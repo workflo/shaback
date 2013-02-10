@@ -38,7 +38,8 @@ class RemoteSshRepository : public Repository
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
-    std::string storeFile(BackupRun* run, File& srcFile);
+//    std::string storeFile(BackupRun* run, File& srcFile);
+    void store(BackupRun* run, File& srcFile, InputStream& in, std::string& hashValue);
     void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
 
@@ -57,6 +58,8 @@ class RemoteSshRepository : public Repository
     ShabackInputStream createInputStream();
 
     ShabackOutputStream createOutputStream();
+
+    void deleteOldIndexFiles();
 
   protected:
 

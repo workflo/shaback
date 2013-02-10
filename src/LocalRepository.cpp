@@ -53,16 +53,16 @@ using namespace std;
 LocalRepository::LocalRepository(RuntimeConfig& config) :
     Repository(config), readCache(config.readCacheFile)
 {
-  splitBlockSize = 1024 * 1024 * 5;
-  splitMinBlocks = 5;
+//  splitBlockSize = 1024 * 1024 * 5;
+//  splitMinBlocks = 5;
 
-  readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
+//  readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 LocalRepository::~LocalRepository()
 {
   readCache.close();
-  free(readBuffer);
+//  free(readBuffer);
 }
 
 void LocalRepository::open()
@@ -227,76 +227,39 @@ string LocalRepository::storeTreeFile(BackupRun* run, string& treeFile)
   return hashValue;
 }
 
-string LocalRepository::storeFile(BackupRun* run, File& srcFile)
+void LocalRepository::store(BackupRun* run, File& srcFile, InputStream& in, string& hashValue)
 {
-  run->numFilesRead++;
-  run->numBytesRead += srcFile.getSize();
+  const bool split = config.splitFile(srcFile);
 
-  string hashValue = srcFile.getXAttr("user.shaback.sha1");
+  in.reset();
 
-  FileInputStream in(srcFile);
+  File destFile = hashValueToFile(hashValue);
 
-  if (hashValue.empty() || strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) != srcFile.getPosixMtime()) {
-    Sha1 sha1;
+  if (config.verbose || config.debug) {
+    cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
+    if (config.debug) {
+      cout << "[f] " << destFile.path << endl;
+    }
+  }
+
+  ShabackOutputStream os = createOutputStream();
+  os.open(destFile);
+
+  if (split) {
+    storeSplitFile(run, hashValue, in, os);
+  } else {
     while (true) {
       int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
       if (bytesRead == -1)
         break;
-      sha1.update(readBuffer, bytesRead);
-    }
-
-    sha1.finalize();
-    hashValue = sha1.toString();
-
-    srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
-    srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
-  }
-
-  // Split this file?
-  const bool split = config.splitFile(srcFile);
-  if (split) {
-    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
-  }
-
-  if (!contains(hashValue)) {
-    in.reset();
-
-    File destFile = hashValueToFile(hashValue);
-
-    if (config.verbose || config.debug) {
-      cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
-      if (config.debug) {
-        cout << "[f] " << destFile.path << endl;
-      }
-    }
-
-    ShabackOutputStream os = createOutputStream();
-    os.open(destFile);
-
-    if (split) {
-      storeSplitFile(run, hashValue, in, os);
-    } else {
-      while (true) {
-        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-        if (bytesRead == -1)
-          break;
-        os.write(readBuffer, bytesRead);
-        run->numBytesStored += bytesRead;
-      }
-    }
-
-    os.finish();
-
-    run->numFilesStored++;
-  } else {
-    if (config.debug) {
-      cout << "[ ] " << srcFile.path << endl;
+      os.write(readBuffer, bytesRead);
+      run->numBytesStored += bytesRead;
     }
   }
 
-  writeCache.insert(hashValue);
+  os.finish();
 
-  return hashValue;
+  run->numFilesStored++;
 }
 
 void LocalRepository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
@@ -583,6 +546,112 @@ ShabackOutputStream LocalRepository::createOutputStream()
   return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
 }
 
+void LocalRepository::deleteOldIndexFiles()
+{
+  string pattern(config.backupName);
+  pattern.append("_????" "-??" "-??_??????.sroot");
+
+  vector<File> indexFiles = config.indexDir.listFiles(pattern);
+
+  if (indexFiles.size() <= 2) return; // Don't delete latest two backups
+
+  sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+  reverse(indexFiles.begin(), indexFiles.end());
+  vector<Date> dates;
+  vector<Date> toDelete;
+
+  for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    File file(*it);
+    Date d(file.fname.substr(config.backupName.size() + 1));
+    dates.push_back(d);
+  }
+
+  int idx = 0;
+  Date now;
+
+  Date upper(now);
+  upper.addDays(-config.keepOldBackupsBoundaries[0]);
+  upper.setTimeOfDay(0, 0, 0);
+
+//  cout << "   upper: " << upper.toFilename() << endl;
+
+  // Keep daily backups:
+  Date dailyLimit(upper);
+  dailyLimit.addDays(-config.keepOldBackupsBoundaries[1]);
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-1);
+    if (lower.compareTo(dailyLimit) <= 0)
+      break;
+    int n = 0;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        n++;
+        if (n > 1) {
+          toDelete.push_back(d);
+        }
+      }
+    }
+    upper = lower;
+  }
+
+  // Keep weekly backups:
+  Date weeklyLimit(upper);
+  weeklyLimit.addDays(-config.keepOldBackupsBoundaries[2]);
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-7);
+    if (lower.compareTo(weeklyLimit) <= 0)
+      break;
+    int n = 0;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        n++;
+        if (n > 1) {
+          toDelete.push_back(d);
+        }
+      }
+    }
+    upper = lower;
+  }
+
+  // Keep monthly backups:
+  Date monthlyLimit(dates.back());
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-30);
+    int n = 0;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        n++;
+        if (n > 1) {
+          toDelete.push_back(d);
+        }
+      }
+    }
+    upper = lower;
+    if (lower.compareTo(monthlyLimit) <= 0)
+      break;
+  }
+
+  // Actually delete files:
+  for (vector<Date>::iterator it = toDelete.begin(); it < toDelete.end(); it++) {
+    Date d(*it);
+    string fname(config.backupName);
+    fname.append("_").append(d.toFilename()).append(".sroot");
+    File file(config.indexDir, fname);
+    if (config.verbose) {
+      cout << "Deleting old index file " << file.path.c_str() << endl;
+    }
+    file.remove();
+  }
+}
 
 int LocalRepository::remoteCommandListener()
 {
@@ -597,18 +666,34 @@ int LocalRepository::remoteCommandListener()
     if (cin.eof()) return 0;
     if (cin.fail()) return 2;
 
+    string cmd;
+    string args;
+
+    int sepPos = cmdline.find(" ");
+    if (sepPos > 0) {
+      cmd = cmdline.substr(0, sepPos);
+      args = cmdline.substr(sepPos +1);
+    } else {
+      cmd = cmdline;
+    }
+
     try {
-      if (cmdline == "lock") {
+      if (cmd == "lock") {
         lock();
         cout << "OK\n";
       }
 
-      else if (cmdline == "unlock") {
+      else if (cmd == "unlock") {
         unlock();
         cout << "OK\n";
       }
 
-      else if (cmdline == "close") {
+      else if (cmd == "contains") {
+        bool c = contains(args);
+        cout << "OK " << (c ? "1" : "0") << "\n";
+      }
+
+      else if (cmd == "close") {
         return 0;
       }
 

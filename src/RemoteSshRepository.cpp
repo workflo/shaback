@@ -101,50 +101,84 @@ void RemoteSshRepository::unlock()
 
 string RemoteSshRepository::storeTreeFile(BackupRun* run, string& treeFile)
 {
-  string response;
-  sendCommand("storeTreeFile", response);
+  Sha1 sha1;
+  sha1.update(treeFile);
+  sha1.finalize();
+  string hashValue = sha1.toString();
+
+  if (!contains(hashValue)) {
+    string response;
+    char cmd[100];
+#ifdef __APPLE__
+    sprintf(cmd, "storeTreeFile %s %jd", hashValue.c_str(), treeFile.size());
+#else
+    sprintf(cmd, "storeTreeFile %s %lu", hashValue.c_str(), treeFile.size());
+#endif
+    sendCommand(cmd, response);
+
+    run->numBytesStored += treeFile.size();
+  }
+
+//  writeCache.insert(hashValue);
+
+  return hashValue;
+
 }
 
-string RemoteSshRepository::storeFile(BackupRun* run, File& srcFile)
+bool RemoteSshRepository::contains(string& hashValue)
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand(string("contains ").append(hashValue), response);
+
+  return response == "1";
+}
+
+void RemoteSshRepository::store(BackupRun* run, File& srcFile, InputStream& in, string& hashValue)
+{
+  string response;
+  sendCommand("store", response);
 }
 
 void RemoteSshRepository::storeRootTreeFile(string& rootHashValue)
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand("storeRootTreeFile", response);
 }
 
 vector<TreeFileEntry> RemoteSshRepository::loadTreeFile(string& treeId)
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand("loadTreeFile", response);
 }
 
 void RemoteSshRepository::exportFile(TreeFileEntry& entry, OutputStream& out)
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand("exportFile", response);
 }
 
 void RemoteSshRepository::exportFile(string& id, OutputStream& out)
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand("exportFile", response);
 }
 
 void RemoteSshRepository::exportSymlink(TreeFileEntry& entry, File& linkFile)
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand("exportSymlink", response);
 }
 
 void RemoteSshRepository::show()
 {
   string response;
-  sendCommand("storeTreeFile", response);
+  sendCommand("show", response);
+}
+
+void RemoteSshRepository::deleteOldIndexFiles()
+{
+  string response;
+  sendCommand("deleteOldIndexFiles", response);
 }
 
 
@@ -160,6 +194,16 @@ void RemoteSshRepository::sendCommand(string command, string& response)
 
   if (!remoteIn->readLine(response)) {
     throw IOException(string("Lost connection to remote shaback upon command: ").append(command));
+  }
+  if (response.find("OK ") == 0) {
+    response = response.substr(3);
+  } else if (response.find("OK") == 0) {
+    response = "";
+  } else {
+    if (response.find("ERROR ") == 0)
+      throw IOException(response.substr(6));
+    else
+      throw IOException(response);
   }
   cout << "<< " << response << endl;
 

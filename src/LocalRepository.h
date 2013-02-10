@@ -62,7 +62,10 @@ class LocalRepository : public Repository
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
-    std::string storeFile(BackupRun* run, File& srcFile);
+//    std::string storeFile(BackupRun* run, File& srcFile);
+
+    void store(BackupRun* run, File& srcFile, InputStream& in, std::string& hashValue);
+
     void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
 
@@ -112,16 +115,11 @@ class LocalRepository : public Repository
     /** The (persistent) read cache. Used to speed up traversing tree files. */
     Cache readCache;
 
-//    int repoFormat;
+    void deleteOldIndexFiles();
 
   protected:
-//    RuntimeConfig config;
-//    int hashAlgorithm;
-//    int encryptionAlgorithm;
-//    int compressionAlgorithm;
-    int splitBlockSize;
-    int splitMinBlocks;
-//    Date startDate;
+//    int splitBlockSize;
+//    int splitMinBlocks;
 
     int restoreByRootFile(File& rootFile);
     int restoreByTreeId(std::string& treeId);
@@ -134,7 +132,7 @@ class LocalRepository : public Repository
      */
     void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
 
-    char* readBuffer;
+//    char* readBuffer;
 };
 
 #endif // SHABACK_LocalRepository_H
