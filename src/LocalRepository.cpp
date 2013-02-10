@@ -35,6 +35,7 @@
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
+#include "ShabackConfig.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
 #include "LocalRepository.h"
@@ -580,4 +581,11 @@ ShabackInputStream LocalRepository::createInputStream()
 ShabackOutputStream LocalRepository::createOutputStream()
 {
   return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
+}
+
+
+int LocalRepository::remoteCommandListener()
+{
+  cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << endl;
+  return 0;
 }

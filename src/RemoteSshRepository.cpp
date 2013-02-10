@@ -59,62 +59,70 @@ RemoteSshRepository::RemoteSshRepository(RuntimeConfig& config) :
 RemoteSshRepository::~RemoteSshRepository()
 {
   free(readBuffer);
-  if (sshProcess) delete sshProcess;
+  if (sshProcess) {
+    sendCommand("close");
+    delete sshProcess;
+  }
 }
 
 
 void RemoteSshRepository::open()
 {
-  cout << "RemoteSshRepository.open()... " << config.remotePart << "\n";
-//  char* args[] = {(char*) config.remotePart.c_str(), "touch", "/tmp/ssh-test", 0};
-  char* args[] = {"florian@naboo", "touch", "/tmp/ssh-test", 0};
-//  char* args[] = {"-la", "/aaaa", 0};
-  Process p("ssh", args);//, config.remotePart, "ls");
-  p.waitFor();
-  printf("return code: %d\n\n", p.exitValue());
-  exit(2);
-
+  char *args[] = {(char*) "ssh", (char*) config.remotePart.c_str(),
+      (char*) "shaback", (char*) "-r", (char*) config.repoDir.path.c_str(),
+      (char*) "remote", 0};
+  sshProcess = new Process("ssh", args);
 }
 
 void RemoteSshRepository::lock(bool exclusive)
 {
+  sendCommand("lock");
 }
 
 void RemoteSshRepository::unlock()
 {
+  sendCommand("unlock");
 }
 
 
 string RemoteSshRepository::storeTreeFile(BackupRun* run, string& treeFile)
 {
+  sendCommand("unlock");
 }
 
 string RemoteSshRepository::storeFile(BackupRun* run, File& srcFile)
 {
+  sendCommand("unlock");
 }
 
 void RemoteSshRepository::storeRootTreeFile(string& rootHashValue)
 {
+  sendCommand("unlock");
 }
 
 vector<TreeFileEntry> RemoteSshRepository::loadTreeFile(string& treeId)
 {
+  sendCommand("unlock");
 }
 
 void RemoteSshRepository::exportFile(TreeFileEntry& entry, OutputStream& out)
 {
+  sendCommand("unlock");
 }
 
 void RemoteSshRepository::exportFile(string& id, OutputStream& out)
 {
+  sendCommand("unlock");
 }
 
 void RemoteSshRepository::exportSymlink(TreeFileEntry& entry, File& linkFile)
 {
+  sendCommand("unlock");
 }
 
 void RemoteSshRepository::show()
 {
+  sendCommand("unlock");
 }
 
 
@@ -122,3 +130,22 @@ ShabackInputStream RemoteSshRepository::createInputStream()
 {
 }
 
+void RemoteSshRepository::sendCommand(string command)
+{
+  cout << ">> " << command << endl;
+
+  OutputStream *out = sshProcess->getOutputStream();
+
+  out->write(command);
+  out->write('\n');
+//  p.waitFor();
+//  printf("return code: %d\n\n", p.exitValue());
+//  exit(2);
+}
+
+
+int RemoteSshRepository::remoteCommandListener()
+{
+  cerr << "Cannot start remote command listener for remote repository." << endl;
+  exit(4);
+}

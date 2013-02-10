@@ -414,6 +414,10 @@ Process::~Process()
   }
 
 #endif
+
+  if (inputStream) delete inputStream;
+  if (outputStream) delete outputStream;
+  if (errorStream) delete errorStream;
 }
 
 void Process::init1()

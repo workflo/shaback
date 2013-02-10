@@ -165,6 +165,11 @@ class Repository
 
     int repoFormat;
 
+    /**
+     * Listen for remote commands on stdin, respond to stdout and stderr.
+     */
+    virtual int remoteCommandListener() = 0;
+
   protected:
     RuntimeConfig config;
     int hashAlgorithm;

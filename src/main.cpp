@@ -176,6 +176,8 @@ int main(int argc, char** argv)
         return shaback.deflate();
       } else if (config.operation == "inflate") {
         return shaback.inflate();
+      } else if (config.operation == "remote") {
+        return shaback.repository->remoteCommandListener();
       } else {
         cerr << "Invalid operation `" << config.operation << "'." << endl;
         return 1;

@@ -104,6 +104,8 @@ class LocalRepository : public Repository
      */
     ShabackOutputStream createOutputStream();
 
+    int remoteCommandListener();
+
     /** The temporary write cache. Used to speed up backup. */
     std::set<std::string> writeCache;
 

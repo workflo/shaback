@@ -62,6 +62,10 @@ class RemoteSshRepository : public Repository
 
     Process* sshProcess;
 
+    virtual void sendCommand(std::string command);
+
+    int remoteCommandListener();
+
   private:
     char* readBuffer;
 
