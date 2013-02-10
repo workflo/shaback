@@ -98,32 +98,52 @@ void RemoteSshRepository::unlock()
   sendCommand("unlock", response);
 }
 
-
-string RemoteSshRepository::storeTreeFile(BackupRun* run, string& treeFile)
+void RemoteSshRepository::storeTextFile(string hashValue, string content)
 {
-  Sha1 sha1;
-  sha1.update(treeFile);
-  sha1.finalize();
-  string hashValue = sha1.toString();
-
-  if (!contains(hashValue)) {
-    string response;
-    char cmd[100];
+  string response;
+  char cmd[100];
 #ifdef __APPLE__
-    sprintf(cmd, "storeTreeFile %s %jd", hashValue.c_str(), treeFile.size());
+  sprintf(cmd, "storeTextFile %s %jd", hashValue.c_str(), content.size());
 #else
-    sprintf(cmd, "storeTreeFile %s %lu", hashValue.c_str(), treeFile.size());
+  sprintf(cmd, "storeTextFile %s %lu", hashValue.c_str(), content.size());
 #endif
-    sendCommand(cmd, response);
+  sendCommand(cmd, response);
 
-    run->numBytesStored += treeFile.size();
-  }
+  remoteOut->write(content.c_str(), content.size());
 
-//  writeCache.insert(hashValue);
-
-  return hashValue;
-
+  waitForOk(cmd, response);
 }
+
+void RemoteSshRepository::storeRootTreeFile(string rootHashValue, string filename)
+{
+  string response;
+  sendCommand(string("storeRootTreeFile ").append(rootHashValue).append(" ").append(filename), response);
+}
+
+//string RemoteSshRepository::storeTreeFile(BackupRun* run, string& treeFile)
+//{
+//  Sha1 sha1;
+//  sha1.update(treeFile);
+//  sha1.finalize();
+//  string hashValue = sha1.toString();
+//
+//  if (!contains(hashValue)) {
+//    string response;
+//    char cmd[100];
+//#ifdef __APPLE__
+//    sprintf(cmd, "storeTreeFile %s %jd", hashValue.c_str(), treeFile.size());
+//#else
+//    sprintf(cmd, "storeTreeFile %s %lu", hashValue.c_str(), treeFile.size());
+//#endif
+//    sendCommand(cmd, response);
+//
+//    run->numBytesStored += treeFile.size();
+//  }
+//
+////  writeCache.insert(hashValue);
+//
+//  return hashValue;
+//}
 
 bool RemoteSshRepository::contains(string& hashValue)
 {
@@ -139,11 +159,11 @@ void RemoteSshRepository::store(BackupRun* run, File& srcFile, InputStream& in, 
   sendCommand("store", response);
 }
 
-void RemoteSshRepository::storeRootTreeFile(string& rootHashValue)
-{
-  string response;
-  sendCommand("storeRootTreeFile", response);
-}
+//void RemoteSshRepository::storeRootTreeFile(string& rootHashValue)
+//{
+//  string response;
+//  sendCommand("storeRootTreeFile", response);
+//}
 
 vector<TreeFileEntry> RemoteSshRepository::loadTreeFile(string& treeId)
 {
@@ -192,6 +212,11 @@ void RemoteSshRepository::sendCommand(string command, string& response)
 
   remoteOut->write(string(command).append("\n"));
 
+  waitForOk(command, response);
+}
+
+void RemoteSshRepository::waitForOk(string command, string& response)
+{
   if (!remoteIn->readLine(response)) {
     throw IOException(string("Lost connection to remote shaback upon command: ").append(command));
   }
@@ -206,10 +231,6 @@ void RemoteSshRepository::sendCommand(string command, string& response)
       throw IOException(response);
   }
   cout << "<< " << response << endl;
-
-//  sshProcess->waitFor();
-//  printf("return code: %d\n\n", sshProcess->exitValue());
-//  exit(2);
 }
 
 

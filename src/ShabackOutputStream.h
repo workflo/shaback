@@ -39,6 +39,7 @@ class ShabackOutputStream
     void write(std::string& s);
     void write(const char* s);
     void write(const char* data, int numBytes);
+    void write(std::istream& in, long len);
 
   private:
     int compressionAlgorithm;

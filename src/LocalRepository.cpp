@@ -200,32 +200,42 @@ bool LocalRepository::contains(string& hashValue)
   return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
-string LocalRepository::storeTreeFile(BackupRun* run, string& treeFile)
+void LocalRepository::storeTextFile(string hashValue, string content)
 {
-  Sha1 sha1;
-  sha1.update(treeFile);
-  sha1.finalize();
-  string hashValue = sha1.toString();
+  File file = hashValueToFile(hashValue);
 
-  if (!contains(hashValue)) {
-    File file = hashValueToFile(hashValue);
-
-    if (config.debug) {
-      cout << "[t] " << file.path << endl;
-    }
-
-    ShabackOutputStream os = createOutputStream();
-    os.open(file);
-    os.write(treeFile);
-    os.finish();
-
-    run->numBytesStored += treeFile.size();
-  }
-
-  writeCache.insert(hashValue);
-
-  return hashValue;
+  ShabackOutputStream os = createOutputStream();
+  os.open(file);
+  os.write(content);
+  os.finish();
 }
+
+//string LocalRepository::storeTreeFile(BackupRun* run, string& treeFile)
+//{
+//  Sha1 sha1;
+//  sha1.update(treeFile);
+//  sha1.finalize();
+//  string hashValue = sha1.toString();
+//
+//  if (!contains(hashValue)) {
+//    File file = hashValueToFile(hashValue);
+//
+//    if (config.debug) {
+//      cout << "[t] " << file.path << endl;
+//    }
+//
+//    ShabackOutputStream os = createOutputStream();
+//    os.open(file);
+//    os.write(treeFile);
+//    os.finish();
+//
+//    run->numBytesStored += treeFile.size();
+//  }
+//
+//  writeCache.insert(hashValue);
+//
+//  return hashValue;
+//}
 
 void LocalRepository::store(BackupRun* run, File& srcFile, InputStream& in, string& hashValue)
 {
@@ -407,21 +417,31 @@ void LocalRepository::importCacheFile()
   }
 }
 
-void LocalRepository::storeRootTreeFile(string& rootHashValue)
+void LocalRepository::storeRootTreeFile(string rootHashValue, string filename)
 {
-  string filename = config.backupName;
-  filename.append("_").append(startDate.toFilename()).append(".sroot");
-
   File file(config.indexDir, filename);
   FileOutputStream os(file);
 
   os.write(rootHashValue.data(), rootHashValue.size());
 
   os.close();
-
-  cout << "ID:         " << rootHashValue << endl;
-  cout << "Index file: " << file.path << endl;
 }
+
+//void LocalRepository::storeRootTreeFile(string& rootHashValue)
+//{
+//  string filename = config.backupName;
+//  filename.append("_").append(startDate.toFilename()).append(".sroot");
+//
+//  File file(config.indexDir, filename);
+//  FileOutputStream os(file);
+//
+//  os.write(rootHashValue.data(), rootHashValue.size());
+//
+//  os.close();
+//
+//  cout << "ID:         " << rootHashValue << endl;
+//  cout << "Index file: " << file.path << endl;
+//}
 
 int LocalRepository::restore()
 {
@@ -655,6 +675,13 @@ void LocalRepository::deleteOldIndexFiles()
 
 int LocalRepository::remoteCommandListener()
 {
+  try {
+    open();
+  } catch (Exception &ex) {
+    cout << "ERROR " << ex.getMessage() << "\n";
+    return 1;
+  }
+
   cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << "\n";
 
   string cmdline;
@@ -693,9 +720,12 @@ int LocalRepository::remoteCommandListener()
         cout << "OK " << (c ? "1" : "0") << "\n";
       }
 
-      else if (cmd == "storeTreeFile") {
-//        bool c = contains(args);
-//        cout << "OK " << (c ? "1" : "0") << "\n";
+      else if (cmd == "storeTextFile") {
+        remoteStoreTextFile(cmdline, args);
+      }
+
+      else if (cmd == "storeRootTreeFile") {
+        remoteStoreRootTreeFile(cmdline, args);
       }
 
       else if (cmd == "close") {
@@ -708,5 +738,41 @@ int LocalRepository::remoteCommandListener()
     } catch (Exception &ex) {
       cout << "ERROR " << ex.getMessage() << "\n";
     }
+  }
+}
+
+void LocalRepository::remoteStoreTextFile(string& cmdline, string& args)
+{
+  int pos = args.find(" ");
+  if (pos > 0) {
+    string hashValue = args.substr(0, pos);
+    long length = atol(args.substr(pos +1).c_str());
+
+    File file = hashValueToFile(hashValue);
+    cout << "OK ready to receive " << file.path << "\n";
+
+    ShabackOutputStream os = createOutputStream();
+    os.open(file);
+    os.write(cin, length);
+    os.finish();
+
+    cout << "OK\n";
+  } else {
+    cout << "ERROR syntax error: " << cmdline << "\n";
+  }
+}
+
+void LocalRepository::remoteStoreRootTreeFile(string& cmdline, string& args)
+{
+  int pos = args.find(" ");
+  if (pos > 0) {
+    string hashValue = args.substr(0, pos);
+    string filename = args.substr(pos +1);
+
+    storeRootTreeFile(hashValue, filename);
+
+    cout << "OK\n";
+  } else {
+    cout << "ERROR syntax error: " << cmdline << "\n";
   }
 }

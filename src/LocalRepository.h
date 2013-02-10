@@ -61,12 +61,17 @@ class LocalRepository : public Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
+//    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
 //    std::string storeFile(BackupRun* run, File& srcFile);
 
     void store(BackupRun* run, File& srcFile, InputStream& in, std::string& hashValue);
 
-    void storeRootTreeFile(std::string& rootHashValue);
+//    void storeRootTreeFile(std::string& rootHashValue);
+
+    void storeRootTreeFile(std::string rootHashValue, std::string filename);
+
+    void storeTextFile(std::string hashValue, std::string content);
+
     void importCacheFile();
 
     /**
@@ -131,6 +136,10 @@ class LocalRepository : public Repository
      * individually.
      */
     void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
+
+    void remoteStoreTextFile(std::string& cmdline, std::string& args);
+
+    void remoteStoreRootTreeFile(std::string& cmdline, std::string& args);
 
 //    char* readBuffer;
 };

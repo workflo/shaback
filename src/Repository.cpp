@@ -196,33 +196,29 @@ File Repository::hashValueToFile(string hashValue)
 //{
 //  return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 //}
-//
-//string Repository::storeTreeFile(BackupRun* run, string& treeFile)
-//{
-//  Sha1 sha1;
-//  sha1.update(treeFile);
-//  sha1.finalize();
-//  string hashValue = sha1.toString();
-//
-//  if (!contains(hashValue)) {
-//    File file = hashValueToFile(hashValue);
-//
-//    if (config.debug) {
-//      cout << "[t] " << file.path << endl;
-//    }
-//
-//    ShabackOutputStream os = createOutputStream();
-//    os.open(file);
-//    os.write(treeFile);
-//    os.finish();
-//
-//    run->numBytesStored += treeFile.size();
-//  }
-//
+
+string Repository::storeTreeFile(BackupRun* run, string& treeFile)
+{
+  Sha1 sha1;
+  sha1.update(treeFile);
+  sha1.finalize();
+  string hashValue = sha1.toString();
+
+  if (!contains(hashValue)) {
+    if (config.debug) {
+      File file = hashValueToFile(hashValue);
+      cout << "[t] " << file.path << endl;
+    }
+
+    storeTextFile(hashValue, treeFile);
+
+    run->numBytesStored += treeFile.size();
+  }
+
 //  writeCache.insert(hashValue);
-//
-//  return hashValue;
-//}
+
+  return hashValue;
+}
 
 string Repository::storeFile(BackupRun* run, File& srcFile)
 {
@@ -447,15 +443,10 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   string filename = config.backupName;
   filename.append("_").append(startDate.toFilename()).append(".sroot");
 
-  File file(config.indexDir, filename);
-  FileOutputStream os(file);
-
-  os.write(rootHashValue.data(), rootHashValue.size());
-
-  os.close();
+  storeRootTreeFile(rootHashValue, filename);
 
   cout << "ID:         " << rootHashValue << endl;
-  cout << "Index file: " << file.path << endl;
+  cout << "Index file: " << filename << endl;
 }
 
 int Repository::restore()

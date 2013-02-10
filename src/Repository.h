@@ -70,11 +70,19 @@ class Repository
 
     File hashValueToFile(std::string hashValue);
     virtual bool contains(std::string& hashValue) = 0;
-    virtual std::string storeTreeFile(BackupRun* run, std::string& treeFile) = 0;
+    virtual std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     virtual std::string storeFile(BackupRun* run, File& srcFile);
-    virtual void storeRootTreeFile(std::string& rootHashValue) = 0;
+
+    void storeRootTreeFile(std::string& rootHashValue);
+
+    virtual void storeRootTreeFile(std::string rootHashValue, std::string filename) = 0;
 
     virtual void store(BackupRun* run, File& srcFile, InputStream& in, std::string& hashValue) = 0;
+
+    /**
+     * Stores a text content under the given hash value.
+     */
+    virtual void storeTextFile(std::string hashValue, std::string content) = 0;
 
 //    void importCacheFile();
 //

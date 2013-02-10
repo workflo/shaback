@@ -37,10 +37,15 @@ class RemoteSshRepository : public Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
+//    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
 //    std::string storeFile(BackupRun* run, File& srcFile);
     void store(BackupRun* run, File& srcFile, InputStream& in, std::string& hashValue);
-    void storeRootTreeFile(std::string& rootHashValue);
+//    void storeRootTreeFile(std::string& rootHashValue);
+
+    void storeRootTreeFile(std::string rootHashValue, std::string filename);
+
+    void storeTextFile(std::string hashValue, std::string content);
+
     void importCacheFile();
 
     void exportCacheFile();
@@ -70,6 +75,7 @@ class RemoteSshRepository : public Repository
     OutputStream* remoteOut;
 
     virtual void sendCommand(std::string command, std::string& response);
+    virtual void waitForOk(std::string command, std::string& response);
 
     int remoteCommandListener();
 
