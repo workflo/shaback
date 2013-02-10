@@ -62,7 +62,11 @@ class RemoteSshRepository : public Repository
 
     Process* sshProcess;
 
-    virtual void sendCommand(std::string command);
+    InputStream* remoteIn;
+
+    OutputStream* remoteOut;
+
+    virtual void sendCommand(std::string command, std::string& response);
 
     int remoteCommandListener();
 

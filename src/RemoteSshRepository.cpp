@@ -51,7 +51,7 @@
 using namespace std;
 
 RemoteSshRepository::RemoteSshRepository(RuntimeConfig& config) :
-    Repository(config), sshProcess(0)
+    Repository(config), sshProcess(0), remoteIn(0), remoteOut(0)
 {
   readBuffer = (char*) malloc(READ_BUFFER_SIZE);
 }
@@ -60,7 +60,8 @@ RemoteSshRepository::~RemoteSshRepository()
 {
   free(readBuffer);
   if (sshProcess) {
-    sendCommand("close");
+    string response;
+    sendCommand("close", response);
     delete sshProcess;
   }
 }
@@ -69,60 +70,81 @@ RemoteSshRepository::~RemoteSshRepository()
 void RemoteSshRepository::open()
 {
   char *args[] = {(char*) "ssh", (char*) config.remotePart.c_str(),
-      (char*) "/Users/florian/git/shaback/src/shaback", (char*) "-r", (char*) config.repoDir.path.c_str(),
+      (char*) "/Users/florian/git/shaback/src/shaback", /*(char*) "-r", (char*) config.repoDir.path.c_str(),*/
       (char*) "remote", 0};
   sshProcess = new Process("ssh", args);
+  remoteOut = sshProcess->getOutputStream();
+  remoteIn = sshProcess->getInputStream();
+
+  string hello;
+  if (!remoteIn->readLine(hello)) {
+    throw IOException("Lost connection to remote shaback.");
+  }
+
+  if (hello.find("SHABACK ") != 0) {
+    throw IOException(string("Unexpected response from remote shaback: ").append(hello));
+  }
 }
 
 void RemoteSshRepository::lock(bool exclusive)
 {
-  sendCommand("lock");
+  string response;
+  sendCommand("lock", response);
 }
 
 void RemoteSshRepository::unlock()
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("unlock", response);
 }
 
 
 string RemoteSshRepository::storeTreeFile(BackupRun* run, string& treeFile)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 string RemoteSshRepository::storeFile(BackupRun* run, File& srcFile)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 void RemoteSshRepository::storeRootTreeFile(string& rootHashValue)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 vector<TreeFileEntry> RemoteSshRepository::loadTreeFile(string& treeId)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 void RemoteSshRepository::exportFile(TreeFileEntry& entry, OutputStream& out)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 void RemoteSshRepository::exportFile(string& id, OutputStream& out)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 void RemoteSshRepository::exportSymlink(TreeFileEntry& entry, File& linkFile)
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 void RemoteSshRepository::show()
 {
-  sendCommand("unlock");
+  string response;
+  sendCommand("storeTreeFile", response);
 }
 
 
@@ -130,17 +152,19 @@ ShabackInputStream RemoteSshRepository::createInputStream()
 {
 }
 
-void RemoteSshRepository::sendCommand(string command)
+void RemoteSshRepository::sendCommand(string command, string& response)
 {
   cout << ">> " << command << endl;
 
-  OutputStream *out = sshProcess->getOutputStream();
+  remoteOut->write(string(command).append("\n"));
 
-  out->write(command);
-  out->write('\n');
+  if (!remoteIn->readLine(response)) {
+    throw IOException(string("Lost connection to remote shaback upon command: ").append(command));
+  }
+  cout << "<< " << response << endl;
 
-//  p.waitFor();
-//  printf("return code: %d\n\n", p.exitValue());
+//  sshProcess->waitFor();
+//  printf("return code: %d\n\n", sshProcess->exitValue());
 //  exit(2);
 }
 

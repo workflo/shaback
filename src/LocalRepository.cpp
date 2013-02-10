@@ -586,7 +586,7 @@ ShabackOutputStream LocalRepository::createOutputStream()
 
 int LocalRepository::remoteCommandListener()
 {
-  cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << endl;
+  cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << "\n";
 
   string cmdline;
 
@@ -608,7 +608,13 @@ int LocalRepository::remoteCommandListener()
         cout << "OK\n";
       }
 
-      else if (cmdline == "close") return 0;
+      else if (cmdline == "close") {
+        return 0;
+      }
+
+      else {
+        cout << "ERROR Invalid remote command: " << cmdline << "\n";
+      }
     } catch (Exception &ex) {
       cout << "ERROR " << ex.getMessage() << "\n";
     }
