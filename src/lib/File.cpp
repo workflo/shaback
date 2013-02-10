@@ -35,6 +35,7 @@
 # include <utime.h>
 # include <unistd.h>
 # include <sys/acl.h>
+# include <acl/libacl.h>
 #endif
 
 #include "File.h"
@@ -419,7 +420,7 @@ string File::getAclString()
   acl_t acl = acl_get_file(path.c_str(), ACL_TYPE_ACCESS);
 
   if (acl != 0) {
-    char* _text = acl_to_text(acl, 0);
+    char* _text = acl_to_any_text(acl, 0, '|', 0);
     if (_text != 0) {
       string text(_text);
 
@@ -441,7 +442,7 @@ void File::setAcl(string aclString)
   if (acl == 0)
     throw Exception::errnoToException(aclString);
 
-  cout << "File::setAcl: file=" << path << ", acl=" << aclString << endl;
+//  cout << "File::setAcl: file=" << path << ", acl=" << aclString << endl;
 
   int ret = acl_set_file(path.c_str(), ACL_TYPE_ACCESS, acl);
 

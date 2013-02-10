@@ -132,9 +132,14 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
       reportError(string("chown: ").append(ex.getMessage()));
   }
 
+  // ACL:
   if (!entry.acl.empty()) {
-    // ACL:
+    try {
     file.setAcl(entry.acl);
+    } catch (Exception& ex) {
+      if (!config.ignoreErrors.count("setfacl"))
+        reportError(string("setfacl: ").append(ex.getMessage()));
+    }
   }
 
   try {

@@ -142,7 +142,6 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
 
   // Access Control Lists:
   string acl = dir.getAclString();
-  std::replace(acl.begin(), acl.end(), '\n', '|');
   treeFileLine.append(acl);
   treeFileLine.append("\t");
 
@@ -179,7 +178,6 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
 
   // Access Control Lists:
   string acl = file.getAclString();
-  std::replace(acl.begin(), acl.end(), '\n', '|');
   treeFileLine.append(acl);
   treeFileLine.append("\t");
 
@@ -206,7 +204,6 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
 
   // Access Control Lists:
   string acl = file.getAclString();
-  std::replace(acl.begin(), acl.end(), '\n', '|');
   treeFileLine.append(acl);
   treeFileLine.append("\t");
 
