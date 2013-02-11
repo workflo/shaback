@@ -132,14 +132,14 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
       reportError(string("chown: ").append(ex.getMessage()));
   }
 
-  try {
-    file.lchmod(entry.fileMode);
-  } catch (Exception& ex) {
-    if (!config.ignoreErrors.count("chmod"))
-      reportError(string("chmod: ").append(ex.getMessage()));
-  }
-
   if (entry.type != TREEFILEENTRY_SYMLINK) {
+    try {
+      file.chmod(entry.fileMode);
+    } catch (Exception& ex) {
+      if (!config.ignoreErrors.count("chmod"))
+        reportError(string("chmod: ").append(ex.getMessage()));
+    }
+
     try {
       file.utime(entry.mtime);
     } catch (Exception& ex) {

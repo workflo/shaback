@@ -368,13 +368,6 @@ void File::chmod(int mode)
     throw Exception::errnoToException(path);
 }
 
-void File::lchmod(int mode)
-{
-  int ret = ::lchmod(path.c_str(), mode);
-  if (ret != 0)
-    throw Exception::errnoToException(path);
-}
-
 void File::chown(int uid, int gid)
 {
   int ret = ::chown(path.c_str(), uid, uid);
