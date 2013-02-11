@@ -370,7 +370,11 @@ void File::chmod(int mode)
 
 void File::lchmod(int mode)
 {
+#ifdef __APPLE__
   int ret = ::lchmod(path.c_str(), mode);
+#else
+  int ret = ::chmod(path.c_str(), mode);
+#endif
   if (ret != 0)
     throw Exception::errnoToException(path);
 }
