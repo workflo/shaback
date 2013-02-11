@@ -155,7 +155,7 @@ void ShabackOutputStream::write(istream& in, long bytesToRead)
   char buffer[4096];
 
   while (bytesToRead > 0) {
-    long read = min(bytesToRead, (long)4096);
+    long read = min(bytesToRead, (long) 4096);
     in.read(buffer, read);
     if (in.fail()) throw IOException("Input stream ended prematurely.");
     bytesToRead -= read;

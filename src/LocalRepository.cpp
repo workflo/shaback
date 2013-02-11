@@ -239,37 +239,19 @@ void LocalRepository::storeTextFile(string hashValue, string content)
 
 void LocalRepository::store(BackupRun* run, File& srcFile, InputStream& in, string& hashValue)
 {
-  const bool split = config.splitFile(srcFile);
-
-  in.reset();
-
   File destFile = hashValueToFile(hashValue);
-
-  if (config.verbose || config.debug) {
-    cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
-    if (config.debug) {
-      cout << "[f] " << destFile.path << endl;
-    }
-  }
-
   ShabackOutputStream os = createOutputStream();
   os.open(destFile);
 
-  if (split) {
-    storeSplitFile(run, hashValue, in, os);
-  } else {
-    while (true) {
-      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1)
-        break;
-      os.write(readBuffer, bytesRead);
-      run->numBytesStored += bytesRead;
-    }
+  while (true) {
+    int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+    if (bytesRead == -1)
+      break;
+    os.write(readBuffer, bytesRead);
+    run->numBytesStored += bytesRead;
   }
 
   os.finish();
-
-  run->numFilesStored++;
 }
 
 void LocalRepository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
@@ -682,12 +664,11 @@ int LocalRepository::remoteCommandListener()
     return 1;
   }
 
-  cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << "\n";
+  cout << "SHABACK " << SHABACK_VERSION_MAJOR << "." << SHABACK_VERSION_MINOR << "\n" << flush;
 
   string cmdline;
 
   for (;;) {
-    cout.flush();
     std::getline (cin, cmdline);
 
     if (cin.eof()) return 0;
@@ -707,21 +688,21 @@ int LocalRepository::remoteCommandListener()
     try {
       if (cmd == "lock") {
         lock();
-        cout << "OK\n";
+        cout << "OK\n" << flush;
       }
 
       else if (cmd == "unlock") {
         unlock();
-        cout << "OK\n";
+        cout << "OK\n" << flush;
       }
 
       else if (cmd == "contains") {
         bool c = contains(args);
-        cout << "OK " << (c ? "1" : "0") << "\n";
+        cout << "OK " << (c ? "1" : "0") << "\n" << flush;
       }
 
-      else if (cmd == "storeTextFile") {
-        remoteStoreTextFile(cmdline, args);
+      else if (cmd == "store") {
+        remoteStore(cmdline, args);
       }
 
       else if (cmd == "storeRootTreeFile") {
@@ -733,33 +714,39 @@ int LocalRepository::remoteCommandListener()
       }
 
       else {
-        cout << "ERROR Invalid remote command: " << cmdline << "\n";
+        cout << "ERROR Invalid remote command: " << cmdline << "\n" << flush;
       }
     } catch (Exception &ex) {
-      cout << "ERROR " << ex.getMessage() << "\n";
+      cout << "ERROR " << ex.getMessage() << "\n" << flush;
     }
   }
 }
 
-void LocalRepository::remoteStoreTextFile(string& cmdline, string& args)
+void LocalRepository::remoteStore(string& cmdline, string& hashValue)
 {
-  int pos = args.find(" ");
-  if (pos > 0) {
-    string hashValue = args.substr(0, pos);
-    long length = atol(args.substr(pos +1).c_str());
+  File file = hashValueToFile(hashValue);
+  cout << "OK ready to receive " << file.path << "\n" << flush;
 
-    File file = hashValueToFile(hashValue);
-    cout << "OK ready to receive " << file.path << "\n";
+  // Open output file:
+  ShabackOutputStream os = createOutputStream();
+  os.open(file);
 
-    ShabackOutputStream os = createOutputStream();
-    os.open(file);
+  // Read many blocks:
+  string lengthS;
+  for (;;) {
+    // Get length of next block:
+    std::getline (cin, lengthS);
+    long length = std::atol(lengthS.c_str());
+
+    if (length == 0) break;
+    cout << "OK ready to receive " << lengthS << " bytes\n" << flush;
+
     os.write(cin, length);
-    os.finish();
-
-    cout << "OK\n";
-  } else {
-    cout << "ERROR syntax error: " << cmdline << "\n";
   }
+
+  os.finish();
+
+  cout << "OK\n" << flush;
 }
 
 void LocalRepository::remoteStoreRootTreeFile(string& cmdline, string& args)

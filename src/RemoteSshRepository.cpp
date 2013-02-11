@@ -101,17 +101,23 @@ void RemoteSshRepository::unlock()
 void RemoteSshRepository::storeTextFile(string hashValue, string content)
 {
   string response;
-  char cmd[100];
+  sendCommand((string("store ").append(hashValue)), response);
+
+  // Send string length as block size:
+  char cmd[32];
 #ifdef __APPLE__
-  sprintf(cmd, "storeTextFile %s %jd", hashValue.c_str(), content.size());
+  sprintf(cmd, "%jd", content.size());
 #else
-  sprintf(cmd, "storeTextFile %s %lu", hashValue.c_str(), content.size());
+  sprintf(cmd, "%lu", content.size());
 #endif
   sendCommand(cmd, response);
 
+  // Send whole string in one block:
   remoteOut->write(content.c_str(), content.size());
+  waitForOk("store", response);
 
-  waitForOk(cmd, response);
+  // No more blocks to come:
+  sendCommand("0", response);
 }
 
 void RemoteSshRepository::storeRootTreeFile(string rootHashValue, string filename)
@@ -119,31 +125,6 @@ void RemoteSshRepository::storeRootTreeFile(string rootHashValue, string filenam
   string response;
   sendCommand(string("storeRootTreeFile ").append(rootHashValue).append(" ").append(filename), response);
 }
-
-//string RemoteSshRepository::storeTreeFile(BackupRun* run, string& treeFile)
-//{
-//  Sha1 sha1;
-//  sha1.update(treeFile);
-//  sha1.finalize();
-//  string hashValue = sha1.toString();
-//
-//  if (!contains(hashValue)) {
-//    string response;
-//    char cmd[100];
-//#ifdef __APPLE__
-//    sprintf(cmd, "storeTreeFile %s %jd", hashValue.c_str(), treeFile.size());
-//#else
-//    sprintf(cmd, "storeTreeFile %s %lu", hashValue.c_str(), treeFile.size());
-//#endif
-//    sendCommand(cmd, response);
-//
-//    run->numBytesStored += treeFile.size();
-//  }
-//
-////  writeCache.insert(hashValue);
-//
-//  return hashValue;
-//}
 
 bool RemoteSshRepository::contains(string& hashValue)
 {
@@ -156,14 +137,26 @@ bool RemoteSshRepository::contains(string& hashValue)
 void RemoteSshRepository::store(BackupRun* run, File& srcFile, InputStream& in, string& hashValue)
 {
   string response;
-  sendCommand("store", response);
-}
+  sendCommand((string("store ").append(hashValue)), response);
 
-//void RemoteSshRepository::storeRootTreeFile(string& rootHashValue)
-//{
-//  string response;
-//  sendCommand("storeRootTreeFile", response);
-//}
+  while (true) {
+    int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+    printf("bytesRead=%i\n", bytesRead);
+    if (bytesRead == -1)
+      break;
+
+    // Send string length as block size:
+    char cmd[32];
+    sprintf(cmd, "%d", bytesRead);
+    sendCommand(cmd, response);
+
+    remoteOut->write(readBuffer, bytesRead);
+    waitForOk("store", response);
+  }
+
+  // No more blocks to come:
+  sendCommand("0", response);
+}
 
 vector<TreeFileEntry> RemoteSshRepository::loadTreeFile(string& treeId)
 {

@@ -253,35 +253,24 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 
   if (!contains(hashValue)) {
     store(run, srcFile, in, hashValue);
-//    in.reset();
-//
-//    File destFile = hashValueToFile(hashValue);
-//
-//    if (config.verbose || config.debug) {
-//      cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
-//      if (config.debug) {
-//        cout << "[f] " << destFile.path << endl;
-//      }
-//    }
-//
-//    ShabackOutputStream os = createOutputStream();
-//    os.open(destFile);
-//
-//    if (split) {
+    in.reset();
+
+    if (config.verbose || config.debug) {
+      cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
+    }
+
+    if (split) {
+      throw IOException("Storing split files not implemented");
+//      File destFile = hashValueToFile(hashValue);
+//      ShabackOutputStream os = createOutputStream();
+//      os.open(destFile);
 //      storeSplitFile(run, hashValue, in, os);
-//    } else {
-//      while (true) {
-//        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-//        if (bytesRead == -1)
-//          break;
-//        os.write(readBuffer, bytesRead);
-//        run->numBytesStored += bytesRead;
-//      }
-//    }
-//
-//    os.finish();
-//
-//    run->numFilesStored++;
+//      os.finish();
+    } else {
+      store(run, srcFile, in, hashValue);
+    }
+
+    run->numFilesStored++;
   } else {
     if (config.debug) {
       cout << "[ ] " << srcFile.path << endl;

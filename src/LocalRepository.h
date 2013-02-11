@@ -137,7 +137,7 @@ class LocalRepository : public Repository
      */
     void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
 
-    void remoteStoreTextFile(std::string& cmdline, std::string& args);
+    void remoteStore(std::string& cmdline, std::string& args);
 
     void remoteStoreRootTreeFile(std::string& cmdline, std::string& args);
 
