@@ -113,7 +113,8 @@ void RemoteSshRepository::storeTextFile(string hashValue, string content)
   sendCommand(cmd, response);
 
   // Send whole string in one block:
-  remoteOut->write(content.c_str(), content.size());
+  printf("sending %i chars...\n", content.size());
+  remoteOut->write(content);
   waitForOk("store", response);
 
   // No more blocks to come:
@@ -141,7 +142,6 @@ void RemoteSshRepository::store(BackupRun* run, File& srcFile, InputStream& in, 
 
   while (true) {
     int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-    printf("bytesRead=%i\n", bytesRead);
     if (bytesRead == -1)
       break;
 
@@ -150,6 +150,7 @@ void RemoteSshRepository::store(BackupRun* run, File& srcFile, InputStream& in, 
     sprintf(cmd, "%d", bytesRead);
     sendCommand(cmd, response);
 
+    printf("sending %i bytes...\n", bytesRead);
     remoteOut->write(readBuffer, bytesRead);
     waitForOk("store", response);
   }
@@ -190,8 +191,8 @@ void RemoteSshRepository::show()
 
 void RemoteSshRepository::deleteOldIndexFiles()
 {
-  string response;
-  sendCommand("deleteOldIndexFiles", response);
+//  string response;
+//  sendCommand("deleteOldIndexFiles", response);
 }
 
 

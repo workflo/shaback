@@ -737,13 +737,15 @@ void LocalRepository::remoteStore(string& cmdline, string& hashValue)
     // Get length of next block:
     std::getline (cin, lengthS);
     long length = std::atol(lengthS.c_str());
-
     if (length == 0) break;
-    cout << "OK ready to receive " << lengthS << " bytes\n" << flush;
 
+    cout << "OK ready to receive " << lengthS << " bytes\n" << flush;
     os.write(cin, length);
+
+    cout << "OK " << lengthS << " bytes received\n" << flush;
   }
 
+  // FIXME: Darf nicht aufgerufen werden, wenn der Strom oben abbricht!
   os.finish();
 
   cout << "OK\n" << flush;

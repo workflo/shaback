@@ -187,8 +187,7 @@ void write(int b)
 #endif
 }
 
-
-void write(char* b, int len)
+void write(const char* b, int len)
 {
   if (len == 0)
     return;
@@ -217,7 +216,6 @@ void write(char* b, int len)
     }
     totalWritten += w;
   } while (totalWritten < len);
-
 #endif
 }
 
