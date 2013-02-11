@@ -16,29 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#ifdef HAVE_SCHED_H
-# include <sched.h>
-#endif
-
-#ifdef HAVE_ERRNO_H
-# include <errno.h>
-#endif
-
-#if defined(HAVE_STDARG_H) || defined(JAKELIB_WIN32API)
-# include <stdarg.h>
-#endif
-
-#ifdef HAVE_SYS_WAIT_H
-# include <sys/wait.h>
-#endif
-
-//#ifdef HAVE_SIGNAL_H
-//# include <signal.h>
-//#endif
 
 #include <fcntl.h>
+#include <iostream>
+#include <unistd.h>
+#include <sched.h>
+#include <errno.h>
+#include <sys/wait.h>
 #include <signal.h>
+#include <string.h>
 
 #include "Exception.h"
 #include "InputStream.h"
