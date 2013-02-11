@@ -113,7 +113,6 @@ void RemoteSshRepository::storeTextFile(string hashValue, string content)
   sendCommand(cmd, response);
 
   // Send whole string in one block:
-  printf("sending %i chars...\n", content.size());
   remoteOut->write(content);
   waitForOk("store", response);
 
@@ -150,7 +149,6 @@ void RemoteSshRepository::store(BackupRun* run, File& srcFile, InputStream& in, 
     sprintf(cmd, "%d", bytesRead);
     sendCommand(cmd, response);
 
-    printf("sending %i bytes...\n", bytesRead);
     remoteOut->write(readBuffer, bytesRead);
     waitForOk("store", response);
   }
