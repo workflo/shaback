@@ -42,6 +42,7 @@ class RestoreRun
   private:
     Repository& repository;
     RuntimeConfig& config;
+    unsigned int fileCount;
 };
 
 #endif // SHABACK_RestoreRun_H
