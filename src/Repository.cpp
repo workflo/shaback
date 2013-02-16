@@ -222,10 +222,11 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   return hashValue;
 }
 
-string Repository::storeFile(BackupRun* run, File& srcFile)
+string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* totalFileSize)
 {
   run->numFilesRead++;
-  run->numBytesRead += srcFile.getSize();
+  *totalFileSize = srcFile.getSize();
+  run->numBytesRead += *totalFileSize;
 
   string hashValue = srcFile.getXAttr("user.shaback.sha1");
 
@@ -255,6 +256,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 
   if (!contains(hashValue)) {
     in.reset();
+    *totalFileSize = 0;
 
     File destFile = hashValueToFile(hashValue);
 
@@ -269,7 +271,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
     os.open(destFile);
 
     if (split) {
-      storeSplitFile(run, hashValue, in, os);
+      storeSplitFile(run, hashValue, in, os, totalFileSize);
     } else {
       while (true) {
         int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
@@ -277,6 +279,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
           break;
         os.write(readBuffer, bytesRead);
         run->numBytesStored += bytesRead;
+        *totalFileSize += bytesRead;
       }
     }
 
@@ -295,7 +298,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile)
 }
 
 void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
-    ShabackOutputStream &blockFileOut)
+    ShabackOutputStream &blockFileOut, shaback_filesize_t* totalFileSize)
 {
   Sha1 totalSha1;
   int blockCount = 0;
@@ -333,6 +336,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
 
     blockFileOut.write(blockHashValue);
     blockFileOut.write("\n");
+    *totalFileSize += bytesRead;
 
     totalSha1.update(readBuffer, bytesRead);
   }
@@ -493,7 +497,12 @@ int Repository::restoreByTreeId(string& treeId)
 {
   RestoreRun run(config, *this);
   File destinationDir(".");
-  run.restore(treeId, destinationDir);
+
+  if (config.restoreAsCpio) {
+    run.restoreAsCpio(treeId, destinationDir);
+  } else {
+    run.restore(treeId, destinationDir);
+  }
 
   if (config.showTotals) {
     run.showTotals();

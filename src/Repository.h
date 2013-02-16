@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include "ShabackConfig.h"
 #include "RuntimeConfig.h"
 #include "Cache.h"
 #include "lib/Date.h"
@@ -71,7 +72,7 @@ class Repository
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
-    std::string storeFile(BackupRun* run, File& srcFile);
+    std::string storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* totalFileSize);
     void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
 
@@ -183,7 +184,7 @@ class Repository
      * Splits the input stream into chunks and stores them
      * individually.
      */
-    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut);
+    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut, shaback_filesize_t* totalFileSize);
 
     char* readBuffer;
 };

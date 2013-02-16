@@ -20,6 +20,7 @@
 #define SHABACK_TreeFileEntry_H
 
 #include <string>
+#include "ShabackConfig.h"
 
 #define TREEFILEENTRY_FILE          'F'
 #define TREEFILEENTRY_DIRECTORY     'D'
@@ -48,6 +49,7 @@ class TreeFileEntry
     int mtime;
     int ctime;
     std::string symLinkDest;
+    shaback_filesize_t size;
 
     /** Indicates whether this file is split into blocks. */
     bool isSplitFile;

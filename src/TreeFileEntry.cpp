@@ -90,8 +90,11 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   from = until +1;
   ctime = strtol(n.c_str(), 0, 10);
 
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing ...");
+  // Size
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file size");
+  n = line.substr(from, until - from);
   from = until +1;
+  size = strtol(n.c_str(), 0, 10);
 
   if (type == TREEFILEENTRY_SYMLINK) {
     // Symlink destination

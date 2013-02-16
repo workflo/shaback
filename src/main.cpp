@@ -59,6 +59,7 @@ void showUsage(string& op)
   } else if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-S | --skip-existing]\n"
+      "                      [-o | --cpio]\n"
       "                      <rootfile> | <dir-id>\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
       "\t<rootfile> is a filename from the repository's index/ directory.\n"
@@ -67,6 +68,8 @@ void showUsage(string& op)
       "\t    Skip files already existing in destination directory.\n\n"
       "\t-t, --totals\n"
       "\t    Give summary report at the end of the recovery run.\n\n"
+      "\t-o, --cpio\n"
+      "\t    Restore to cpio stream on stdout.\n"
       "\n"
       "\tFiles will always be restored into the CWD.\n");
   } else if (op == "gc") {

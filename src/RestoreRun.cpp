@@ -23,6 +23,7 @@
 
 #include "lib/Exception.h"
 #include "lib/FileOutputStream.h"
+#include "lib/StandardOutputStream.h"
 
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
@@ -30,7 +31,7 @@
 using namespace std;
 
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0)
+    repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0), fileCount(0)
 {
   // TODO Move out of constructor!!
   repository.lock();
@@ -56,12 +57,12 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 
         if (!skip) {
           if (config.verbose)
-            cout << "[d] " << dir.path << endl;
+            cerr << "[d] " << dir.path << endl;
 
           dir.mkdirs();
         }
         if (dir.isDir()) {
-          restore(entry.id, destinationDir, depth +1);
+          restore(entry.id, destinationDir, depth + 1);
           if (!skip) {
             restoreMetaData(dir, entry);
           }
@@ -74,28 +75,33 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       case TREEFILEENTRY_FILE: {
         File file(destinationDir, entry.path);
 
-        if (config.skipExisting && file.isFile()) break;
+        if (config.restoreAsCpio) {
 
-        if (config.verbose)
-          cout << "[f] " << file.path << endl;
+        } else {
+          if (config.skipExisting && file.isFile())
+            break;
 
-        // Create base directory:
-        if (depth == 0) {
-          file.getParent().mkdirs();
-          if (!file.getParent().isDir()) {
-            reportError(string("Cannot create destination directory: ").append(file.getParent().path));
+          if (config.verbose)
+            cerr << "[f] " << file.path << endl;
+
+          // Create base directory:
+          if (depth == 0) {
+            file.getParent().mkdirs();
+            if (!file.getParent().isDir()) {
+              reportError(string("Cannot create destination directory: ").append(file.getParent().path));
+            }
           }
-        }
-        file.remove();
+          file.remove();
 
-        try {
-          FileOutputStream out(file);
-          repository.exportFile(entry, out);
-          out.close();
-          restoreMetaData(file, entry);
-          numFilesRestored++;
-        } catch (Exception &ex) {
-          reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
+          try {
+            FileOutputStream out(file);
+            repository.exportFile(entry, out);
+            out.close();
+            restoreMetaData(file, entry);
+            numFilesRestored++;
+          } catch (Exception &ex) {
+            reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
+          }
         }
         break;
       }
@@ -103,7 +109,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       case TREEFILEENTRY_SYMLINK: {
         File file(destinationDir, entry.path);
 
-        if (config.skipExisting && file.isSymlink()) break;
+        if (config.skipExisting && file.isSymlink())
+          break;
 
         if (config.verbose)
           cout << "[s] " << file.path << endl;
@@ -120,6 +127,58 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       default:
         throw IllegalStateException("Unexpected tree file entry type");
     }
+  }
+}
+
+void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
+{
+  StandardOutputStream out(stdout);
+  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+
+  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
+    TreeFileEntry entry(*it);
+
+    switch (entry.type) {
+      case TREEFILEENTRY_DIRECTORY: {
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
+            entry.path.substr(1).c_str(), 0x0);
+        restoreAsCpio(entry.id, destinationDir, depth + 1);
+        break;
+      }
+
+      case TREEFILEENTRY_FILE: {
+        if (entry.size > 0xffffffff) {
+          reportError(string("File too large for cpio: ").append(entry.path));
+          break;
+        }
+
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(),
+            (unsigned int) entry.size, entry.path.substr(1).c_str(), 0x0);
+        try {
+          repository.exportFile(entry, out);
+          numFilesRestored++;
+        } catch (Exception &ex) {
+          reportError(string("Cannot restore file ").append(entry.path).append(": ").append(ex.getMessage()));
+        }
+        break;
+      }
+
+      case TREEFILEENTRY_SYMLINK: {
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
+            entry.path.substr(1).c_str(), (unsigned int) entry.symLinkDest.size() + 1, entry.symLinkDest.c_str(), 0x0);
+        break;
+      }
+
+      default:
+        throw IllegalStateException("Unexpected tree file entry type");
+    }
+  }
+
+  if (depth == 0) {
+    fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
   }
 }
 
@@ -162,11 +221,11 @@ void RestoreRun::reportError(string msg)
 
 void RestoreRun::showTotals()
 {
-  printf("Files restored:   %12d\n", numFilesRestored);
+  fprintf(stderr, "Files restored:   %12d\n", numFilesRestored);
   //  #ifdef __APPLE__
   //  printf("Bytes restored:   %12jd\n", (intmax_t) numBytesRestored);
   //  #else
   //  printf("Bytes restored:   %12jd\n", numBytesRestored);
   //  #endif
-  printf("Errors:           %12d\n", numErrors);
+  fprintf(stderr, "Errors:           %12d\n", numErrors);
 }

@@ -52,6 +52,7 @@ RuntimeConfig::RuntimeConfig()
   haveExclusiveLock = false;
   useWriteCache = true;
   skipExisting = false;
+  restoreAsCpio = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -89,11 +90,12 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         0, 'n' }, { "help", no_argument, 0, 'h' }, { "encryption", required_argument, 0, 'E' }, { "compression",
         required_argument, 0, 'C' }, {"ignore-error", required_argument, 0, 'i'},
         {"repo-format", required_argument, 0, 'F'},
+        {"cpio", no_argument, 0, 'o'},
         {"no-write-cache", no_argument, 0, 'W'},
         {"skip-existing", no_argument, 0, 'S'},
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WS", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSo", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -132,6 +134,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'd':
         debug = true;
+        break;
+
+      case 'o':
+        restoreAsCpio = true;
         break;
 
       case 'p':
