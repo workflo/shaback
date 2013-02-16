@@ -493,7 +493,12 @@ int Repository::restoreByTreeId(string& treeId)
 {
   RestoreRun run(config, *this);
   File destinationDir(".");
-  run.restore(treeId, destinationDir);
+
+  if (config.restoreAsCpio) {
+    run.restoreAsCpio(treeId, destinationDir);
+  } else {
+    run.restore(treeId, destinationDir);
+  }
 
   if (config.showTotals) {
     run.showTotals();

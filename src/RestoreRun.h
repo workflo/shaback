@@ -29,6 +29,7 @@ class RestoreRun
     ~RestoreRun();
 
     void restore(std::string& treeId, File& destinationDir, int depth = 0);
+    void restoreAsCpio(std::string& treeId, File& destinationDir, int depth = 0);
     void showTotals();
 
     off_t numBytesRestored;
