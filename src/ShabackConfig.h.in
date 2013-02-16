@@ -1,5 +1,15 @@
 
+#ifndef SHABACK_ShabackConfig_H
+#define SHABACK_ShabackConfig_H
+
 #define SHABACK_VERSION_MAJOR @SHABACK_VERSION_MAJOR@
 #define SHABACK_VERSION_MINOR @SHABACK_VERSION_MINOR@
 #define SHABACK_SYSCONFDIR "@CMAKE_INSTALL_PREFIX@/etc"
 
+#ifdef __APPLE__
+# define shaback_filesize_t intmax_t
+#else
+# define shaback_filesize_t long long
+#endif
+
+#endif // SHABACK_ShabackConfig_H

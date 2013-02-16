@@ -148,7 +148,8 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
 
 string BackupRun::handleFile(File& file, bool absolutePaths)
 {
-  string hashValue = repository.storeFile(this, file);
+  shaback_filesize_t totalFileSize = 0;
+  string hashValue = repository.storeFile(this, file, &totalFileSize);
 
   string treeFileLine("F\t");
   treeFileLine.append(hashValue);
@@ -161,13 +162,7 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
-      file.getPosixMtime(), file.getPosixCtime(),
-#ifdef __APPLE__
-      (intmax_t) file.getSize()
-#else
-      file.getSize()
-#endif
-  );
+      file.getPosixMtime(), file.getPosixCtime(), totalFileSize);
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
@@ -197,13 +192,13 @@ void BackupRun::showTotals()
 {
   printf("Files inspected:  %12d\n", numFilesRead);
 #ifdef __APPLE__
-  printf("Bytes inspected:  %12jd\n", (intmax_t) numBytesRead);
+  printf("Bytes inspected:  %12jd\n", numBytesRead);
 #else
   printf("Bytes inspected:  %12lu\n", numBytesRead);
 #endif
   printf("Files stored:     %12d\n", numFilesStored);
 #ifdef __APPLE__
-  printf("Bytes stored:     %12jd\n", (intmax_t) numBytesStored);
+  printf("Bytes stored:     %12jd\n", numBytesStored);
 #else
   printf("Bytes stored:     %12lu\n", numBytesStored);
 #endif

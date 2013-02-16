@@ -20,6 +20,7 @@
 #define SHABACK_BackupRun_H
 
 #include <string>
+#include "ShabackConfig.h"
 #include "Repository.h"
 #include "lib/File.h"
 #include "lib/Exception.h"
@@ -34,8 +35,8 @@ class BackupRun
     void showTotals();
     void reportError(Exception& ex);
 
-    off_t numBytesRead;
-    off_t numBytesStored;
+    shaback_filesize_t numBytesRead;
+    shaback_filesize_t numBytesStored;
     int numFilesRead;
     int numFilesStored;
     int numErrors;
