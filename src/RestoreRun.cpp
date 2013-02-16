@@ -23,6 +23,7 @@
 
 #include "lib/Exception.h"
 #include "lib/FileOutputStream.h"
+#include "lib/StandardOutputStream.h"
 
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
@@ -131,6 +132,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 
 void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
 {
+  StandardOutputStream out(stdout);
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
 
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
@@ -138,54 +140,33 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
 
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
-        printf("070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode, entry.uid,
-            entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
             entry.path.substr(1).c_str(), 0x0);
         restoreAsCpio(entry.id, destinationDir, depth + 1);
         break;
       }
 
       case TREEFILEENTRY_FILE: {
-//        printf("070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode, entry.uid,
-//            entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
-//            entry.path.substr(1).c_str(), 0x0);
-//        File file(destinationDir, entry.path);
-//
-//        if (config.restoreAsCpio) {
-//
-//        } else {
-//          if (config.skipExisting && file.isFile())
-//            break;
-//
-//          if (config.verbose)
-//            cerr << "[f] " << file.path << endl;
-//
-//          // Create base directory:
-//          if (depth == 0) {
-//            file.getParent().mkdirs();
-//            if (!file.getParent().isDir()) {
-//              reportError(string("Cannot create destination directory: ").append(file.getParent().path));
-//            }
-//          }
-//          file.remove();
-//
-//          try {
-//            FileOutputStream out(file);
-//            repository.exportFile(entry, out);
-//            out.close();
-//            restoreMetaData(file, entry);
-//            numFilesRestored++;
-//          } catch (Exception &ex) {
-//            reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
-//          }
-//        }
+
+        // TODO: Check max file size!!
+
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(),
+            (unsigned int) entry.size, entry.path.substr(1).c_str(), 0x0);
+        try {
+          repository.exportFile(entry, out);
+          numFilesRestored++;
+        } catch (Exception &ex) {
+          reportError(string("Cannot restore file ").append(entry.path).append(": ").append(ex.getMessage()));
+        }
         break;
       }
 
       case TREEFILEENTRY_SYMLINK: {
-        printf("070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode, entry.uid,
-            entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
-            entry.path.substr(1).c_str(), (unsigned int) entry.symLinkDest.size() +1, entry.symLinkDest.c_str(), 0x0);
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
+            entry.path.substr(1).c_str(), (unsigned int) entry.symLinkDest.size() + 1, entry.symLinkDest.c_str(), 0x0);
         break;
       }
 
@@ -195,7 +176,7 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
   }
 
   if (depth == 0) {
-    printf("0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
+    fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
   }
 }
 
