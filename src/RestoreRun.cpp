@@ -132,6 +132,11 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
       reportError(string("chown: ").append(ex.getMessage()));
   }
 
+  if (entry.type == TREEFILEENTRY_FILE) {
+    file.setXAttr("user.shaback.sha1", entry.id); // TODO: Use dynamic digest name
+    file.setXAttr("user.shaback.mtime", entry.mtime);
+  }
+
   if (entry.type != TREEFILEENTRY_SYMLINK) {
     try {
       file.chmod(entry.fileMode);
