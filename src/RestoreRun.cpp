@@ -148,8 +148,10 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
       }
 
       case TREEFILEENTRY_FILE: {
-
-        // TODO: Check max file size!!
+        if (entry.size > 0xffffffff) {
+          reportError(string("File too large for cpio: ").append(entry.path));
+          break;
+        }
 
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
             entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(),
@@ -214,11 +216,11 @@ void RestoreRun::reportError(string msg)
 
 void RestoreRun::showTotals()
 {
-  printf("Files restored:   %12d\n", numFilesRestored);
+  fprintf(stderr, "Files restored:   %12d\n", numFilesRestored);
   //  #ifdef __APPLE__
   //  printf("Bytes restored:   %12jd\n", (intmax_t) numBytesRestored);
   //  #else
   //  printf("Bytes restored:   %12jd\n", numBytesRestored);
   //  #endif
-  printf("Errors:           %12d\n", numErrors);
+  fprintf(stderr, "Errors:           %12d\n", numErrors);
 }

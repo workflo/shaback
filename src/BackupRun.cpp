@@ -190,19 +190,19 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
 
 void BackupRun::showTotals()
 {
-  printf("Files inspected:  %12d\n", numFilesRead);
+  fprintf(stderr, "Files inspected:  %12d\n", numFilesRead);
 #ifdef __APPLE__
-  printf("Bytes inspected:  %12jd\n", numBytesRead);
+  fprintf(stderr, "Bytes inspected:  %12jd\n", numBytesRead);
 #else
-  printf("Bytes inspected:  %12lu\n", numBytesRead);
+  fprintf(stderr, "Bytes inspected:  %12lu\n", numBytesRead);
 #endif
-  printf("Files stored:     %12d\n", numFilesStored);
+  fprintf(stderr, "Files stored:     %12d\n", numFilesStored);
 #ifdef __APPLE__
-  printf("Bytes stored:     %12jd\n", numBytesStored);
+  fprintf(stderr, "Bytes stored:     %12jd\n", numBytesStored);
 #else
-  printf("Bytes stored:     %12lu\n", numBytesStored);
+  fprintf(stderr, "Bytes stored:     %12lu\n", numBytesStored);
 #endif
-  printf("Errors:           %12d\n", numErrors);
+  fprintf(stderr, "Errors:           %12d\n", numErrors);
 }
 
 void BackupRun::reportError(Exception& ex)
