@@ -138,11 +138,18 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
 
+    string path(entry.path);
+    if (path.find("/") == 0) {
+	path.erase(0, 1);
+    } else if (path.find("./") == 0) {
+        path.erase(0, 2);
+    }
+
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
-            entry.path.substr(1).c_str(), 0x0);
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+            path.c_str(), 0x0);
         restoreAsCpio(entry.id, destinationDir, depth + 1);
         break;
       }
@@ -154,8 +161,8 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
         }
 
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(),
-            (unsigned int) entry.size, entry.path.substr(1).c_str(), 0x0);
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            (unsigned int) entry.size, path.c_str(), 0x0);
         try {
           repository.exportFile(entry, out);
           numFilesRestored++;
@@ -167,8 +174,8 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
 
       case TREEFILEENTRY_SYMLINK: {
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) entry.path.size(), 0,
-            entry.path.substr(1).c_str(), (unsigned int) entry.symLinkDest.size() + 1, entry.symLinkDest.c_str(), 0x0);
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+            path.c_str(), (unsigned int) entry.symLinkDest.size() + 1, entry.symLinkDest.c_str(), 0x0);
         break;
       }
 
