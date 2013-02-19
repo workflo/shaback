@@ -156,7 +156,7 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
 
       case TREEFILEENTRY_FILE: {
         if (entry.size > 0xffffffff) {
-          reportError(string("File too large for cpio: ").append(entry.path));
+          reportError(string("File too large for cpio: ").append(path));
           break;
         }
 
@@ -167,7 +167,7 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
           repository.exportFile(entry, out);
           numFilesRestored++;
         } catch (Exception &ex) {
-          reportError(string("Cannot restore file ").append(entry.path).append(": ").append(ex.getMessage()));
+          reportError(string("Cannot restore file ").append(path).append(": ").append(ex.getMessage()));
         }
         break;
       }
