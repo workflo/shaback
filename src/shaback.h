@@ -27,7 +27,10 @@ class Shaback
 public:
     Shaback(RuntimeConfig& config);
     virtual ~Shaback();
+
+#if defined(SHABACK_HAS_BACKUP)
     virtual void createRepository();
+#endif
     static int deflate();
     static int inflate();
 

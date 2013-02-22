@@ -58,6 +58,7 @@ void ShabackInputStream::open(File& file)
   fileInputStream = new FileInputStream(file);
   inputStream = fileInputStream;
 
+#if defined(OPENSSL_FOUND)
   switch (encryptionAlgorithm) {
     case ENCRYPTION_BLOWFISH:
       encryptionInputStream = new BlowfishInputStream(config.cryptoPassword, inputStream);
@@ -72,6 +73,7 @@ void ShabackInputStream::open(File& file)
     case ENCRYPTION_NONE:
       break;
   }
+#endif
 
   switch (compressionAlgorithm) {
     case COMPRESSION_DEFLATE:

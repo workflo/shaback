@@ -12,4 +12,9 @@
 # define shaback_filesize_t long long
 #endif
 
+
+#if defined(OPENSSL_FOUND)
+# define SHABACK_HAS_BACKUP
+#endif
+
 #endif // SHABACK_ShabackConfig_H

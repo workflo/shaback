@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "BackupRun.h"
+#if defined(SHABACK_HAS_BACKUP)
 #include "lib/Sha1.h"
 #include "lib/Exception.h"
 #include "TreeFile.h"
@@ -317,3 +318,4 @@ void BackupRun::deleteOldIndexFiles()
     file.remove();
   }
 }
+#endif

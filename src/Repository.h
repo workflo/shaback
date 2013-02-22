@@ -37,7 +37,10 @@ class Repository
     Repository(RuntimeConfig& config);
     ~Repository();
 
+#if defined(SHABACK_HAS_BACKUP)
     int backup();
+#endif
+
     int restore();
 
     /**
@@ -71,9 +74,11 @@ class Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
+#if defined(SHABACK_HAS_BACKUP)
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     std::string storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* totalFileSize);
     void storeRootTreeFile(std::string& rootHashValue);
+#endif
     void importCacheFile();
 
     /**
@@ -138,10 +143,12 @@ class Repository
      */
     static int repoFormatByName(std::string name);
 
+#if defined(SHABACK_HAS_BACKUP)
     /**
      * Returns the hash digest for the given password as a hex string.
      */
     static std::string hashPassword(std::string password);
+#endif
 
     /**
      * Maps the internal compression algorithm's number to a human-readable name.
@@ -177,7 +184,10 @@ class Repository
 
     int restoreByRootFile(File& rootFile);
     int restoreByTreeId(std::string& treeId);
+
+#if defined(SHABACK_HAS_BACKUP)
     void checkPassword();
+#endif
 
   private:
     /**

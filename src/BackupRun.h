@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_BackupRun_H
+#include "ShabackConfig.h"
+#if !defined(SHABACK_BackupRun_H) && defined(SHABACK_HAS_BACKUP)
 #define SHABACK_BackupRun_H
 
 #include <string>
-#include "ShabackConfig.h"
 #include "Repository.h"
 #include "lib/File.h"
 #include "lib/Exception.h"

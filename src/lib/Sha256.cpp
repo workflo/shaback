@@ -19,6 +19,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "Sha256.h"
+#if defined(OPENSSL_FOUND)
 
 using namespace std;
 
@@ -80,3 +81,4 @@ void Sha256::finalize()
 
   hexStr = hexChars;
 }
+#endif

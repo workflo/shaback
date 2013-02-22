@@ -19,6 +19,7 @@
 #include <iostream>
 
 #include "BlowfishInputStream.h"
+#if defined(OPENSSL_FOUND)
 #include "Exception.h"
 #include "Sha256.h"
 
@@ -89,3 +90,4 @@ void BlowfishInputStream::close()
     in = 0;
   }
 }
+#endif

@@ -16,7 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_Sha256_H
+#include "config.h"
+#if !defined(SHABACK_Sha256_H) && defined(OPENSSL_FOUND)
 #define SHABACK_Sha256_H
 
 #include <string>

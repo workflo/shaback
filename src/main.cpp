@@ -34,6 +34,7 @@ using namespace std;
 
 void showUsage(string& op)
 {
+#if defined(SHABACK_HAS_BACKUP)
   if (op == "backup") {
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-t | --totals] [-p <pw> | --password=<pw>]\n"
@@ -56,7 +57,9 @@ void showUsage(string& op)
       "\t    An arbitrary number of files and directories to be backed up.\n"
       "\t    If no files are specified here, the directory list from the config\n"
       "\t    file takes effect.\n\n");
-  } else if (op == "restore") {
+  } else
+#endif
+  if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-S | --skip-existing]\n"
       "                      [-o | --cpio]\n"
@@ -78,6 +81,7 @@ void showUsage(string& op)
   } else if (op == "show") {
     printf("usage: shaback show [<general_options>] [-p <pw> | --password=<pw>] <id>\n\n");
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
+#if defined(SHABACK_HAS_BACKUP)
   } else if (op == "init") {
     printf("usage: shaback init [<general_options>] [-f | --force]\n"
       "                      [-E <enc> | --encryption=<enc>]\n"
@@ -109,6 +113,7 @@ void showUsage(string& op)
       "\t    <fmt> must be one of: `2-2' or `3', where `2-2' is the default.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n");
+#endif
   } else if (op == "deflate") {
     printf("usage: shaback deflate\n\n");
   } else if (op == "inflate") {
@@ -117,11 +122,13 @@ void showUsage(string& op)
     printf("usage: shaback <command> [<options>] [<args>]\n");
     printf("\n");
     printf("Valid commands are:\n");
+#if defined(SHABACK_HAS_BACKUP)
     printf("   backup      Backup a set of files or directories.\n");
+#endif
     printf("   gc          Garbage collection: Delete unused files from archive.\n");
-    //  printf("   extract     Extract backup sets from archive.\n");
-    //    printf("   fsck        Perform integrity check with optional garbage collection.\n");
+#if defined(SHABACK_HAS_BACKUP)
     printf("   init        Create a new repository.\n");
+#endif
     printf("   restore     Restore files from repository.\n");
     //    printf("   cleanup     Delete old index files\n");
     printf("   show        Decompress and decrypt a certain object from the repository.\n");
@@ -166,9 +173,19 @@ int main(int argc, char** argv)
       Shaback shaback(config);
 
       if (config.operation == "init") {
+#if defined(SHABACK_HAS_BACKUP)
         shaback.createRepository();
+#else
+        cerr << "Command 'init' not available - missing openssl." << endl;
+        exit(1);
+#endif
       } else if (config.operation == "backup") {
+#if defined(SHABACK_HAS_BACKUP)
         return shaback.repository.backup();
+#else
+        cerr << "Command 'backup' not available - missing openssl." << endl;
+        exit(1);
+#endif
       } else if (config.operation == "restore") {
         return shaback.repository.restore();
       } else if (config.operation == "show") {

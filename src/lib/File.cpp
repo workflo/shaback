@@ -110,7 +110,7 @@ File File::tmpdir()
   if (!p) p = getenv("TMPDIR");
   if (!p) p = getenv("TMP");
   if (!p) p = getenv("TEMP");
-  if (!p) p = "/tmp";
+  if (!p) p = (char*) "/tmp";
 
   return File(p);
 
@@ -147,7 +147,11 @@ void File::refresh()
     fileExists = false;
   }
 #else
+#ifdef __APPLE__
   if (lstat64(path.c_str(), &statBuffer) == -1) {
+#else
+  if (lstat64(path.c_str(), &statBuffer) == -1) {
+#endif
     fileExists = false;
   } else {
     fileExists = true;

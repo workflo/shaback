@@ -31,6 +31,7 @@
 #include "lib/FileOutputStream.h"
 #include "lib/StandardOutputStream.h"
 #include "lib/Properties.h"
+#include "lib/Digest.h"
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
@@ -81,10 +82,16 @@ void Repository::open()
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
+#if defined(SHABACK_HAS_BACKUP)
     checkPassword();
+#else
+    cerr << "Cannot handle encrypted repositories - missing openssl." << endl;
+    exit(1);
+#endif
   }
 }
 
+#if defined(SHABACK_HAS_BACKUP)
 void Repository::checkPassword()
 {
   FileInputStream in(config.passwordCheckFile);
@@ -102,6 +109,7 @@ void Repository::checkPassword()
         string("Password file does not contain hashed password: ").append(config.passwordCheckFile.path));
   }
 }
+#endif
 
 void Repository::lock(bool exclusive)
 {
@@ -152,6 +160,7 @@ void Repository::openReadCache()
   }
 }
 
+#if defined(SHABACK_HAS_BACKUP)
 int Repository::backup()
 {
   open();
@@ -170,6 +179,7 @@ int Repository::backup()
 
   return rc;
 }
+#endif
 
 File Repository::hashValueToFile(string hashValue)
 {
@@ -195,6 +205,7 @@ bool Repository::contains(string& hashValue)
   return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
+#if defined(SHABACK_HAS_BACKUP)
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
 {
   Sha1 sha1;
@@ -352,6 +363,7 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
 //    cerr << "File changed while being backed up: " << fileSha1.toString() << " <> " << fileHashValue << endl;
   }
 }
+#endif
 
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
@@ -443,6 +455,7 @@ void Repository::importCacheFile()
   }
 }
 
+#if defined(SHABACK_HAS_BACKUP)
 void Repository::storeRootTreeFile(string& rootHashValue)
 {
   string filename = config.backupName;
@@ -458,6 +471,7 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   cout << "ID:         " << rootHashValue << endl;
   cout << "Index file: " << file.path << endl;
 }
+#endif
 
 int Repository::restore()
 {
@@ -664,6 +678,7 @@ string Repository::repoFormatToName(int fmt)
   }
 }
 
+#if defined(SHABACK_HAS_BACKUP)
 string Repository::hashPassword(string password)
 {
   Sha256 sha;
@@ -673,6 +688,7 @@ string Repository::hashPassword(string password)
   sha.finalize();
   return sha.toString();
 }
+#endif
 
 void Repository::removeAllCacheFiles()
 {

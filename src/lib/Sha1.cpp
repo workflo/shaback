@@ -19,6 +19,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "Sha1.h"
+#if defined(OPENSSL_FOUND)
 
 using namespace std;
 
@@ -73,3 +74,4 @@ void Sha1::finalize()
 
   hexStr = hexChars;
 }
+#endif

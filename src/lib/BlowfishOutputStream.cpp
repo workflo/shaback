@@ -19,6 +19,7 @@
 #include <iostream>
 
 #include "BlowfishOutputStream.h"
+#if defined(OPENSSL_FOUND)
 #include "Exception.h"
 #include "Sha256.h"
 
@@ -86,3 +87,4 @@ void BlowfishOutputStream::close()
     out = 0;
   }
 }
+#endif

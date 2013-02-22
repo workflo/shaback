@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 2.8)
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(Lzma QUIET)
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
 
