@@ -31,8 +31,7 @@
 using namespace std;
 
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
-    repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0), fileCount(0),
-    bytesToBeRestored(0)
+    repository(repository), config(config)
 {
   // TODO Move out of constructor!!
   repository.lock();
@@ -45,6 +44,12 @@ RestoreRun::~RestoreRun()
 
 int RestoreRun::start(std::string& treeId, File& destinationDir)
 {
+  numErrors = 0;
+  numFilesRestored = 0;
+  numBytesRestored = 0;
+  fileCount = 0;
+  bytesToBeRestored = 0;
+
   // Open index file to read directory sizes:
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
 
@@ -258,12 +263,11 @@ void RestoreRun::reportError(string msg)
 
 void RestoreRun::showTotals()
 {
-  fprintf(stderr, "Files restored:   %12d\n", numFilesRestored);
+  fprintf(stderr, "Files restored:   %12d                      \n", numFilesRestored);
   #ifdef __APPLE__
-  printf("Bytes restored:   %12jd\n", numBytesRestored);
-//  printf("Bytes to be restored:   %12jd\n", bytesToBeRestored);
+  fprintf(stderr, "Bytes restored:   %12jd\n", numBytesRestored);
   #else
-  printf("Bytes restored:   %12jd\n", numBytesRestored);
+  fprintf(stderr, "Bytes restored:   %12jd\n", numBytesRestored);
   #endif
   fprintf(stderr, "Errors:           %12d\n", numErrors);
 }
