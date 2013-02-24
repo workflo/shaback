@@ -65,14 +65,15 @@ int BackupRun::run()
 
   for (vector<string>::iterator it = config.dirs.begin(); it < config.dirs.end(); it++) {
     File file(*it);
+    shaback_filesize_t totalSubDirSize = 0;
 
     try {
       if (file.isSymlink()) {
         rootFile.append(handleSymlink(file, true));
       } else if (file.isDir()) {
-        rootFile.append(handleDirectory(file, true));
+        rootFile.append(handleDirectory(file, true, &totalSubDirSize));
       } else if (file.isFile()) {
-        rootFile.append(handleFile(file, true));
+        rootFile.append(handleFile(file, true, &totalSubDirSize));
       } else if (!file.exists()) {
         throw FileNotFoundException(file.path);
       } else {
@@ -92,10 +93,11 @@ int BackupRun::run()
   return (numErrors == 0 ? 0 : 1);
 }
 
-string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren)
+string BackupRun::handleDirectory(File& dir, bool absolutePaths, shaback_filesize_t* totalParentDirSize, bool skipChildren)
 {
   string treeFile(TREEFILE_HEADER);
   treeFile.append("\n").append(dir.path).append("\n");
+  shaback_filesize_t totalDirSize = 0;
 
   config.runEnterDirCallbacks(dir);
 
@@ -113,9 +115,9 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
           treeFile.append(handleSymlink(child, false));
         } else if (child.isDir()) {
           treeFile.append(
-              handleDirectory(child, false, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev())));
+              handleDirectory(child, false, &totalDirSize, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev())));
         } else if (child.isFile()) {
-          treeFile.append(handleFile(child, false));
+          treeFile.append(handleFile(child, false, &totalDirSize));
         } else {
           // Ignore other types of files.
         }
@@ -137,17 +139,19 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildr
   }
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
-      dir.getPosixMtime(), dir.getPosixCtime());
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
+      dir.getPosixMtime(), dir.getPosixCtime(), totalDirSize);
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
   config.runLeaveDirCallbacks(dir);
 
+  *totalParentDirSize += totalDirSize;
+
   return treeFileLine;
 }
 
-string BackupRun::handleFile(File& file, bool absolutePaths)
+string BackupRun::handleFile(File& file, bool absolutePaths, shaback_filesize_t* totalDirSize)
 {
   shaback_filesize_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
@@ -166,6 +170,8 @@ string BackupRun::handleFile(File& file, bool absolutePaths)
       file.getPosixMtime(), file.getPosixCtime(), totalFileSize);
   treeFileLine.append(buf);
   treeFileLine.append("\n");
+
+  *totalDirSize += totalFileSize;
 
   return treeFileLine;
 }
