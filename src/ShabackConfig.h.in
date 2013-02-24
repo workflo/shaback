@@ -13,6 +13,7 @@
 #endif
 
 
+#include "lib/config.h"
 #if defined(OPENSSL_FOUND)
 # define SHABACK_HAS_BACKUP
 #endif
