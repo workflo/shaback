@@ -209,8 +209,8 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
 
       case TREEFILEENTRY_SYMLINK: {
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
-            path.c_str(), (unsigned int) entry.symLinkDest.size() + 1, entry.symLinkDest.c_str(), 0x0);
+            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         break;
       }
 
