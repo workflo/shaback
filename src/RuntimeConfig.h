@@ -38,6 +38,7 @@ class RuntimeConfig
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
 
+    bool quiet;
     bool verbose;
     bool debug;
     bool force;

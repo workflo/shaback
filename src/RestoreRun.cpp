@@ -31,7 +31,8 @@
 using namespace std;
 
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
-    repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0), fileCount(0)
+    repository(repository), config(config), numErrors(0), numFilesRestored(0), numBytesRestored(0), fileCount(0),
+    bytesToBeRestored(0)
 {
   // TODO Move out of constructor!!
   repository.lock();
@@ -40,6 +41,29 @@ RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
 RestoreRun::~RestoreRun()
 {
   repository.unlock();
+}
+
+int RestoreRun::start(std::string& treeId, File& destinationDir)
+{
+  // Open index file to read directory sizes:
+  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+
+  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
+    TreeFileEntry entry(*it);
+    bytesToBeRestored += entry.size;
+  }
+
+  if (config.restoreAsCpio) {
+    restoreAsCpio(treeId, destinationDir);
+  } else {
+    restore(treeId, destinationDir);
+  }
+
+  if (config.showTotals) {
+    showTotals();
+  }
+
+  return (numErrors > 0 ? 1 : 0);
 }
 
 void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
@@ -99,6 +123,9 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
             out.close();
             restoreMetaData(file, entry);
             numFilesRestored++;
+            numBytesRestored += entry.size;
+
+            if (!config.quiet) progress();
           } catch (Exception &ex) {
             reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
           }
@@ -165,7 +192,10 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
             (unsigned int) entry.size, path.c_str(), 0x0);
         try {
           repository.exportFile(entry, out);
-          numFilesRestored++;
+          numFilesRestored ++;
+          numBytesRestored += entry.size;
+
+          if (!config.quiet) progress();
         } catch (Exception &ex) {
           reportError(string("Cannot restore file ").append(path).append(": ").append(ex.getMessage()));
         }
@@ -229,10 +259,18 @@ void RestoreRun::reportError(string msg)
 void RestoreRun::showTotals()
 {
   fprintf(stderr, "Files restored:   %12d\n", numFilesRestored);
-  //  #ifdef __APPLE__
-  //  printf("Bytes restored:   %12jd\n", (intmax_t) numBytesRestored);
-  //  #else
-  //  printf("Bytes restored:   %12jd\n", numBytesRestored);
-  //  #endif
+  #ifdef __APPLE__
+  printf("Bytes restored:   %12jd\n", numBytesRestored);
+//  printf("Bytes to be restored:   %12jd\n", bytesToBeRestored);
+  #else
+  printf("Bytes restored:   %12jd\n", numBytesRestored);
+  #endif
   fprintf(stderr, "Errors:           %12d\n", numErrors);
+}
+
+void RestoreRun::progress()
+{
+  int percentage = 0;
+  if (bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) numBytesRestored / (float) bytesToBeRestored));
+  fprintf(stderr, "%jd of %jd bytes (%d\%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
 }

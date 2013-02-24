@@ -32,7 +32,10 @@ class RestoreRun
     void restoreAsCpio(std::string& treeId, File& destinationDir, int depth = 0);
     void showTotals();
 
-    off_t numBytesRestored;
+    int start(std::string& treeId, File& destinationDir);
+
+    shaback_filesize_t numBytesRestored;
+    shaback_filesize_t bytesToBeRestored;
     int numFilesRestored;
     int numErrors;
 
@@ -44,6 +47,7 @@ class RestoreRun
     Repository& repository;
     RuntimeConfig& config;
     unsigned int fileCount;
+    void progress();
 };
 
 #endif // SHABACK_RestoreRun_H

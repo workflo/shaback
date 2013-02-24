@@ -43,6 +43,7 @@ using namespace std;
 RuntimeConfig::RuntimeConfig()
 {
   repository = ".";
+  quiet = false;
   verbose = false;
   debug = false;
   oneFileSystem = false;
@@ -93,9 +94,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"cpio", no_argument, 0, 'o'},
         {"no-write-cache", no_argument, 0, 'W'},
         {"skip-existing", no_argument, 0, 'S'},
+        {"quiet", no_argument, 0, 'q'},
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSo", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSoq", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -110,6 +112,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'f':
         force = true;
+        break;
+
+      case 'q':
+        quiet = true;
         break;
 
       case 'h':

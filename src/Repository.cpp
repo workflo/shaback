@@ -512,17 +512,7 @@ int Repository::restoreByTreeId(string& treeId)
   RestoreRun run(config, *this);
   File destinationDir(".");
 
-  if (config.restoreAsCpio) {
-    run.restoreAsCpio(treeId, destinationDir);
-  } else {
-    run.restore(treeId, destinationDir);
-  }
-
-  if (config.showTotals) {
-    run.showTotals();
-  }
-
-  return (run.numErrors > 0 ? 1 : 0);
+  return run.start(treeId, destinationDir);
 }
 
 void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
