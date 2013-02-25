@@ -190,7 +190,7 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
       }
 
       case TREEFILEENTRY_FILE: {
-        if (entry.size > 0xffffffff) {
+        if (entry.size >= 0x7fffffff) {
           reportError(string("File too large for cpio: ").append(path));
           break;
         }
