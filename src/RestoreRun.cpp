@@ -49,6 +49,7 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
   numBytesRestored = 0;
   fileCount = 0;
   bytesToBeRestored = 0;
+  progressCounter = 0;
 
   // Open index file to read directory sizes:
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
@@ -59,7 +60,7 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
   }
 
   if (config.restoreAsCpio) {
-    restoreAsCpio(treeId, destinationDir);
+    restoreAsCpio(treeId);
   } else {
     restore(treeId, destinationDir);
   }
@@ -162,7 +163,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
   }
 }
 
-void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
+void RestoreRun::restoreAsCpio(string& treeId, int depth)
 {
   StandardOutputStream out(stdout);
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
@@ -171,10 +172,12 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
     TreeFileEntry entry(*it);
 
     string path(entry.path);
-    if (path.find("/") == 0) {
+    if (path == "/") {
+      path = ".";
+    } else {
+      while (path.size() > 1 && path[0] == '/') {
 	path.erase(0, 1);
-    } else if (path.find("./") == 0) {
-        path.erase(0, 2);
+      }
     }
 
     switch (entry.type) {
@@ -182,7 +185,7 @@ void RestoreRun::restoreAsCpio(string& treeId, File& destinationDir, int depth)
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
             entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
             path.c_str(), 0x0);
-        restoreAsCpio(entry.id, destinationDir, depth + 1);
+        restoreAsCpio(entry.id, depth + 1);
         break;
       }
 
@@ -274,7 +277,9 @@ void RestoreRun::showTotals()
 
 void RestoreRun::progress()
 {
-  int percentage = 0;
-  if (bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) numBytesRestored / (float) bytesToBeRestored));
-  fprintf(stderr, "%jd of %jd bytes (%d\%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+  if (++progressCounter > 20) {
+    int percentage = 0;
+    if (bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) numBytesRestored / (float) bytesToBeRestored));
+    fprintf(stderr, "%jd of %jd bytes (%d\%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+  }
 }
