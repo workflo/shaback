@@ -1,0 +1,235 @@
+#! /usr/bin/perl -w
+
+#
+# Recover an ODC-Style CPIO Archive as used by shaback recover --cpio
+#
+
+print "Hallo, Welt ...\n";
+
+my ($file) = @ARGV;
+my $cpio = Archive::Cpio->new;
+
+my $IN;
+if ($file) {
+  open($IN, '<', $file) or die "can't open $file: $!\n";
+} else {
+  $IN = \*STDIN;
+}
+
+$cpio->restore_run($IN);
+
+print "Zuende.\n";
+exit 0;
+
+
+#########################################################################
+
+
+package Archive::Cpio::Common;
+
+sub magics() {
+    {
+	"070707" => 'ODC',
+	"070701" => 'NewAscii',
+	"\xC7\x71" => 'OldBinary', # swabbed 070707
+	"\x71\xC7" => 'OldBinary', # 070707
+    };
+}
+
+
+sub max  { my $n = shift; $_ > $n and $n = $_ foreach @_; $n }
+
+
+sub begins_with {
+    my ($s, $prefix) = @_;
+    index($s, $prefix) == 0;
+}
+
+#########################################################################
+
+package Archive::Cpio::ODC;
+
+#use Archive::Cpio::Common;
+
+sub HEADER() {
+ (
+    magic => 6,
+    dev => 6,
+    inode => 6,
+    mode => 6,
+    uid => 6,
+    gid => 6,
+    nlink => 6,
+    rdev => 6,
+    mtime => 11,
+    namesize => 6,
+    datasize => 11,
+);
+}
+
+
+sub new {
+    my ($class, $magic) = @_;
+    bless { magic => oct($magic) }, $class;
+}
+
+
+sub restore_one {
+    my ($o, $FHwp) = @_;
+    # Meta Data
+    my $entry = read_one_header($o, $FHwp);
+
+    # File Header
+    $entry->{name} = $FHwp->read($entry->{namesize});
+    $entry->{name} =~ s/\0$//;
+    $entry->{name} ne "TRAILER!!!" or return;
+
+    print "Entry: " . $entry->{name} . "\n";
+
+    # TBI: Hier geht es weiter (?)
+
+    # Actual Data
+    $entry->{data} = $FHwp->read($entry->{datasize});
+
+    # Just for output
+    cleanup_entry($entry);
+    return $entry;
+}
+
+
+sub read_one_header {
+    my ($o, $FHwp) = @_;
+
+    my %h;
+    my @header = HEADER();
+
+    while (@header) {
+	my $field = shift @header;
+	my $size =  shift @header;
+	$h{$field} = $FHwp->read($size);
+	$h{$field} =~ /^[0-9]*$/si or die "bad header value $h{$field}\n";
+	$h{$field} = oct $h{$field};
+    }
+    my $l = $h{magic};
+    my $r = $o->{magic};
+    ($l == $r) or die "bad magic ($l vs $r)\n";
+
+    \%h;
+}
+
+
+sub cleanup_entry {
+    my ($entry) = @_;
+
+    foreach ('datasize', 'namesize', 'magic') {
+	delete $entry->{$_};
+    }
+}
+
+
+#########################################################################
+
+package Archive::Cpio::FileHandle_with_pushback;
+
+sub new {
+    my ($class, $F) = @_;
+    bless { F => $F, already_read => '' }, $class;
+}
+
+
+sub pushback {
+    my ($FHwp, $s) = @_;
+
+    $FHwp->{already_read} .= $s;
+}
+
+
+sub read {
+    my ($FHwp, $size) = @_;
+
+    $size or return;
+
+    $size =~ /^\d+$/ or die "bad size $size\n";
+
+    my $tmp = '';
+
+    if ($FHwp->{already_read}) {
+	$tmp = substr($FHwp->{already_read}, 0, $size);
+	substr($FHwp->{already_read}, 0, $size) = '';
+	$size -= length($tmp);
+    }
+    read($FHwp->{F}, $tmp, $size, length($tmp)) == $size or die "unexpected end of file while reading (got $tmp)\n";
+    $tmp;
+}
+
+
+sub read_ahead {
+    my ($FHwp, $size) = @_;
+
+    my $s = $FHwp->read($size);
+    $FHwp->pushback($s);
+    $s;
+}
+
+
+#########################################################################
+
+
+package Archive::Cpio::File;
+
+sub new {
+    my ($class, $val) = @_;
+
+    bless $val, $class;
+}
+
+sub name { my ($o) = @_; $o->{name} }
+sub size { my ($o) = @_; length($o->{data}) }
+sub get_content { my ($o) = @_; $o->{data} }
+
+
+
+#########################################################################
+
+
+package Archive::Cpio;
+
+our $VERSION = 0.09;
+
+sub new {
+    my ($class, %options) = @_;
+    bless \%options, $class;
+}
+
+
+sub restore_run {
+    my ($cpio, $F, $handler) = @_;
+
+    my $FHwp = Archive::Cpio::FileHandle_with_pushback->new($F);
+    $cpio->{archive_format} ||= detect_archive_format($FHwp);
+
+    while (my $entry = $cpio->{archive_format}->restore_one($FHwp)) {
+        print "Done: " . $entry->{name} . "\n";
+    }
+}
+
+
+sub detect_archive_format {
+    my ($FHwp) = @_;
+
+    my $magics = Archive::Cpio::Common::magics();
+
+    my $max_length = Archive::Cpio::Common::max(map { length $_ } values %$magics);
+    my $s = $FHwp->read_ahead($max_length);
+
+    foreach my $magic (keys %$magics) {
+	my $archive_format = $magics->{$magic};
+	Archive::Cpio::Common::begins_with($s, $magic) or next;
+	
+	#warn "found magic for $archive_format\n";
+
+	# my $class = "Archive::Cpio::$archive_format";
+	return Archive::Cpio::ODC->new($magic, $s);
+    }
+    die "invalid archive\n";
+}
