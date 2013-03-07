@@ -4,10 +4,17 @@
 # Recover an ODC-Style CPIO Archive as used by shaback recover --cpio
 #
 
+use File::Path qw(mkpath);
+
 print "Hallo, Welt ...\n";
 
 my ($file) = @ARGV;
 my $cpio = Archive::Cpio->new;
+
+my $numDirsRestored = 0;
+my $numFilesRestored = 0;
+my $numLinksRestored = 0;
+my $numBytesRestored = 0;
 
 my $IN;
 if ($file) {
@@ -15,11 +22,38 @@ if ($file) {
 } else {
   $IN = \*STDIN;
 }
-
+binmode($IN);
 $cpio->restore_run($IN);
 
-print "Zuende.\n";
+printf "Restored %d Bytes in %d files, %d dirs, %d links\n", $numBytesRestored, $numFilesRestored, $numDirsRestored, $numLinksRestored;
 exit 0;
+
+
+
+sub restoreMetaData($$) {
+  my ($file, $entry) = @_;
+  my $num;
+
+  # TBI: Muss lchown sein
+  $num = chown $entry->{uid}, $entry->{gid}, $file;
+  if ($num != 1) {
+    # TBI: Fehlerbehandlung
+  };
+
+  if ($entry->{type} ne 'l') {
+    $num = chmod $entry->{perm}, $file;
+    if ($num != 1) {
+      # TBI: Fehlerbehandlung
+    }
+  }
+
+  $num = utime $entry->{mtime}, $entry->{mtime}, $file;
+  if ($num != 1) {
+      # TBI: Fehlerbehandlung
+  }
+
+  # TBI: shaback stellt hier auch user.shaback.sha1/user.shaback.mtime wieder her
+}
 
 
 #########################################################################
@@ -48,6 +82,8 @@ sub begins_with {
 #########################################################################
 
 package Archive::Cpio::ODC;
+
+use Fcntl qw(:DEFAULT);
 
 #use Archive::Cpio::Common;
 
@@ -89,23 +125,44 @@ sub restore_one {
     # $entry->{inode}: Der wievielte Eintrag im Archiv
     #print "Entry: " . $entry->{inode} . " " . $entry->{name} . "\n";
     my $type = ($entry->{mode} & 0770000);
-    my $perm = ($entry->{mode} & 0007777);
-    # printf "%06o, %06o\n", $entry->{mode}, ($entry->{mode} & 0770000);
+    $entry->{perm} = ($entry->{mode} & 0007777);
 
     if ($type == 0040000) { # Dir
+      $entry->{type} = 'd';
       printf "d: %s (%d)\n", $entry->{name}, $entry->{inode};
-
-      my $data = $FHwp->read($entry->{datasize});
+      my $data = $FHwp->read($entry->{datasize}); # empty
+      ::mkpath($entry->{name});
+      ::restoreMetaData($entry->{name}, $entry);
+      $numDirsRestored++;
 
     } elsif ($type == 0100000) { # File
+      $entry->{type} = 'f';
       printf "f: (%d B) %s (%d)\n", $entry->{datasize}, $entry->{name}, $entry->{inode};
-      my $data = $FHwp->read($entry->{datasize});
+      unlink $entry->{name}; # in case the target exists as a link
+      my $out;
+      #sysopen($out, $entry->{name}, O_WRONLY) || die "$entry->{name}: $!"; # 1 == O_WRONLY
+      # TBI: non-magic open
+      open($out, '>' . $entry->{name}) || die "$entry->{name}: $!"; # 1 == O_WRONLY
+
+      binmode $out;
+      $FHwp->copy_to($out, $entry->{datasize});
+      #my $data = $FHwp->read($entry->{datasize});
+
+      ::restoreMetaData($entry->{name}, $entry);
+      $numFilesRestored++;
+      $numBytesRestored += $entry->{datasize};
 
     } elsif ($type == 0120000) { # Symlink
+      $entry->{type} = 'l';
       printf "l: %s (%d)\n", $entry->{name}, $entry->{inode};
+      my $oldfile = $FHwp->read($entry->{datasize});
 
-      # Actual Data
-      my $data = $FHwp->read($entry->{datasize});
+      unlink $entry->{name}; # Symlink would not work, otherwise
+      if (symlink $oldfile, $entry->{name}) {
+        # TBI: Fehlerbehandlung
+      }
+      ::restoreMetaData($entry->{name}, $entry);
+      $numLinksRestored++;
 
     } else {
       printf "E: Unsupported type %06o, skipping: %s", $type, $entry->{name};
@@ -185,9 +242,11 @@ sub read {
 	$tmp = substr($FHwp->{already_read}, 0, $size);
 	substr($FHwp->{already_read}, 0, $size) = '';
 	$size -= length($tmp);
+        return $tmp if ($size == 0);
     }
+
     read($FHwp->{F}, $tmp, $size, length($tmp)) == $size or die "unexpected end of file while reading (got $tmp)\n";
-    $tmp;
+    return $tmp;
 }
 
 
@@ -199,6 +258,29 @@ sub read_ahead {
     $s;
 }
 
+#
+# $len bytes lesen und nach $out schreiben
+sub copy_to {
+  my ($FHwp, $out, $len) = @_;
+
+  # Read-ahead aufloesen, FIXME: Ich glaube, hier kommt man gar nicht hin
+  if ($FHwp->{already_read}) {
+    syswrite $out, $FHwp->{already_read}|| die;
+    $len -= length($FHwp->{already_read});
+    $FHwp->{already_read} = '';
+  }
+
+  # Blockweise schreiben
+  my $buf;
+  my $bs = 8192; # TBI: Optimale (?) Block-groesse
+
+  while ($len > 0) {
+    my $cs = $len < $bs ? $len : $bs; # chunk suze
+    CORE::read($FHwp->{F}, $buf, $cs) == $cs or die "unexpected end of file while reading (got $buf)\n";
+    syswrite $out, $buf;
+    $len -= $cs;
+  }
+}
 
 #########################################################################
 
