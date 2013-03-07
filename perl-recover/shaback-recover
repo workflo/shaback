@@ -84,12 +84,40 @@ sub restore_one {
     $entry->{name} =~ s/\0$//;
     $entry->{name} ne "TRAILER!!!" or return;
 
-    print "Entry: " . $entry->{name} . "\n";
+    # $entry->{magic}: Konstant
+    # $entry->{dev}: Konstant
+    # $entry->{inode}: Der wievielte Eintrag im Archiv
+    #print "Entry: " . $entry->{inode} . " " . $entry->{name} . "\n";
+    my $type = ($entry->{mode} & 0770000);
+    my $perm = ($entry->{mode} & 0007777);
+    # printf "%06o, %06o\n", $entry->{mode}, ($entry->{mode} & 0770000);
 
-    # TBI: Hier geht es weiter (?)
+    if ($type == 0040000) { # Dir
+      printf "d: %s (%d)\n", $entry->{name}, $entry->{inode};
 
-    # Actual Data
-    $entry->{data} = $FHwp->read($entry->{datasize});
+      my $data = $FHwp->read($entry->{datasize});
+
+    } elsif ($type == 0100000) { # File
+      printf "f: (%d B) %s (%d)\n", $entry->{datasize}, $entry->{name}, $entry->{inode};
+      my $data = $FHwp->read($entry->{datasize});
+
+    } elsif ($type == 0120000) { # Symlink
+      printf "l: %s (%d)\n", $entry->{name}, $entry->{inode};
+
+      # Actual Data
+      my $data = $FHwp->read($entry->{datasize});
+
+    } else {
+      printf "E: Unsupported type %06o, skipping: %s", $type, $entry->{name};
+      $FHwp->read($entry->{datasize});
+      #<Flo> #define __S_IFDIR 0040000 /* Directory.  */
+      #<Flo> #define __S_IFCHR 0020000 /* Character device.  */
+      #<Flo> #define __S_IFBLK 0060000 /* Block device.  */
+      #<Flo> #define __S_IFREG 0100000 /* Regular file.  */
+      #<Flo> #define __S_IFIFO 0010000 /* FIFO.  */
+      #<Flo> #define __S_IFLNK 0120000 /* Symbolic link.  */
+      #<Flo> #define __S_IFSOCK 0140000 /* Socket.  */
+    }
 
     # Just for output
     cleanup_entry($entry);
@@ -209,7 +237,7 @@ sub restore_run {
     $cpio->{archive_format} ||= detect_archive_format($FHwp);
 
     while (my $entry = $cpio->{archive_format}->restore_one($FHwp)) {
-        print "Done: " . $entry->{name} . "\n";
+        #print "Done: " . $entry->{name} . "\n";
     }
 }
 
