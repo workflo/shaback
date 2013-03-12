@@ -2,11 +2,11 @@
 
 #
 # Recover an ODC-Style CPIO Archive as used by shaback recover --cpio
+# Usage: shaback-recover [file]
+#        Reads given file or STDIN
 #
 
 use File::Path qw(mkpath);
-
-print "Hallo, Welt ...\n";
 
 my ($file) = @ARGV;
 my $cpio = Archive::Cpio->new;
@@ -277,22 +277,6 @@ sub copy_to {
     $len -= $cs;
   }
 }
-
-#########################################################################
-
-
-package Archive::Cpio::File;
-
-sub new {
-    my ($class, $val) = @_;
-
-    bless $val, $class;
-}
-
-sub name { my ($o) = @_; $o->{name} }
-sub size { my ($o) = @_; length($o->{data}) }
-sub get_content { my ($o) = @_; $o->{data} }
-
 
 
 #########################################################################
