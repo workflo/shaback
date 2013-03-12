@@ -140,13 +140,9 @@ sub restore_one {
       printf "f: (%d B) %s (%d)\n", $entry->{datasize}, $entry->{name}, $entry->{inode};
       unlink $entry->{name}; # in case the target exists as a link
       my $out;
-      #sysopen($out, $entry->{name}, O_WRONLY) || die "$entry->{name}: $!"; # 1 == O_WRONLY
-      # TBI: non-magic open
-      open($out, '>' . $entry->{name}) || die "$entry->{name}: $!"; # 1 == O_WRONLY
-
+      sysopen($out, $entry->{name}, O_WRONLY | O_CREAT | O_LARGEFILE) || die "$entry->{name}: $!";
       binmode $out;
       $FHwp->copy_to($out, $entry->{datasize});
-      #my $data = $FHwp->read($entry->{datasize});
 
       ::restoreMetaData($entry->{name}, $entry);
       $numFilesRestored++;
