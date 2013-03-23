@@ -255,18 +255,19 @@ void BackupRun::deleteOldIndexFiles()
     lower.addDays(-1);
     if (lower.compareTo(dailyLimit) <= 0)
       break;
-    int n = 0;
 //    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    bool found = false;
     for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
       Date d(*it);
       if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
-        n++;
-        if (n > 1) {
-          toDelete.push_back(d);
-        }
+        toDelete.push_back(d);
+        found = true;
       }
     }
     upper = lower;
+
+    // Keep last one from this range:
+    if (found) toDelete.pop_back();
   }
 
   // Keep weekly backups:
@@ -277,18 +278,19 @@ void BackupRun::deleteOldIndexFiles()
     lower.addDays(-7);
     if (lower.compareTo(weeklyLimit) <= 0)
       break;
-    int n = 0;
+    bool found = false;
 //    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
     for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
       Date d(*it);
       if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
-        n++;
-        if (n > 1) {
-          toDelete.push_back(d);
-        }
+        toDelete.push_back(d);
+        found = true;
       }
     }
     upper = lower;
+
+    // Keep last one from this range:
+    if (found) toDelete.pop_back();
   }
 
   // Keep monthly backups:
@@ -296,18 +298,20 @@ void BackupRun::deleteOldIndexFiles()
   while (true) {
     Date lower(upper);
     lower.addDays(-30);
-    int n = 0;
+    bool found = false;
 //    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
     for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
       Date d(*it);
       if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
-        n++;
-        if (n > 1) {
-          toDelete.push_back(d);
-        }
+        toDelete.push_back(d);
+        found = true;
       }
     }
     upper = lower;
+
+    // Keep last one from this range:
+    if (found) toDelete.pop_back();
+
     if (lower.compareTo(monthlyLimit) <= 0)
       break;
   }
