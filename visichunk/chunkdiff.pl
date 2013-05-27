@@ -1,5 +1,5 @@
 #! /usr/bin/perl -w
-use Fcntl qw();
+#use Fcntl qw();
 use Getopt::Std;
 use POSIX;
 
@@ -47,7 +47,7 @@ my $smetotal = 0;
 my $chgtotal = 0;
 my $blktotal = 0;
 
-while (!($oldend && $newend)) {
+until ($oldend && $newend) {
   my $type = 'change';
 
   if ($oldend) {
@@ -74,8 +74,8 @@ while (!($oldend && $newend)) {
     my $cmpsize = $oldread < $newread ? $oldread : $newread;
     $blktotal += $cmpsize;
     my $cmpdiff = 0;
-    for (my $i = 0; $i < $cmpsize; $i++) {
-      $cmpdiff++ unless (substr($oldbuf, $i, 1) eq substr($newbuf, $i, 1));
+    for (0 .. $cmpsize) {
+      $cmpdiff++ unless (substr($oldbuf, $_, 1) eq substr($newbuf, $_, 1));
     }
 
     if ($cmpdiff == 0) {
