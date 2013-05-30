@@ -40,8 +40,15 @@ target_link_libraries(shaback
   ${LZMA_LIBRARIES}
   shabacklib)
 
+add_executable(visichunk
+		VisiChunk.cpp
+		)
+
+target_link_libraries(visichunk
+  shabacklib)
+
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
-install(PROGRAMS shaback DESTINATION bin)
+install(PROGRAMS shaback visichunk DESTINATION bin)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
