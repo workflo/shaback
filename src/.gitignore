@@ -10,4 +10,5 @@ CPackConfig.cmake
 install_manifest.txt
 CPackSourceConfig.cmake
 lib/config.h
+visichunk
 
