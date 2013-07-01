@@ -131,7 +131,7 @@ void parseCommandlineArgs(int argc, char** argv)
 char* pct(long num, long total)
 {
   static char buf[64];
-  snprintf(buf, 64, "%2.1f%%", (num * 100/ total));
+  snprintf(buf, 64, "%2.1f%%", ((double)num * 100 / (double) total));
   return buf;
 }
 
@@ -237,17 +237,17 @@ void run()
   /* Summary output */
   if (html) printf("\n<br><pre>\n");
 
-  printf("Old file   : %s (%d b)\n", oldFile.c_str(), oldtotal);
-  printf("New file   : %s (%d b)\n", newFile.c_str(), newtotal);
+  printf("Old file   : %s (%ld b)\n", oldFile.c_str(), oldtotal);
+  printf("New file   : %s (%ld b)\n", newFile.c_str(), newtotal);
   printf("Chunk size : %d\n", chunkSize);
-  printf("Common bytes   : %d\t%s of %d\n", smetotal, pct(smetotal, blktotal), blktotal);
-  printf("Changed bytes  : %d\t%s of %d\n", chgtotal, pct(chgtotal, blktotal), blktotal);
+  printf("Common bytes   : %ld\t%s of %ld\n", smetotal, pct(smetotal, blktotal), blktotal);
+  printf("Changed bytes  : %ld\t%s of %ld\n", chgtotal, pct(chgtotal, blktotal), blktotal);
   printf("Equal Chunks   : %d\t%s\n", numSame, pct(numSame, numchunks));
-  printf("Changed Chunks : %d\t%s\n", numChange, pct(numChange, numchunks));
+  printf("Changed Chunks : %ld\t%s\n", numChange, pct(numChange, numchunks));
   if (numGrown)
-    printf("Grown Chunks   : %d\t%s\n", numGrown, pct(numGrown, numchunks));
+    printf("Grown Chunks   : %ld\t%s\n", numGrown, pct(numGrown, numchunks));
   if (numShrunk)
-    printf("Shrunk Chunks  : %d\t%s\n", numShrunk, pct(numShrunk, numchunks));
+    printf("Shrunk Chunks  : %ld\t%s\n", numShrunk, pct(numShrunk, numchunks));
 
   if (html) printf("</pre>\n");
 };
