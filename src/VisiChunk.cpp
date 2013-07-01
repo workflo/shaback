@@ -1,6 +1,7 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2012 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2013 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2013 Raimund Jacob-Bloedorn (raimi@lkcc.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +39,43 @@ void showUsage(const char* arg0)
   printf("\t    -b <chunksize> in bytes\n");
   printf("\t    -h html output\n");
   printf("\t    -n do not list unchanged blocks\n");
+}
+
+
+void htmlHead()
+{
+  printf
+    (
+     "<!html>\n"
+     "<html>\n"
+     "  <head>\n"
+     "    <title>Color Blocks</title>\n"
+     "<style>\n"
+     ".c { width: 3px; height: 3px; display: inline-block; margin: 0; padding: 0;}\n"
+     ".g { background-color: #00FF00; } /* grow */\n"
+     ".s { background-color: #0000FF; } /* shrunk */\n"
+     ".e { background-color: #AAAAAA; } /* equal */\n"
+     );
+
+  for (int i = 1; i <= 100; i++) {
+    printf(".c%d { background-color: rgb(%d,0,0); }\n", i, (i + 155));
+  }
+
+  printf
+    (
+     "</style>\n"
+     "  </head>\n"
+     "  <body>\n"
+     );
+}
+
+
+void htmlEnd()
+{
+  printf(
+         "  </body>\n"
+         "</html>\n"
+         );
 }
 
 
@@ -87,6 +125,14 @@ void parseCommandlineArgs(int argc, char** argv)
     oldFile = argv[optind++];
     newFile = argv[optind++];
   }
+}
+
+
+char* pct(long num, long total)
+{
+  static char buf[64];
+  snprintf(buf, 64, "%2.1f%%", (num * 100/ total));
+  return buf;
 }
 
 
@@ -187,6 +233,23 @@ void run()
 
     numchunks++;
   }
+
+  /* Summary output */
+  if (html) printf("\n<br><pre>\n");
+
+  printf("Old file   : %s (%d b)\n", oldFile.c_str(), oldtotal);
+  printf("New file   : %s (%d b)\n", newFile.c_str(), newtotal);
+  printf("Chunk size : %d\n", chunkSize);
+  printf("Common bytes   : %d\t%s of %d\n", smetotal, pct(smetotal, blktotal), blktotal);
+  printf("Changed bytes  : %d\t%s of %d\n", chgtotal, pct(chgtotal, blktotal), blktotal);
+  printf("Equal Chunks   : %d\t%s\n", numSame, pct(numSame, numchunks));
+  printf("Changed Chunks : %d\t%s\n", numChange, pct(numChange, numchunks));
+  if (numGrown)
+    printf("Grown Chunks   : %d\t%s\n", numGrown, pct(numGrown, numchunks));
+  if (numShrunk)
+    printf("Shrunk Chunks  : %d\t%s\n", numShrunk, pct(numShrunk, numchunks));
+
+  if (html) printf("</pre>\n");
 };
 
 
@@ -194,7 +257,9 @@ int main(int argc, char** argv)
 {
   try {
     parseCommandlineArgs(argc, argv);
+    if (html) htmlHead();
     run();
+    if (html) htmlEnd();
   } catch (Exception& ex) {
     cerr << ex.getMessage() << endl;
     return 2;
