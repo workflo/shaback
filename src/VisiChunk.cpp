@@ -206,7 +206,7 @@ void run()
         chgtotal += cmpdiff;
         numChange++;
         // Anderer Block
-        int cl = ceil(cmpdiff * 100/ cmpsize);
+        int cl = ceil((double) cmpdiff * 100 / (double) cmpsize);
         if (html) {
           printf ("<div class=\"c c%i\"></div>", cl);
         } else {
