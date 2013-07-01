@@ -158,6 +158,8 @@ void run()
   bool newend = false;
   char* oldbuf = (char*) malloc(chunkSize);
   char* newbuf = (char*) malloc(chunkSize);
+  int changeHistogram[101];
+  for (int i = 0; i < 101; i++) changeHistogram[i] = 0;
 
   while (!oldend || !newend) {
     int type = CHANGETYPE_CHANGE;
@@ -207,6 +209,7 @@ void run()
         numChange++;
         // Anderer Block
         int cl = ceil((double) cmpdiff * 100 / (double) cmpsize);
+        changeHistogram[cl]++;
         if (html) {
           printf ("<div class=\"c c%i\"></div>", cl);
         } else {
@@ -248,6 +251,14 @@ void run()
     printf("Grown Chunks   : %ld\t%s\n", numGrown, pct(numGrown, numchunks));
   if (numShrunk)
     printf("Shrunk Chunks  : %ld\t%s\n", numShrunk, pct(numShrunk, numchunks));
+
+  /* Histogram of changed blocks */
+  printf("\nAmount of changes in %d changed chunks:\n", numChange);
+  for (int i = 1; i <= 100; i++) {
+    int num = changeHistogram[i];
+    if (num == 0) continue;
+    printf("%s%d%%: %d\t(%s of changed blocks)\n", (i<10?" ":""), i, num, pct(num, numChange));
+  }
 
   if (html) printf("</pre>\n");
 };
