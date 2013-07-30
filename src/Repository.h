@@ -194,7 +194,7 @@ class Repository
      * Splits the input stream into chunks and stores them
      * individually.
      */
-    void storeSplitFile(BackupRun* run, std::string& hashValue, InputStream &in, ShabackOutputStream &blockFileOut, shaback_filesize_t* totalFileSize);
+    std::string storeSplitFile(BackupRun* run, File &srcFile, InputStream &in, shaback_filesize_t* totalFileSize);
 
     char* readBuffer;
 };

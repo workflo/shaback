@@ -241,29 +241,35 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
 
   string hashValue = srcFile.getXAttr("user.shaback.sha1");
 
+  // XAttr contains sha1 digest and mtime is still uptodate:
+  if (!hashValue.empty() && strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) == srcFile.getPosixMtime()) {
+    // Hash value is already stored:
+    if (contains(hashValue)) {
+      // Done :)
+      return hashValue;
+    }
+  }
+
   FileInputStream in(srcFile);
 
-  if (hashValue.empty() || strtol(srcFile.getXAttr("user.shaback.mtime").c_str(), 0, 10) != srcFile.getPosixMtime()) {
-    Sha1 sha1;
-    while (true) {
-      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1)
-        break;
-      sha1.update(readBuffer, bytesRead);
-    }
-
-    sha1.finalize();
-    hashValue = sha1.toString();
-
-    srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
-    srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  // Allow large files with certain name patterns to be split into blocks/chunks:
+  if (config.splitFile(srcFile)) {
+    return storeSplitFile(run, srcFile, in, totalFileSize);
   }
 
-  // Split this file?
-  const bool split = config.splitFile(srcFile);
-  if (split) {
-    hashValue.append(SPLITFILE_ID_INDICATOR_STR);
+  Sha1 sha1;
+  while (true) {
+    int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+    if (bytesRead == -1)
+      break;
+    sha1.update(readBuffer, bytesRead);
   }
+
+  sha1.finalize();
+  hashValue = sha1.toString();
+
+  srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
+  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
 
   if (!contains(hashValue)) {
     in.reset();
@@ -272,7 +278,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
     File destFile = hashValueToFile(hashValue);
 
     if (config.verbose || config.debug) {
-      cout << (split ? "[s] " : "[m] ") << srcFile.path << endl;
+      cout << "[m] " << srcFile.path << endl;
       if (config.debug) {
         cout << "[f] " << destFile.path << endl;
       }
@@ -281,17 +287,13 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
     ShabackOutputStream os = createOutputStream();
     os.open(destFile);
 
-    if (split) {
-      storeSplitFile(run, hashValue, in, os, totalFileSize);
-    } else {
-      while (true) {
-        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-        if (bytesRead == -1)
-          break;
-        os.write(readBuffer, bytesRead);
-        run->numBytesStored += bytesRead;
-        *totalFileSize += bytesRead;
-      }
+    while (true) {
+      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      if (bytesRead == -1)
+        break;
+      os.write(readBuffer, bytesRead);
+      run->numBytesStored += bytesRead;
+      *totalFileSize += bytesRead;
     }
 
     os.finish();
@@ -308,11 +310,16 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
   return hashValue;
 }
 
-void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStream &in,
-    ShabackOutputStream &blockFileOut, shaback_filesize_t* totalFileSize)
+string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in,
+    shaback_filesize_t* totalFileSize)
 {
+  string blockList;
   Sha1 totalSha1;
   int blockCount = 0;
+
+  if (config.verbose || config.debug) {
+    cout << "[s] " << srcFile.path << endl;
+  }
 
   while (true) {
     Sha1 blockSha1;
@@ -345,8 +352,8 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
       run->numBytesStored += bytesRead;
     }
 
-    blockFileOut.write(blockHashValue);
-    blockFileOut.write("\n");
+    blockList.append(blockHashValue);
+    blockList.append("\n");
     *totalFileSize += bytesRead;
 
     totalSha1.update(readBuffer, bytesRead);
@@ -357,11 +364,24 @@ void Repository::storeSplitFile(BackupRun* run, string& fileHashValue, InputStre
 
   totalSha1.finalize();
   string totalHashValue = totalSha1.toString();
+  totalHashValue.append(SPLITFILE_ID_INDICATOR_STR);
 
-  if (fileHashValue.compare(0, totalHashValue.size(), totalHashValue) != 0) {
-    // TODO: throw exception if hash value has changed
-//    cerr << "File changed while being backed up: " << fileSha1.toString() << " <> " << fileHashValue << endl;
+  if (!contains(totalHashValue)) {
+    File blockFile = hashValueToFile(totalHashValue);
+    ShabackOutputStream os = createOutputStream();
+    os.open(blockFile);
+    os.write(blockList);
+    os.finish();
+
+    writeCache.insert(totalHashValue);
+    run->numBytesStored += blockList.size();
+    run->numFilesStored++;
   }
+
+  srcFile.setXAttr("user.shaback.sha1", totalHashValue); // TODO: Use dynamic digest name
+  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+
+  return totalHashValue;
 }
 #endif
 
