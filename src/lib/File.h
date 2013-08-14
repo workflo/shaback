@@ -35,6 +35,10 @@
 # define MAX_PATH_LEN FILENAME_MAX
 #endif
 
+#ifdef O_DIRECT
+# define HAS_O_DIRECT
+#endif
+
 class File
 {
   public:

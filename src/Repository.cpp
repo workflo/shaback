@@ -45,14 +45,15 @@
 #include "SplitFileIndexReader.h"
 #include "TreeFile.h"
 
-#define READ_BUFFER_SIZE (1024 * 4)
+#define BLOCKSIZE 1024
+#define READ_BUFFER_SIZE (BLOCKSIZE * 4)
 
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
     config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile)
 {
-  readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
+  posix_memalign(&readBuffer, BLOCKSIZE, max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
@@ -250,7 +251,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
     }
   }
 
-  FileInputStream in(srcFile);
+  FileInputStream in(srcFile, false);
 
   // Allow large files with certain name patterns to be split into blocks/chunks:
   if (config.splitFile(srcFile)) {
@@ -259,7 +260,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
 
   Sha1 sha1;
   while (true) {
-    int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+    int bytesRead = in.read((char*)readBuffer, READ_BUFFER_SIZE);
     if (bytesRead == -1)
       break;
     sha1.update(readBuffer, bytesRead);
@@ -284,14 +285,14 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
       }
     }
 
-    ShabackOutputStream os = createOutputStream();
+    ShabackOutputStream os = createOutputStream(false);
     os.open(destFile);
 
     while (true) {
-      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      int bytesRead = in.read((char*)readBuffer, READ_BUFFER_SIZE);
       if (bytesRead == -1)
         break;
-      os.write(readBuffer, bytesRead);
+      os.write((char*)readBuffer, bytesRead);
       run->numBytesStored += bytesRead;
       *totalFileSize += bytesRead;
     }
@@ -323,7 +324,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
 
   while (true) {
     Sha1 blockSha1;
-    const int bytesRead = in.read(readBuffer, splitBlockSize);
+    const int bytesRead = in.read((char*)readBuffer, splitBlockSize);
     if (bytesRead == -1)
       break;
 
@@ -342,10 +343,10 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
     if (!contains(blockHashValue)) {
       File blockDestFile = hashValueToFile(blockHashValue);
 
-      ShabackOutputStream os = createOutputStream();
+      ShabackOutputStream os = createOutputStream(false);
       os.open(blockDestFile);
 
-      os.write(readBuffer, bytesRead);
+      os.write((char*)readBuffer, bytesRead);
       os.finish();
 
       writeCache.insert(blockHashValue);
@@ -710,12 +711,12 @@ void Repository::removeAllCacheFiles()
   }
 }
 
-ShabackInputStream Repository::createInputStream()
+ShabackInputStream Repository::createInputStream(bool allowCaching)
 {
-  return ShabackInputStream(config, compressionAlgorithm, encryptionAlgorithm);
+  return ShabackInputStream(config, compressionAlgorithm, encryptionAlgorithm, allowCaching);
 }
 
-ShabackOutputStream Repository::createOutputStream()
+ShabackOutputStream Repository::createOutputStream(bool allowCaching)
 {
-  return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
+  return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm, allowCaching);
 }

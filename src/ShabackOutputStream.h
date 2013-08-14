@@ -29,7 +29,7 @@
 class ShabackOutputStream
 {
   public:
-    ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm);
+    ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm, bool allowCaching);
     ~ShabackOutputStream();
 
     void open(File& file);
@@ -41,6 +41,7 @@ class ShabackOutputStream
     void write(const char* data, int numBytes);
 
   private:
+    bool allowCaching;
     int compressionAlgorithm;
     int encryptionAlgorithm;
     File file;

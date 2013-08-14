@@ -17,6 +17,7 @@
  */
 
 #include <fcntl.h>
+#include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -26,18 +27,21 @@
 
 using namespace std;
 
-FileOutputStream::FileOutputStream(File& file)
+FileOutputStream::FileOutputStream(File& file, bool allowCaching)
+: allowCaching(allowCaching)
 {
   init(file.path);
 }
 
-FileOutputStream::FileOutputStream(const char *filename)
+FileOutputStream::FileOutputStream(const char *filename, bool allowCaching)
+: allowCaching(allowCaching)
 {
   string _filename(filename);
   init(_filename);
 }
 
-FileOutputStream::FileOutputStream(string& filename)
+FileOutputStream::FileOutputStream(string& filename, bool allowCaching)
+: allowCaching(allowCaching)
 {
   init(filename);
 }
@@ -63,10 +67,21 @@ void FileOutputStream::init(string& filename)
   }
 
 #else
+
+  int openFlags = O_WRONLY | O_CREAT | O_TRUNC;
+
+  #if defined(HAS_O_DIRECT)
+    if (!allowCaching) {
+      openFlags |= O_DIRECT;
+      cout << "Output: O_DIRECT " << filename << endl;
+    }
+  #endif
+
+
 #if defined(__APPLE__)
-  handle = ::open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP);
+  handle = ::open(filename.c_str(), openFlags, S_IRUSR | S_IWUSR | S_IRGRP);
 #else
-  handle = ::open64(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP);
+  handle = ::open64(filename.c_str(), openFlags, S_IRUSR | S_IWUSR | S_IRGRP);
 #endif
 
   if (handle == -1) {

@@ -29,7 +29,7 @@
 class ShabackInputStream : public InputStream
 {
   public:
-    ShabackInputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm);
+    ShabackInputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm, bool allowCaching);
     ~ShabackInputStream();
 
     void open(File& file);
@@ -39,6 +39,7 @@ class ShabackInputStream : public InputStream
     int read();
 
   private:
+    bool allowCaching;
     int compressionAlgorithm;
     int encryptionAlgorithm;
     File file;

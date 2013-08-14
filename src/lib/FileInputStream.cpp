@@ -28,18 +28,21 @@ using namespace std;
 /*****************************************************************************\
  * FileInputStream                                                            |
  *****************************************************************************/
-FileInputStream::FileInputStream(File& file)
+FileInputStream::FileInputStream(File& file, bool allowCaching)
+: allowCaching(allowCaching)
 {
   init(file.path);
 }
 
-FileInputStream::FileInputStream(const char* filename)
+FileInputStream::FileInputStream(const char* filename, bool allowCaching)
+: allowCaching(allowCaching)
 {
   string _filename(filename);
   init(_filename);
 }
 
-FileInputStream::FileInputStream(string& filename)
+FileInputStream::FileInputStream(string& filename, bool allowCaching)
+: allowCaching(allowCaching)
 {
   init(filename);
 }
@@ -66,10 +69,17 @@ void FileInputStream::init(string& filename)
 
 #else
 
+  int openFlags = O_RDONLY;
+
+  if (!allowCaching) {
+    openFlags |= O_DIRECT;
+    cout << "Input: O_DIRECT " << filename <<endl;
+  }
+
 #if defined(__APPLE__)
-  handle = ::open(filename.c_str(), O_RDONLY);
+  handle = ::open(filename.c_str(), openFlags);
 #else
-  handle = ::open64(filename.c_str(), O_RDONLY);
+  handle = ::open64(filename.c_str(), openFlags);
 #endif
 
   if (handle == -1) {

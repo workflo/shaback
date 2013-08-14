@@ -34,9 +34,9 @@
 class FileOutputStream: public OutputStream
 {
   public:
-    FileOutputStream(File& file);
-    FileOutputStream(const char* filename);
-    FileOutputStream(std::string& filename);
+    FileOutputStream(File& file, bool allowCaching = true);
+    FileOutputStream(const char* filename, bool allowCaching = true);
+    FileOutputStream(std::string& filename, bool allowCaching = true);
     ~FileOutputStream();
 
     void write(int b);
@@ -44,6 +44,9 @@ class FileOutputStream: public OutputStream
     void close();
 
   protected:
+
+    bool allowCaching;
+
 #ifdef WIN32
     HANDLE handle;
 #else

@@ -38,17 +38,17 @@ class FileInputStream: public InputStream
     /**
      * Opens the specified file for reading.
      */
-    FileInputStream(File& file);
+    FileInputStream(File& file, bool allowCaching = true);
 
     /**
      * Opens the specified file for reading.
      */
-    FileInputStream(const char* filename);
+    FileInputStream(const char* filename, bool allowCaching = true);
 
     /**
      * Opens the specified file for reading.
      */
-    FileInputStream(std::string& filename);
+    FileInputStream(std::string& filename, bool allowCaching = true);
 
     ~FileInputStream();
 
@@ -61,6 +61,9 @@ class FileInputStream: public InputStream
     void reset();
 
   protected:
+
+    bool allowCaching;
+
 #ifdef WIN32
     HANDLE handle;
 #else

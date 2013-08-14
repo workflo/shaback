@@ -111,13 +111,13 @@ class Repository
      * Returns a new \c ShabackInputStream configured to read a file from this
      * repository.
      */
-    ShabackInputStream createInputStream();
+    ShabackInputStream createInputStream(bool allowCaching = true);
 
     /**
      * Returns a new \c ShabackOutputStream configured to write a file to this
      * repository.
      */
-    ShabackOutputStream createOutputStream();
+    ShabackOutputStream createOutputStream(bool allowCaching = true);
 
     /**
      * Maps the given name of an encryption algorithm to its respective
@@ -178,7 +178,7 @@ class Repository
     int hashAlgorithm;
     int encryptionAlgorithm;
     int compressionAlgorithm;
-    int splitBlockSize;
+    int splitBlockSize;  // Must be a multiple auf 512 to allow O_DIRECT file IO mode!
     int splitMinBlocks;
     Date startDate;
 
@@ -196,7 +196,7 @@ class Repository
      */
     std::string storeSplitFile(BackupRun* run, File &srcFile, InputStream &in, shaback_filesize_t* totalFileSize);
 
-    char* readBuffer;
+    void* readBuffer;
 };
 
 #define COMPRESSION_NONE    0

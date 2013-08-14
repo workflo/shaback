@@ -31,8 +31,9 @@
 
 using namespace std;
 
-ShabackOutputStream::ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm) :
-  config(config), opened(false), compressionAlgorithm(compressionAlgorithm), encryptionAlgorithm(encryptionAlgorithm)
+ShabackOutputStream::ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm, bool allowCaching) :
+  config(config), opened(false), compressionAlgorithm(compressionAlgorithm), encryptionAlgorithm(encryptionAlgorithm),
+  allowCaching(allowCaching)
 {
   outputStream = 0;
   compressionOutputStream = 0;
@@ -60,7 +61,7 @@ void ShabackOutputStream::open(File& file)
   tmpFilename.append(".tmp");
   this->tmpFile = tmpFilename;
 
-  fileOutputStream = new FileOutputStream(tmpFile);
+  fileOutputStream = new FileOutputStream(tmpFile, allowCaching);
   outputStream = fileOutputStream;
 
 #if defined(OPENSSL_FOUND)

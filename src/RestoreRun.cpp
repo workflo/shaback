@@ -124,7 +124,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
           file.remove();
 
           try {
-            FileOutputStream out(file);
+            FileOutputStream out(file, false);
             repository.exportFile(entry, out);
             out.close();
             restoreMetaData(file, entry);
