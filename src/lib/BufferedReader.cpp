@@ -90,7 +90,7 @@ int BufferedReader::read(char* b, int len)
 
   //try {
   int r = 1;
-  for (r; r < len; r++) {
+  for (; r < len; r++) {
     c = read();
     if (c == -1)
       break;

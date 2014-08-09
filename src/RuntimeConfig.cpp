@@ -463,7 +463,7 @@ bool RuntimeConfig::splitFile(File& file)
 
 void RuntimeConfig::runPreBackupCallbacks()
 {
-  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPreBackupCallbacks");
+  lua_getglobal(this->luaState, "_runPreBackupCallbacks");
   lua_call(this->luaState, 0, 0);
 }
 
@@ -471,7 +471,7 @@ void RuntimeConfig::runPreBackupCallbacks()
 #if defined(SHABACK_HAS_BACKUP)
 void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
 {
-  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runPostBackupCallbacks");
+  lua_getglobal(this->luaState, "_runPostBackupCallbacks");
   lua_pushinteger(this->luaState, run->numFilesRead);
   lua_pushinteger(this->luaState, run->numBytesRead);
   lua_pushinteger(this->luaState, run->numFilesStored);
@@ -483,7 +483,7 @@ void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
 
 void RuntimeConfig::runEnterDirCallbacks(File &dir)
 {
-  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runEnterDirCallbacks");
+  lua_getglobal(this->luaState, "_runEnterDirCallbacks");
   lua_pushstring(this->luaState, dir.path.c_str());
   lua_call(this->luaState, 1, 0);
 }
@@ -491,7 +491,7 @@ void RuntimeConfig::runEnterDirCallbacks(File &dir)
 
 void RuntimeConfig::runLeaveDirCallbacks(File &dir)
 {
-  lua_getfield(this->luaState, LUA_GLOBALSINDEX, "_runLeaveDirCallbacks");
+  lua_getglobal(this->luaState, "_runLeaveDirCallbacks");
   lua_pushstring(this->luaState, dir.path.c_str());
   lua_call(this->luaState, 1, 0);
 }
