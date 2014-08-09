@@ -245,7 +245,11 @@ void run()
   printf("Chunk size : %d\n", chunkSize);
   printf("Common bytes   : %ld\t%s of %ld\n", smetotal, pct(smetotal, blktotal), blktotal);
   printf("Changed bytes  : %ld\t%s of %ld\n", chgtotal, pct(chgtotal, blktotal), blktotal);
+#ifdef __APPLE__
+  printf("Equal Chunks   : %jd\t%s\n", numSame, pct(numSame, numchunks));
+#else
   printf("Equal Chunks   : %d\t%s\n", numSame, pct(numSame, numchunks));
+#endif
   printf("Changed Chunks : %ld\t%s\n", numChange, pct(numChange, numchunks));
   if (numGrown)
     printf("Grown Chunks   : %ld\t%s\n", numGrown, pct(numGrown, numchunks));
@@ -253,7 +257,11 @@ void run()
     printf("Shrunk Chunks  : %ld\t%s\n", numShrunk, pct(numShrunk, numchunks));
 
   /* Histogram of changed blocks */
+#ifdef __APPLE__
+  printf("\nAmount of changes in %jd changed chunks:\n", numChange);
+#else
   printf("\nAmount of changes in %d changed chunks:\n", numChange);
+#endif
   for (int i = 1; i <= 100; i++) {
     int num = changeHistogram[i];
     if (num == 0) continue;
