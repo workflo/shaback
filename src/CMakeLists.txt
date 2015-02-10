@@ -32,13 +32,14 @@ add_executable(shaback
 		)
 
 target_link_libraries(shaback 
+  shabacklib
   ${ZLIB_LIBRARY}
   ${OPENSSL_CRYPTO_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GDBM_LIBRARY}
   ${BZIP2_LIBRARIES}
   ${LZMA_LIBRARIES}
-  shabacklib)
+)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
 install(PROGRAMS shaback DESTINATION bin)
