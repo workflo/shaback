@@ -5,7 +5,7 @@ set (CMAKE_MODULE_PATH CMakeModules)
 set (CMAKE_VERBOSE_MAKEFILE true)
 
 cmake_minimum_required(VERSION 2.8)
-find_package(ZLIB REQUIRED)
+find_package(ZLIB QUIET)
 find_package(BZip2 REQUIRED)
 find_package(Lzma QUIET)
 find_package(OpenSSL QUIET)
