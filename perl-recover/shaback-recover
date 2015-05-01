@@ -119,10 +119,6 @@ sub restore_one {
     $entry->{name} =~ s/\0$//;
     $entry->{name} ne "TRAILER!!!" or return;
 
-    # $entry->{magic}: Konstant
-    # $entry->{dev}: Konstant
-    # $entry->{count}: Der wievielte Eintrag im Archiv
-    #print "Entry: " . $entry->{count} . " " . $entry->{name} . "\n";
     my $type = ($entry->{mode} & 0770000);
     $entry->{perm} = ($entry->{mode} & 0007777);
 
@@ -188,7 +184,7 @@ sub read_one_header {
         my $size =  shift @header;
         $h{$field} = $FHwp->read($size);
         if ($field ne "magic") {
-            printf("%s: %s\n", $field, $h{$field});
+            # printf("%s: %s\n", $field, $h{$field});
             $h{$field} =~ /^[0-9]*$/si or die "bad header value $h{$field}\n";
             $h{$field} = oct $h{$field};
         }
@@ -320,7 +316,6 @@ sub detect_archive_format {
         
         #warn "found magic for $archive_format\n";
 
-        # my $class = "Archive::Cpio::$archive_format";
         return Archive::Cpio::ODC->new($magic, $s);
     }
     die "This is not a Shaback recovery stream!\n";
