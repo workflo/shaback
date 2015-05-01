@@ -147,11 +147,12 @@ void File::refresh()
     fileExists = false;
   }
 #else
-#ifdef __APPLE__
+ #if defined(__APPLE__) || !defined(HAVE_LSTAT64)
+  // lstat is 64 bit on MacOS X.
+  if (lstat(path.c_str(), &statBuffer) == -1) {
+ #else
   if (lstat64(path.c_str(), &statBuffer) == -1) {
-#else
-  if (lstat64(path.c_str(), &statBuffer) == -1) {
-#endif
+ #endif
     fileExists = false;
   } else {
     fileExists = true;
@@ -408,3 +409,4 @@ bool filePathComparator(File a,File b)
 {
   return (a.path < b.path);
 }
+

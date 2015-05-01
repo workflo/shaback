@@ -28,6 +28,7 @@
 # include <windows.h>
 # include <direct.h>
 #endif
+#include "config.h"
 
 #ifdef PATH_MAX
 # define MAX_PATH_LEN PATH_MAX
@@ -165,7 +166,11 @@ class File
 #ifdef WIN32
     WIN32_FIND_DATAA ffblk;
 #else
+  #if defined(__APPLE__) || !defined(HAVE_LSTAT64)
+    struct stat statBuffer;
+  #else
     struct stat64 statBuffer;
+  #endif
 #endif
 };
 
