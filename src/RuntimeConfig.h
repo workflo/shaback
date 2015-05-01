@@ -47,7 +47,8 @@ class RuntimeConfig
     bool help;
     bool useWriteCache;
     bool skipExisting;
-    bool restoreAsCpio;
+    bool restoreAsCpioStream;
+    bool restoreAsShabackStream;
 
     std::string operation;
     std::string repository;

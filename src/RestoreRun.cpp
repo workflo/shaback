@@ -59,8 +59,8 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
     bytesToBeRestored += entry.size;
   }
 
-  if (config.restoreAsCpio) {
-    restoreAsCpio(treeId);
+  if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
+    restoreAsCpioStream(treeId);
   } else {
     restore(treeId, destinationDir);
   }
@@ -105,7 +105,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       case TREEFILEENTRY_FILE: {
         File file(destinationDir, entry.path);
 
-        if (config.restoreAsCpio) {
+        if (config.restoreAsCpioStream) {
 
         } else {
           if (config.skipExisting && file.isFile())
@@ -163,7 +163,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
   }
 }
 
-void RestoreRun::restoreAsCpio(string& treeId, int depth)
+void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 {
   StandardOutputStream out(stdout);
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
@@ -185,19 +185,26 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
             entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
             path.c_str(), 0x0);
-        restoreAsCpio(entry.id, depth + 1);
+        restoreAsCpioStream(entry.id, depth + 1);
         break;
       }
 
       case TREEFILEENTRY_FILE: {
-        if (entry.size >= 0x7fffffff) {
-          reportError(string("File too large for cpio: ").append(path));
-          break;
-        }
+        if (config.restoreAsShabackStream) {
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
+              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              (unsigned int) entry.size, path.c_str(), 0x0);
+        } else {
+          // cpio has a file size limit of 2 GB :(
+          if (entry.size >= 0x7fffffff) {
+            reportError(string("File too large for cpio: ").append(path));
+            break;
+          }
 
-        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-            (unsigned int) entry.size, path.c_str(), 0x0);
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              (unsigned int) entry.size, path.c_str(), 0x0);
+        }
         try {
           repository.exportFile(entry, out);
           numFilesRestored ++;

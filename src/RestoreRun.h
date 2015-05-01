@@ -29,7 +29,7 @@ class RestoreRun
     ~RestoreRun();
 
     void restore(std::string& treeId, File& destinationDir, int depth = 0);
-    void restoreAsCpio(std::string& treeId, int depth = 0);
+    void restoreAsCpioStream(std::string& treeId, int depth = 0);
     void showTotals();
 
     int start(std::string& treeId, File& destinationDir);

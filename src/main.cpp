@@ -73,6 +73,8 @@ void showUsage(string& op)
       "\t    Give summary report at the end of the recovery run.\n\n"
       "\t-o, --cpio\n"
       "\t    Restore to cpio stream on stdout.\n\n"
+      "\t-O, --shaback\n"
+      "\t    Restore to shaback recovery stream on stdout.\n\n"
       "\t-q, --quiet\n"
       "\t    Suppress progress output.\n\n"
       "\tFiles will always be restored into the CWD.\n");
