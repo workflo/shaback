@@ -183,7 +183,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
         if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1-d%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
               entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
               path.c_str(), 0x0);
         } else {
@@ -197,7 +197,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 
       case TREEFILEENTRY_FILE: {
         if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1-f%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
               entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.size, path.c_str(), 0x0);
         } else {
@@ -225,7 +225,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 
       case TREEFILEENTRY_SYMLINK: {
         if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1-s%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++fileCount, entry.fileMode,
               entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         } else {
@@ -243,7 +243,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 
   if (depth == 0) {
     if (config.restoreAsShabackStream) {
-      fprintf(stdout, "ShAbAcKsTrEaM1-EOF");
+      fprintf(stdout, "ShAbAcKsTrEaM1_000000000000000000000000000000000001000000000000000130000000000000000TRAILER!!!%c", 0x0);
     } else {
       fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
     }
