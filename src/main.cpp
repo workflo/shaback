@@ -73,12 +73,12 @@ void showUsage(string& op)
       "\t    Give summary report at the end of the recovery run.\n\n"
       "\t-o, --cpio\n"
       "\t    Restore to cpio stream on stdout.\n"
-      "\t    Limits max file size to 2 GB.\n\n"
+      "\t    Limits max file size to (%jd Byte) 8 GB.\n\n"
       "\t-O, --shaback\n"
       "\t    Restore to shaback recovery stream on stdout.\n\n"
       "\t-q, --quiet\n"
       "\t    Suppress progress output.\n\n"
-      "\tFiles will always be restored into the CWD.\n");
+      "\tFiles will always be restored into the CWD.\n", CPIO_ODC_MAX_FILE_SIZE);
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");

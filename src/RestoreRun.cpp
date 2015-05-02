@@ -201,8 +201,8 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
               entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.size, path.c_str(), 0x0);
         } else {
-          // cpio has a file size limit of 2 GB :(
-          if (entry.size >= 0x7fffffff) {
+          // cpio has a file size limit of 8 GB :(
+          if (entry.size >= CPIO_ODC_MAX_FILE_SIZE) {
             reportError(string("File too large for cpio: ").append(path));
             break;
           }
