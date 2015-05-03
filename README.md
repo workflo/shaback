@@ -9,4 +9,6 @@ Multiple machines can be backed up into one repo to benefit from a maximum of de
 
 A garbage collector makes sure that old backups will be deleted and unneeded data will be removed from the repo.
 
+Individual backup sets can be exported to a cpio archive to allow for easy recovery without having to install any special software.
+
 See Wiki for documentation: [Wiki on github](https://github.com/workflo/shaback/wiki)
