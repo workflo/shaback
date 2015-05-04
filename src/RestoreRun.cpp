@@ -215,8 +215,6 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
           repository.exportFile(entry, out);
           numFilesRestored ++;
           numBytesRestored += entry.size;
-
-          if (!config.quiet) progress();
         } catch (Exception &ex) {
           reportError(string("Cannot restore file ").append(path).append(": ").append(ex.getMessage()));
         }
