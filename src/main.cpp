@@ -138,6 +138,7 @@ void showUsage(string& op)
     printf("   show        Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate     Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate     Decompress data from stdin to stdout using `Deflate' compression.\n");
+    printf("   version     Print version information.\n");
     printf("\n");
     printf("General options are:\n");
     printf("\t-c <file>, --config=<file>\n"
@@ -200,6 +201,8 @@ int main(int argc, char** argv)
         return shaback.deflate();
       } else if (config.operation == "inflate") {
         return shaback.inflate();
+      } else if (config.operation == "version") {
+        printf("Shaback version %u.%u\n", SHABACK_VERSION_MAJOR, SHABACK_VERSION_MINOR);
       } else {
         cerr << "Invalid operation `" << config.operation << "'." << endl;
         return 1;
