@@ -321,6 +321,8 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
     cout << "[s] " << srcFile.path << endl;
   }
 
+  *totalFileSize = 0;
+
   while (true) {
     Sha1 blockSha1;
     const int bytesRead = in.read(readBuffer, splitBlockSize);
