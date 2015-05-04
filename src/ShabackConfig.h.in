@@ -18,6 +18,6 @@
 # define SHABACK_HAS_BACKUP
 #endif
 
-#define CPIO_ODC_MAX_FILE_SIZE (077777777777 -1)
+#define CPIO_ODC_MAX_FILE_SIZE (077777777777LL -1)
 
 #endif // SHABACK_ShabackConfig_H
