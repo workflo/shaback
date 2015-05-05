@@ -184,11 +184,11 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
       case TREEFILEENTRY_DIRECTORY: {
         if (config.restoreAsShabackStream) {
           fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
-              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
               path.c_str(), 0x0);
         } else {
           fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
               path.c_str(), 0x0);
         }
         restoreAsCpioStream(entry.id, depth + 1);
@@ -198,7 +198,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
       case TREEFILEENTRY_FILE: {
         if (config.restoreAsShabackStream) {
           fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
-              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.size, path.c_str(), 0x0);
         } else {
           // cpio has a file size limit of 8 GB :(
@@ -208,7 +208,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
           }
 
           fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.size, path.c_str(), 0x0);
         }
         try {
@@ -224,11 +224,11 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
       case TREEFILEENTRY_SYMLINK: {
         if (config.restoreAsShabackStream) {
           fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++fileCount, entry.fileMode,
-              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         } else {
           fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
-              entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         }
         break;
