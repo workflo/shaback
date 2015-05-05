@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <signal.h>
 #include <iostream>
 
 extern "C" {
@@ -156,6 +157,16 @@ void showUsage(string& op)
   }
 }
 
+
+static Repository* globalRepo;
+
+static void interruptHandler(int sig)
+{
+  cerr << "Operation cancelled." << endl;
+  globalRepo->unlock();
+  exit(sig);
+}
+
 int main(int argc, char** argv)
 {
   try {
@@ -173,6 +184,12 @@ int main(int argc, char** argv)
       showUsage(config.operation);
     } else {
       Shaback shaback(config);
+      globalRepo = &shaback.repository;
+
+      signal(SIGINT, interruptHandler);
+      signal(SIGTERM, interruptHandler);
+      signal(SIGHUP, interruptHandler);
+      signal(SIGPIPE, interruptHandler);
 
       if (config.operation == "init") {
 #if defined(SHABACK_HAS_BACKUP)
