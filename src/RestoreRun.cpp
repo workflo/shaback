@@ -183,7 +183,7 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
             path.c_str(), 0x0);
         restoreAsCpio(entry.id, depth + 1);
         break;
@@ -196,7 +196,7 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
         }
 
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
             (unsigned int) entry.size, path.c_str(), 0x0);
         try {
           repository.exportFile(entry, out);
@@ -210,7 +210,7 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
 
       case TREEFILEENTRY_SYMLINK: {
         fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
-            entry.uid, entry.gid, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
             (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         break;
       }
