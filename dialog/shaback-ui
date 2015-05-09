@@ -5,7 +5,7 @@
 answer=$(tempfile 2>/dev/null) || answer=/tmp/test$$
 trap "rm -f $answer" 0 1 2 5 15
 
-CWD=`pwd`
+CWD=${SHABACK_REPO:-`pwd`}
 
 while true; do
 	if [ -z $SHABACK_REPO ]; then
@@ -20,7 +20,7 @@ while true; do
 	fi
 
 	if [ ! -f "$SHABACK_REPO/repo.properties" ]; then
-		dialog --title "Shaback Repository" --msgbox "\n\nThis is not your Shaback Repository :(\n\nTry again!" 10 50
+		dialog --title "Shaback Repository" --msgbox "\n\nThis is not your Shaback Repository:\n\n$SHABACK_REPO" 10 76
 		CWD=$SHABACK_REPO
 		SHABACK_REPO=""
 	else
@@ -28,6 +28,16 @@ while true; do
 	fi
 done
 
-clear
+#clear
 
-echo "Recover from $SHABACK_REPO"
+#echo "Recover from $SHABACK_REPO"
+
+#hosts=`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | uniq`
+#dialog --title "Shaback Recovery" --menu "Select Host to recover:" 22 76 5 1 $hosts 
+
+dialog --fselect "$SHABACK_REPO/index/" 22 76 2> $answer
+
+clear
+cat $answer
+
+
