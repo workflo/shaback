@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#SHABACK_REPO=~/tmp/shaback
+
+answer=$(tempfile 2>/dev/null) || answer=/tmp/test$$
+trap "rm -f $answer" 0 1 2 5 15
+
+CWD=`pwd`
+
+while true; do
+	if [ -z $SHABACK_REPO ]; then
+		dialog --title "Select Shaback Repository" --dselect $CWD 22 76 2> $answer
+		SHABACK_REPO=`cat $answer`
+	fi
+
+	if [ -z $SHABACK_REPO ]; then
+		clear
+		echo "No Shaback Repository selected."
+		exit 1
+	fi
+
+	if [ ! -f "$SHABACK_REPO/repo.properties" ]; then
+		dialog --title "Shaback Repository" --msgbox "\n\nThis is not your Shaback Repository :(\n\nTry again!" 10 50
+		CWD=$SHABACK_REPO
+		SHABACK_REPO=""
+	else
+		break
+	fi
+done
+
+clear
+
+echo "Recover from $SHABACK_REPO"
