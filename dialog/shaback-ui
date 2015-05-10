@@ -28,16 +28,54 @@ while true; do
 	fi
 done
 
-#clear
 
-#echo "Recover from $SHABACK_REPO"
+declare -a hosts=(`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | sort -u`)
 
-#hosts=`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | uniq`
-#dialog --title "Shaback Recovery" --menu "Select Host to recover:" 22 76 5 1 $hosts 
+n=0
+_params=""
 
-dialog --fselect "$SHABACK_REPO/index/" 22 76 2> $answer
+for h in ${hosts[@]}; do
+	_params="$_params $n $h"
+	n=`expr $n + 1`
+done
+
+declare -a params=($_params)
+
+dialog --title "Shaback Recovery" --menu "Select Host to recover:" 22 76 15 ${params[@]} 2> $answer
+
+if [ $? != 0 ]; then
+	clear
+	echo "Cancelled.";
+	exit 1
+fi
+
+host=${hosts[`cat $answer`]}
+
+
+declare -a versions=(`find "$SHABACK_REPO/index" -type f -name "${host}_*.sroot" | sort -r`)
+
+n=0
+_params=""
+
+for v in ${versions[@]}; do
+	_params="$_params $n `basename  $v .sroot`"
+	n=`expr $n + 1`
+done
+
+declare -a params=($_params)
+
+dialog --title "Shaback Recovery: ${host}" --menu "Select Backup to recover:" 22 76 15 ${params[@]} 2> $answer
+
+if [ $? != 0 ]; then
+	clear
+	echo "Cancelled.";
+	exit 1
+fi
+
+version=${versions[`cat $answer`]}
+
 
 clear
-cat $answer
+echo ${version}
 
 
