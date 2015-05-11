@@ -1,26 +1,28 @@
 #!/bin/bash
-
-#SHABACK_REPO=~/tmp/shaback
+set -e
 
 answer=$(tempfile 2>/dev/null) || answer=/tmp/test$$
 trap "rm -f $answer" 0 1 2 5 15
 
+SHABACK_REPO=${SHABACK_REPO:-$1}
 CWD=${SHABACK_REPO:-`pwd`}
+dest_dir=`pwd`
+dest_dir=/tmp
+
+BT="Shaback - recovery console"
 
 while true; do
 	if [ -z $SHABACK_REPO ]; then
-		dialog --title "Select Shaback Repository" --dselect $CWD 22 76 2> $answer
+		dialog --title "Select Shaback Repository" --backtitle "$BT" --dselect $CWD 22 76 2> $answer
 		SHABACK_REPO=`cat $answer`
 	fi
 
 	if [ -z $SHABACK_REPO ]; then
-		clear
-		echo "No Shaback Repository selected."
-		exit 1
+		clear; echo "No Shaback Repository selected."; false
 	fi
 
 	if [ ! -f "$SHABACK_REPO/repo.properties" ]; then
-		dialog --title "Shaback Repository" --msgbox "\n\nThis is not your Shaback Repository:\n\n$SHABACK_REPO" 10 76
+		dialog --title "Shaback Repository" --backtitle "$BT" --msgbox "\n\nThis is not your Shaback Repository:\n\n$SHABACK_REPO" 10 76
 		CWD=$SHABACK_REPO
 		SHABACK_REPO=""
 	else
@@ -28,6 +30,10 @@ while true; do
 	fi
 done
 
+
+#
+# Select host
+#
 
 declare -a hosts=(`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | sort -u`)
 
@@ -41,41 +47,96 @@ done
 
 declare -a params=($_params)
 
-dialog --title "Shaback Recovery" --menu "Select Host to recover:" 22 76 15 ${params[@]} 2> $answer
-
-if [ $? != 0 ]; then
-	clear
-	echo "Cancelled.";
-	exit 1
-fi
+dialog --title "Shaback Recovery" --backtitle "$BT" --menu "Select Host to recover:" 22 76 15 ${params[@]} 2> $answer || (
+	clear; echo "Cancelled."; false
+)
 
 host=${hosts[`cat $answer`]}
 
 
-declare -a versions=(`find "$SHABACK_REPO/index" -type f -name "${host}_*.sroot" | sort -r`)
+#
+# Select backup set / version
+#
+mode="B"
+while [ $mode == "B" ]; do
+	declare -a versions=(`find "$SHABACK_REPO/index" -type f -name "${host}_*.sroot" | sort -r`)
 
-n=0
-_params=""
+	n=0
+	_params=""
 
-for v in ${versions[@]}; do
-	_params="$_params $n `basename  $v .sroot`"
-	n=`expr $n + 1`
+	for v in ${versions[@]}; do
+		_params="$_params $n `basename  $v .sroot`"
+		n=`expr $n + 1`
+	done
+
+	declare -a params=($_params)
+
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select Backup to recover:" 22 76 15 ${params[@]} 2> $answer || (
+		clear; echo "Cancelled."; false
+	)
+
+	version=${versions[`cat $answer`]}
+
+
+	#
+	# Select recovery mode
+	#
+	mode="B"
+	while [ $mode == "B" ]; do
+		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select recovery mode" 14 50 3 C "Restore complete backup set" S "Select individual directory" B "Go back" 2> $answer || (
+			clear; echo "Cancelled."; false
+		)
+		mode=`cat $answer`
+
+		if [ $mode == "C" ]; then
+			id=`cat $version`
+		fi
+
+		break
+	done
 done
 
-declare -a params=($_params)
 
-dialog --title "Shaback Recovery: ${host}" --menu "Select Backup to recover:" 22 76 15 ${params[@]} 2> $answer
+#
+# Select destination directory
+#
 
-if [ $? != 0 ]; then
-	clear
-	echo "Cancelled.";
-	exit 1
-fi
+dialog --title "Destination directory" --backtitle "$BT" --dselect $dest_dir 22 76 2> $answer || (
+			clear; echo "Cancelled."; false
+		)
+dest_dir=`cat $answer`
 
-version=${versions[`cat $answer`]}
 
+#
+# Confirmation
+#
+
+dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --yesno "Really recover backup file set\n\n    ${id}\n\nto\n\n    ${dest_dir}\n\n?" 13 76 || (
+			clear; echo "Cancelled."; false
+		)
+
+
+#
+# Start recovering
+#
+
+mkdir -p $dest_dir
+
+cd $dest_dir
+shaback_error_log=`mktemp`
+trap "rm -f $shaback_error_log" 0 1 2 5 15
+
+
+shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 9 76 0
+
+
+dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
 
 clear
-echo ${version}
+echo "MODE: ${mode}"
+echo "VERSION: ${version}"
+echo "ID: ${id}"
+echo "dest_dir: ${dest_dir}"
 
-
+cat $shaback_error_log

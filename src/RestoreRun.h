@@ -20,6 +20,7 @@
 #define SHABACK_RestoreRun_H
 
 #include <string>
+#include <time.h>
 #include "Repository.h"
 
 class RestoreRun
@@ -47,8 +48,8 @@ class RestoreRun
     Repository& repository;
     RuntimeConfig& config;
     unsigned int fileCount;
-    void progress();
-    int progressCounter;
+    void progress(std::string &path);
+    time_t lastProgressTime;
 };
 
 #endif // SHABACK_RestoreRun_H

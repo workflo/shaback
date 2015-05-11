@@ -41,6 +41,7 @@ class RuntimeConfig
     bool quiet;
     bool verbose;
     bool debug;
+    bool gauge;
     bool force;
     bool oneFileSystem;
     bool showTotals;

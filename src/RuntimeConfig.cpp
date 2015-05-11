@@ -54,6 +54,7 @@ RuntimeConfig::RuntimeConfig()
   useWriteCache = true;
   skipExisting = false;
   restoreAsCpioStream = false;
+  gauge = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -96,9 +97,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"no-write-cache", no_argument, 0, 'W'},
         {"skip-existing", no_argument, 0, 'S'},
         {"quiet", no_argument, 0, 'q'},
+        {"gauge", no_argument, 0, 'G'},
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSoOq", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSoOqG", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -145,6 +147,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'o':
         restoreAsCpioStream = true;
+        break;
+
+      case 'G':
+        gauge = true;
         break;
 
       case 'O':

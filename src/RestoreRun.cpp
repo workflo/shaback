@@ -49,7 +49,7 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
   numBytesRestored = 0;
   fileCount = 0;
   bytesToBeRestored = 0;
-  progressCounter = 0;
+  time(&lastProgressTime);
 
   // Open index file to read directory sizes:
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
@@ -86,7 +86,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         bool skip = (config.skipExisting && dir.isDir());
 
         if (!skip) {
-          if (config.verbose)
+          if (config.verbose && !config.gauge)
             cerr << "[d] " << dir.path << endl;
 
           dir.mkdirs();
@@ -111,7 +111,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
           if (config.skipExisting && file.isFile())
             break;
 
-          if (config.verbose)
+          if (config.verbose && !config.gauge) 
             cerr << "[f] " << file.path << endl;
 
           // Create base directory:
@@ -131,7 +131,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
             numFilesRestored++;
             numBytesRestored += entry.size;
 
-            if (!config.quiet) progress();
+            if (!config.quiet) progress(entry.path);
           } catch (Exception &ex) {
             reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
           }
@@ -145,7 +145,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         if (config.skipExisting && file.isSymlink())
           break;
 
-        if (config.verbose)
+        if (config.verbose && !config.gauge)
           cout << "[s] " << file.path << endl;
 
         if (depth == 0)
@@ -296,11 +296,22 @@ void RestoreRun::showTotals()
   fprintf(stderr, "Errors:           %12d\n", numErrors);
 }
 
-void RestoreRun::progress()
+void RestoreRun::progress(std::string &path)
 {
-  if (++progressCounter > 20) {
+  time_t now;
+  time(&now);
+
+  if (difftime(now, lastProgressTime) >= 1) {
     int percentage = 0;
     if (bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) numBytesRestored / (float) bytesToBeRestored));
-    fprintf(stderr, "%jd of %jd bytes (%d\%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+
+    if (config.gauge) {
+      fprintf(stdout, "XXX\n%d\n%s\nXXX\n", percentage, path.c_str());
+      fflush(stdout);
+    } else {
+      fprintf(stderr, "%jd of %jd bytes (%d\%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+    }
+
+    time(&lastProgressTime);
   }
 }
