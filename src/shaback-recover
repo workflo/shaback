@@ -1,5 +1,12 @@
 #!/bin/bash
+
 set -e
+
+which dialog >/dev/null || (
+	echo "'dialog' not installed!"
+	which apt-get > /dev/null && echo -e "\nRun as root and try again:\n   apt-get install dialog"
+	false
+)
 
 answer=$(tempfile 2>/dev/null) || answer=/tmp/test$$
 trap "rm -f $answer" 0 1 2 5 15
