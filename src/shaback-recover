@@ -10,55 +10,71 @@ dest_dir=`pwd`
 dest_dir=/tmp
 
 BT="Shaback - recovery console"
+step="selectRepo"
 
-while true; do
-	if [ -z $SHABACK_REPO ]; then
-		dialog --title "Select Shaback Repository" --backtitle "$BT" --dselect $CWD 22 76 2> $answer
-		SHABACK_REPO=`cat $answer`
-	fi
 
-	if [ -z $SHABACK_REPO ]; then
-		clear; echo "No Shaback Repository selected."; false
-	fi
 
-	if [ ! -f "$SHABACK_REPO/repo.properties" ]; then
-		dialog --title "Shaback Repository" --backtitle "$BT" --msgbox "\n\nThis is not your Shaback Repository:\n\n$SHABACK_REPO" 10 76
-		CWD=$SHABACK_REPO
-		SHABACK_REPO=""
-	else
-		break
-	fi
-done
+
+
+
+#
+# Select the shaback repository
+#
+selectRepo () {
+	while true; do
+		if [ -z $SHABACK_REPO ]; then
+			dialog --title "Select Shaback Repository" --backtitle "$BT" --dselect $CWD 22 76 2> $answer
+			SHABACK_REPO=`cat $answer`
+		fi
+
+		if [ -z $SHABACK_REPO ]; then
+			clear; echo "No Shaback Repository selected."; false
+		fi
+
+		if [ ! -f "$SHABACK_REPO/repo.properties" ]; then
+			dialog --title "Shaback Repository" --backtitle "$BT" --msgbox "\n\nThis is not your Shaback Repository:\n\n$SHABACK_REPO" 10 76
+			CWD=$SHABACK_REPO
+			SHABACK_REPO=""
+		else
+			step="selectHost"
+			break
+		fi
+	done
+}
 
 
 #
 # Select host
 #
+selectHost () {
+	declare -a hosts=(`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | sort -u`)
 
-declare -a hosts=(`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | sort -u`)
+	n=0
+	_params=""
 
-n=0
-_params=""
+	for h in ${hosts[@]}; do
+		_params="$_params $n $h"
+		n=`expr $n + 1`
+	done
 
-for h in ${hosts[@]}; do
-	_params="$_params $n $h"
-	n=`expr $n + 1`
-done
+	declare -a params=($_params)
 
-declare -a params=($_params)
+	dialog --title "Shaback Recovery" --backtitle "$BT" --menu "Select Host to recover:" 22 76 15 ${params[@]} 2> $answer || (
+		clear; echo "Cancelled."; false
+	)
 
-dialog --title "Shaback Recovery" --backtitle "$BT" --menu "Select Host to recover:" 22 76 15 ${params[@]} 2> $answer || (
-	clear; echo "Cancelled."; false
-)
+	host=${hosts[`cat $answer`]}
+	step="selectVersion"
+}
 
-host=${hosts[`cat $answer`]}
 
 
 #
 # Select backup set / version
 #
-mode="B"
-while [ $mode == "B" ]; do
+selectVersion () {
+	mode="B"
+
 	declare -a versions=(`find "$SHABACK_REPO/index" -type f -name "${host}_*.sroot" | sort -r`)
 
 	n=0
@@ -72,10 +88,27 @@ while [ $mode == "B" ]; do
 	declare -a params=($_params)
 
 	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select Backup to recover:" 22 76 15 ${params[@]} 2> $answer || (
-		clear; echo "Cancelled."; false
+		step="selectHost"
+		clear; echo "zueureck"
+		return 0
 	)
 
 	version=${versions[`cat $answer`]}
+	step="selectMode"
+}
+
+
+while true; do
+	echo " Step: $step"
+	case $step in
+		"selectRepo" ) selectRepo ;;
+		"selectHost" ) selectHost ;;
+		"selectVersion" ) selectVersion ;;
+		* ) exit
+	esac
+done
+
+
 
 
 	#
@@ -94,7 +127,7 @@ while [ $mode == "B" ]; do
 
 		break
 	done
-done
+
 
 
 #
@@ -130,13 +163,10 @@ trap "rm -f $shaback_error_log" 0 1 2 5 15
 shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
 	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 9 76 0
 
-
+# wc -l $shaback_error_log == 0 ?
 dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
 
 clear
-echo "MODE: ${mode}"
-echo "VERSION: ${version}"
+
 echo "ID: ${id}"
 echo "dest_dir: ${dest_dir}"
-
-cat $shaback_error_log
