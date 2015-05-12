@@ -20,10 +20,6 @@ BT="Shaback - recovery console"
 step="selectRepo"
 
 
-
-
-
-
 #
 # Select the shaback repository
 #
@@ -95,85 +91,101 @@ selectVersion () {
 	declare -a params=($_params)
 
 	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select Backup to recover:" 22 76 15 ${params[@]} 2> $answer || (
-		step="selectHost"
-		clear; echo "zueureck"
-		return 0
-	)
+		false
+	) || step="selectHost"
+	if [ $step == "selectHost" ]; then return; fi
 
 	version=${versions[`cat $answer`]}
 	step="selectMode"
 }
 
 
-while true; do
-	echo " Step: $step"
-	case $step in
-		"selectRepo" ) selectRepo ;;
-		"selectHost" ) selectHost ;;
-		"selectVersion" ) selectVersion ;;
-		* ) exit
-	esac
-done
+#
+# Select recovery mode
+#
+selectMode () {
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select recovery mode" 14 50 3 C "Restore complete backup set" S "Select individual directory" 2> $answer || (
+		false
+	) || step="selectVersion"
+	if [ $step == "selectVersion" ]; then return; fi
 
+	mode=`cat $answer`
 
-
-
-	#
-	# Select recovery mode
-	#
-	mode="B"
-	while [ $mode == "B" ]; do
-		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select recovery mode" 14 50 3 C "Restore complete backup set" S "Select individual directory" B "Go back" 2> $answer || (
-			clear; echo "Cancelled."; false
-		)
-		mode=`cat $answer`
-
-		if [ $mode == "C" ]; then
-			id=`cat $version`
-		fi
-
-		break
-	done
-
+	if [ $mode == "C" ]; then
+		id=`cat $version`
+		step="selectDestination"
+	fi
+	if [ $mode == "S" ]; then
+		id=""
+		step="selectDirectory"
+	fi
+}
 
 
 #
 # Select destination directory
 #
+selectDestination () {
+	dialog --title "Destination directory" --backtitle "$BT" --dselect $dest_dir 22 76 2> $answer || (
+		false
+	) || step="selectMode"
+	if [ $step == "selectMode" ]; then return; fi	
 
-dialog --title "Destination directory" --backtitle "$BT" --dselect $dest_dir 22 76 2> $answer || (
-			clear; echo "Cancelled."; false
-		)
-dest_dir=`cat $answer`
+	dest_dir=`cat $answer`
+	step="confirmRecovery"
+}
 
 
 #
 # Confirmation
 #
+confirmRecovery () {
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --yesno "Really recover backup file set\n\n    ${id}\n\nto\n\n    ${dest_dir}\n\n?" 13 76 || (
+		false
+	) || step="selectDestination"
+	if [ $step == "selectDestination" ]; then return; fi
 
-dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --yesno "Really recover backup file set\n\n    ${id}\n\nto\n\n    ${dest_dir}\n\n?" 13 76 || (
-			clear; echo "Cancelled."; false
-		)
+	step="recover"
+}
 
 
 #
 # Start recovering
 #
+recover () {
+	# Ggf. noch vorher nachfragen?
+	mkdir -p $dest_dir
 
-mkdir -p $dest_dir
+	cd $dest_dir
+	shaback_error_log=`mktemp`
+	trap "rm -f $shaback_error_log" 0 1 2 5 15
 
-cd $dest_dir
-shaback_error_log=`mktemp`
-trap "rm -f $shaback_error_log" 0 1 2 5 15
+	shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
+		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 9 76 0
+
+	# wc -l $shaback_error_log == 0 ?
+	dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
+
+	clear
+
+	echo "ID: ${id}"
+	echo "dest_dir: ${dest_dir}"
+}
 
 
-shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
-	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 9 76 0
-
-# wc -l $shaback_error_log == 0 ?
-dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
-
-clear
-
-echo "ID: ${id}"
-echo "dest_dir: ${dest_dir}"
+#
+# Main loop
+#
+while true; do
+	#echo " Step: $step"
+	case $step in
+		"selectRepo" ) selectRepo ;;
+		"selectHost" ) selectHost ;;
+		"selectVersion" ) selectVersion ;;
+		"selectMode" ) selectMode ;;
+		"selectDestination" ) selectDestination ;;
+		"confirmRecovery" ) confirmRecovery ;;
+		"recover" ) recover ;;
+		* ) exit
+	esac
+done
