@@ -11,6 +11,7 @@ find_package(Lzma QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
+find_package(Dialog QUIET)
 
 ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})

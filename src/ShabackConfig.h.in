@@ -18,6 +18,8 @@
 # define SHABACK_HAS_BACKUP
 #endif
 
+#cmakedefine DIALOG_FOUND
+
 #define CPIO_ODC_MAX_FILE_SIZE (077777777777LL -1)
 
 #endif // SHABACK_ShabackConfig_H
