@@ -14,7 +14,6 @@ trap "rm -f $answer" 0 1 2 5 15
 SHABACK_REPO=${SHABACK_REPO:-$1}
 CWD=${SHABACK_REPO:-`pwd`}
 dest_dir=`pwd`
-dest_dir=/tmp
 
 BT="Shaback - recovery console"
 step="selectRepo"
@@ -225,7 +224,7 @@ recover () {
 	trap "rm -f $shaback_error_log" 0 1 2 5 15
 
 	shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
-		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 9 76 0
+		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 12 76 0
 
 	dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
 
