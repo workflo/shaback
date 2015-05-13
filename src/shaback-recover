@@ -146,7 +146,7 @@ selectDirectory () {
 				if [ $name == "/" ]; then
 					name=""
 				fi
-				p="${parentPath}/${name}/${sha1}"
+				p="${parentPath}/${name}"
 				p=${p//\/\//\/}
 				p=${p// /_/}
 				sha1Arr+=($sha1)
