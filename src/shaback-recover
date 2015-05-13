@@ -127,23 +127,32 @@ selectDirectory () {
 
 	while true; do
 		shaback -r ${SHABACK_REPO} show $dirId > $answer
-		parentPath=`cat $answer | head -2 | tail -1`
+		parentPath=""
 		
 		if [ ${#pathToRoot[@]} -gt 1 ]; then
-			declare -a sha1Arr=("")
-			declare -a names=(0 "..")	
+			declare -a sha1Arr=("..")
+			declare -a params=(0 "..")	
+			declare -a names=("..")	
 			n=1
 		else
 			declare -a sha1Arr=()
 			declare -a names=()	
+			declare -a params=()	
 			n=0
 		fi
 
 		while read ftype sha1 name dummy; do
 			if [ "$ftype" == "D" ]; then
-				sha1Arr[${#sha1Arr[@]}]=$sha1
-				names[${#names[@]}]=$n
-				names[${#names[@]}]="$parentPath/$name"
+				if [ $name == "/" ]; then
+					name=""
+				fi
+				p="${parentPath}/${name}/${sha1}"
+				p=${p//\/\//\/}
+				p=${p// /_/}
+				sha1Arr+=($sha1)
+				params+=($n)
+				params+=($p)
+				names+=($p)
 				((n+=1))
 			else
 				if [ "$name" == "" ]; then
@@ -152,18 +161,31 @@ selectDirectory () {
 			fi
 		done < <(shaback -r ${SHABACK_REPO} show $dirId )
 
-		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select directory to recover:" 22 76 15 ${names[@]} 2> $answer || step="selectMode"
-		if [ $step == "selectMode" ]; then return; fi
+		rc=0
+		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --extra-button --extra-label "Recover" --menu "Select directory to recover:" 22 76 15 ${params[@]} 2> $answer || rc=$?
+		if [ $rc == 255 ]; then 
+			step="selectMode"
+			return
+		fi
 
 		sel_dir=`cat $answer`
 
-		if [ $sel_dir == "0" -a ${names[0]} == ".." ]; then
+		if [ ${names[$sel_dir]} == ".." ]; then
 			# ".."
-			dirId=${sha1Arr[0]}
-			continue
+			dirId=${pathToRoot[-2]}
+			unset pathToRoot[${#pathToRoot[@]}-1]
+		else
+			dirId=${sha1Arr[$sel_dir]}
+			pathToRoot[${#pathToRoot[@]}]=$dirId
 		fi
 
-		dirId=${sha1Arr[$sel_dir]}
+		if [ $rc == 3 ]; then
+			id=${sha1Arr[$sel_dir]}
+			if [ $id != ".." ]; then
+				step="selectDestination"
+				return
+			fi
+		fi
 	done
 }
 
@@ -205,13 +227,11 @@ recover () {
 	shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
 		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 9 76 0
 
-	# wc -l $shaback_error_log == 0 ?
 	dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
 
 	clear
 
-	echo "ID: ${id}"
-	echo "dest_dir: ${dest_dir}"
+	step="done"
 }
 
 
