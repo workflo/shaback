@@ -44,6 +44,8 @@
 #include "ShabackException.h"
 #include "SplitFileIndexReader.h"
 #include "TreeFile.h"
+#include "BackupsetSelector.h"
+
 
 #define READ_BUFFER_SIZE (1024 * 4)
 
@@ -497,14 +499,26 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
 int Repository::restore()
 {
+#if defined(DIALOG_FOUND)
+  string treeSpec;
+
+  if (config.gui) {
+    BackupsetSelector sel(*this);
+    treeSpec = sel.start();
+  } else if (config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to restore.");
+  } else {
+    treeSpec = config.cliArgs.at(0);
+  }
+#else
   if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   }
 
-  open();
-  // openReadCache();
-
   string treeSpec = config.cliArgs.at(0);
+#endif
+
+  open();
 
   if (Digest::looksLikeDigest(treeSpec)) {
     return restoreByTreeId(treeSpec);

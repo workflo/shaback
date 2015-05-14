@@ -55,6 +55,7 @@ RuntimeConfig::RuntimeConfig()
   skipExisting = false;
   restoreAsCpioStream = false;
   gauge = false;
+  gui = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -98,9 +99,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"skip-existing", no_argument, 0, 'S'},
         {"quiet", no_argument, 0, 'q'},
         {"gauge", no_argument, 0, 'G'},
+        {"gui", no_argument, 0, 'g'},
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSoOqG", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSoOqGg", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -153,6 +155,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         gauge = true;
         break;
 
+      case 'g':
+        gui = true;
+        break;
+
       case 'O':
         restoreAsShabackStream = true;
         break;
@@ -183,6 +189,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       default:
         cerr << "?? getopt returned character code " << c << "??" << std::endl;
+        exit(1);
     }
   }
 

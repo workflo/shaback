@@ -50,6 +50,7 @@ class RuntimeConfig
     bool skipExisting;
     bool restoreAsCpioStream;
     bool restoreAsShabackStream;
+    bool gui;
 
     std::string operation;
     std::string repository;

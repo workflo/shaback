@@ -17,7 +17,8 @@ ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
-		BackupRun.cpp 
+		BackupRun.cpp
+		BackupsetSelector.cpp
 		Cache.cpp 
 		GarbageCollection.cpp
 		main.cpp 
