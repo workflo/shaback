@@ -23,23 +23,31 @@
 #include <vector>
 #include "ShabackConfig.h"
 
-#if defined(DIALOG_FOUND)
+#if defined(HAVE_DIALOG)
 
 #include <dialog.h>
 
+#include "lib/File.h"
+#include "lib/Exception.h"
+
+
 class Repository;
+class RuntimeConfig;
 
 class BackupsetSelector
 {
   public:
-    BackupsetSelector(Repository& repository);
+    BackupsetSelector(Repository& repository, RuntimeConfig& config);
     ~BackupsetSelector();
 
     std::string start();
-    
-  private:
 
+  private:
+    Repository& repository;
+    RuntimeConfig& config;
+    
+    void selectHost();
 };
 
-#endif // DIALOG_FOUND
+#endif // HAVE_DIALOG
 #endif // SHABACK_BackupsetSelector_H

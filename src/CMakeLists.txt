@@ -11,6 +11,7 @@ find_package(Lzma QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
+find_package(NCurses QUIET)
 find_package(Dialog QUIET)
 
 ADD_SUBDIRECTORY(lib)
@@ -41,6 +42,8 @@ target_link_libraries(shaback
   ${GDBM_LIBRARY}
   ${BZIP2_LIBRARIES}
   ${LZMA_LIBRARIES}
+  ${DIALOG_LIBRARIES}
+  ${NCURSES_LIBRARIES}
 )
 
 add_executable(visichunk

@@ -18,24 +18,70 @@
 
 #include "BackupsetSelector.h"
 
- #if defined(DIALOG_FOUND)
+ #if defined(HAVE_DIALOG)
+
+#include <iostream>
+#include <algorithm>
+#include <stdlib.h>
+#include <stdio.h>
+#include "Repository.h"
+
+using namespace std;
 
 
-BackupsetSelector::BackupsetSelector(Repository& repository)
+BackupsetSelector::BackupsetSelector(Repository& repository, RuntimeConfig& config)
+	: repository(repository), config(config)
 {
-
+  init_dialog(stdin, stdout);
 }
 
 
 BackupsetSelector::~BackupsetSelector()
 {
-
+  end_dialog();
 }
 
 
 std::string BackupsetSelector::start()
 {
-	
+	selectHost();
+	return "sss";
+}
+
+
+void BackupsetSelector::selectHost()
+{	
+  string pattern("*_????" "-??" "-??_??????.sroot");
+
+  vector<File> indexFiles = config.indexDir.listFiles(pattern);
+  set<string> setNames; 
+
+  for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    File file(*it);
+    string setName = file.fname.substr(0, file.fname.length() - 24);
+    setNames.insert(setName);
+  }
+
+  for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
+    string setName(*it);
+    cout << setName << endl;
+  }
+
+  // sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+
+  int count = setNames.size();
+  // char* items[] = {"1", "Erster Eintrag", "2","Zweiter Eintrag", "3","Dritter und letzter Eintrag"};
+  const char** items = (const char**) malloc(count * 2 * sizeof(char*));
+
+  int n = 0;
+  for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
+    string setName(*it);
+    items[n++] = "111";
+    items[n++] = setName.c_str();
+  }
+
+  int sel = dialog_menu("Shaback recovery", "Select backup set to recover from:", 22, 76, 0, count, (char **) items);
+  free(items);
 }
 
  #endif
