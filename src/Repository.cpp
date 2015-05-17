@@ -235,7 +235,7 @@ string Repository::storeTreeFile(BackupRun* run, string& treeFile)
   return hashValue;
 }
 
-string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* totalFileSize)
+string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize)
 {
   run->numFilesRead++;
   *totalFileSize = srcFile.getSize();
@@ -313,7 +313,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, shaback_filesize_t* 
 }
 
 string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in,
-    shaback_filesize_t* totalFileSize)
+    intmax_t* totalFileSize)
 {
   string blockList;
   Sha1 totalSha1;
@@ -499,7 +499,7 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
 int Repository::restore()
 {
-#if defined(DIALOG_FOUND)
+#if defined(HAVE_DIALOG)
   string treeSpec;
 
   if (config.gui) {

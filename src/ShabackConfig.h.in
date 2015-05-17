@@ -6,8 +6,6 @@
 #define SHABACK_VERSION_MINOR @SHABACK_VERSION_MINOR@
 #define SHABACK_SYSCONFDIR "@CMAKE_INSTALL_PREFIX@/etc"
 
-#define shaback_filesize_t intmax_t
-
 #include "lib/config.h"
 #if defined(OPENSSL_FOUND)
 # define SHABACK_HAS_BACKUP

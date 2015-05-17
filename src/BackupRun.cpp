@@ -65,7 +65,7 @@ int BackupRun::run()
 
   for (vector<string>::iterator it = config.dirs.begin(); it < config.dirs.end(); it++) {
     File file(*it);
-    shaback_filesize_t totalSubDirSize = 0;
+    intmax_t totalSubDirSize = 0;
 
     try {
       if (file.isSymlink()) {
@@ -93,11 +93,11 @@ int BackupRun::run()
   return (numErrors == 0 ? 0 : 1);
 }
 
-string BackupRun::handleDirectory(File& dir, bool absolutePaths, shaback_filesize_t* totalParentDirSize, bool skipChildren)
+string BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalParentDirSize, bool skipChildren)
 {
   string treeFile(TREEFILE_HEADER);
   treeFile.append("\n").append(dir.path).append("\n");
-  shaback_filesize_t totalDirSize = 0;
+  intmax_t totalDirSize = 0;
 
   config.runEnterDirCallbacks(dir);
 
@@ -151,9 +151,9 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, shaback_filesiz
   return treeFileLine;
 }
 
-string BackupRun::handleFile(File& file, bool absolutePaths, shaback_filesize_t* totalDirSize)
+string BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirSize)
 {
-  shaback_filesize_t totalFileSize = 0;
+  intmax_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
 
   string treeFileLine("F\t");

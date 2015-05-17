@@ -20,6 +20,7 @@
 #define SHABACK_RestoreRun_H
 
 #include <string>
+#include <stdint.h>
 #include <time.h>
 #include "Repository.h"
 
@@ -35,8 +36,8 @@ class RestoreRun
 
     int start(std::string& treeId, File& destinationDir);
 
-    shaback_filesize_t numBytesRestored;
-    shaback_filesize_t bytesToBeRestored;
+    intmax_t numBytesRestored;
+    intmax_t bytesToBeRestored;
     int numFilesRestored;
     int numErrors;
 
