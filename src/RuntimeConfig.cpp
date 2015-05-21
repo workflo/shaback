@@ -99,7 +99,9 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"skip-existing", no_argument, 0, 'S'},
         {"quiet", no_argument, 0, 'q'},
         {"gauge", no_argument, 0, 'G'},
+#if defined(HAVE_DIALOG)        
         {"gui", no_argument, 0, 'g'},
+#endif
         { 0, 0, 0, 0 } };
 
     int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WSoOqGg", long_options, &option_index);
@@ -155,9 +157,11 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         gauge = true;
         break;
 
+#if defined(HAVE_DIALOG)
       case 'g':
         gui = true;
         break;
+#endif
 
       case 'O':
         restoreAsShabackStream = true;

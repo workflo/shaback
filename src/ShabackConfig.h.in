@@ -11,8 +11,8 @@
 # define SHABACK_HAS_BACKUP
 #endif
 
-#cmakedefine DIALOG_FOUND
-#cmakedefine NCURSES_FOUND
+// #cmakedefine DIALOG_FOUND
+// #cmakedefine NCURSES_FOUND
 
 #if defined(DIALOG_FOUND) && defined(NCURSES_FOUND)
   #define HAVE_DIALOG
