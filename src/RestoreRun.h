@@ -20,6 +20,8 @@
 #define SHABACK_RestoreRun_H
 
 #include <string>
+#include <stdint.h>
+#include <time.h>
 #include "Repository.h"
 
 class RestoreRun
@@ -29,13 +31,13 @@ class RestoreRun
     ~RestoreRun();
 
     void restore(std::string& treeId, File& destinationDir, int depth = 0);
-    void restoreAsCpio(std::string& treeId, int depth = 0);
+    void restoreAsCpioStream(std::string& treeId, int depth = 0);
     void showTotals();
 
     int start(std::string& treeId, File& destinationDir);
 
-    shaback_filesize_t numBytesRestored;
-    shaback_filesize_t bytesToBeRestored;
+    intmax_t numBytesRestored;
+    intmax_t bytesToBeRestored;
     int numFilesRestored;
     int numErrors;
 
@@ -47,8 +49,8 @@ class RestoreRun
     Repository& repository;
     RuntimeConfig& config;
     unsigned int fileCount;
-    void progress();
-    int progressCounter;
+    void progress(std::string &path);
+    time_t lastProgressTime;
 };
 
 #endif // SHABACK_RestoreRun_H

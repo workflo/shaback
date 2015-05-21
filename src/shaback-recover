@@ -1,0 +1,253 @@
+#!/bin/bash
+
+set -e
+
+which dialog >/dev/null || (
+	echo "'dialog' not installed!"
+	which apt-get > /dev/null && echo -e "\nRun as root and try again:\n   apt-get install dialog"
+	false
+)
+
+answer=$(tempfile 2>/dev/null) || answer=/tmp/test$$
+trap "rm -f $answer" 0 1 2 5 15
+
+SHABACK_REPO=${SHABACK_REPO:-$1}
+CWD=${SHABACK_REPO:-`pwd`}
+dest_dir=`pwd`
+
+BT="Shaback - recovery console"
+step="selectRepo"
+
+
+#
+# Select the shaback repository
+#
+selectRepo () {
+	while true; do
+		if [ -z $SHABACK_REPO ]; then
+			dialog --title "Select Shaback Repository" --backtitle "$BT" --dselect $CWD 22 76 2> $answer
+			SHABACK_REPO=`cat $answer`
+		fi
+
+		if [ -z $SHABACK_REPO ]; then
+			clear; echo "No Shaback Repository selected."; false
+		fi
+
+		if [ ! -f "$SHABACK_REPO/repo.properties" ]; then
+			dialog --title "Shaback Repository" --backtitle "$BT" --msgbox "\n\nThis is not your Shaback Repository:\n\n$SHABACK_REPO" 10 76
+			CWD=$SHABACK_REPO
+			SHABACK_REPO=""
+		else
+			step="selectHost"
+			break
+		fi
+	done
+}
+
+
+#
+# Select host
+#
+selectHost () {
+	declare -a hosts=(`find "$SHABACK_REPO/index" -type f -name '*.sroot' | sed -e 's/.*\/\([^\/]*\)[-_0-9]\{18\}\.sroot/\1/' | sort -u`)
+
+	n=0
+	_params=""
+
+	for h in ${hosts[@]}; do
+		_params="$_params $n $h"
+		n=`expr $n + 1`
+	done
+
+	declare -a params=($_params)
+
+	dialog --title "Shaback Recovery" --backtitle "$BT" --menu "Select Host to recover:" 22 76 15 ${params[@]} 2> $answer || (
+		clear; echo "Cancelled."; false
+	)
+
+	host=${hosts[`cat $answer`]}
+	step="selectVersion"
+}
+
+
+
+#
+# Select backup set / version
+#
+selectVersion () {
+	mode="B"
+
+	declare -a versions=(`find "$SHABACK_REPO/index" -type f -name "${host}_*.sroot" | sort -r`)
+
+	n=0
+	_params=""
+
+	for v in ${versions[@]}; do
+		_params="$_params $n `basename  $v .sroot`"
+		n=`expr $n + 1`
+	done
+
+	declare -a params=($_params)
+
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select Backup to recover:" 22 76 15 ${params[@]} 2> $answer || step="selectHost"
+	if [ $step == "selectHost" ]; then return; fi
+
+	version=${versions[`cat $answer`]}
+	step="selectMode"
+}
+
+
+#
+# Select recovery mode
+#
+selectMode () {
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --menu "Select recovery mode" 14 50 3 C "Restore complete backup set" S "Select individual directory" 2> $answer || step="selectVersion"
+	if [ $step == "selectVersion" ]; then return; fi
+
+	mode=`cat $answer`
+	id=`cat $version`
+
+	if [ $mode == "C" ]; then
+		step="selectDestination"
+	fi
+	if [ $mode == "S" ]; then
+		step="selectDirectory"
+	fi
+}
+
+
+#
+# Select directory to recover
+#
+selectDirectory () {
+	dirId=$id
+#	dirId=cbcee611b728bf446e9707304ef8b56da4595206
+	declare -a pathToRoot=($dirId)
+
+	while true; do
+		shaback -r ${SHABACK_REPO} show $dirId > $answer
+		parentPath=""
+		
+		if [ ${#pathToRoot[@]} -gt 1 ]; then
+			declare -a sha1Arr=("..")
+			declare -a params=(0 "..")	
+			declare -a names=("..")	
+			n=1
+		else
+			declare -a sha1Arr=()
+			declare -a names=()	
+			declare -a params=()	
+			n=0
+		fi
+
+		while read ftype sha1 name dummy; do
+			if [ "$ftype" == "D" ]; then
+				if [ $name == "/" ]; then
+					name=""
+				fi
+				p="${parentPath}/${name}"
+				p=${p//\/\//\/}
+				p=${p// /_/}
+				sha1Arr+=($sha1)
+				params+=($n)
+				params+=($p)
+				names+=($p)
+				((n+=1))
+			else
+				if [ "$name" == "" ]; then
+					parentPath=$ftype
+				fi
+			fi
+		done < <(shaback -r ${SHABACK_REPO} show $dirId )
+
+		rc=0
+		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --extra-button --extra-label "Recover" --menu "Select directory to recover:" 22 76 15 ${params[@]} 2> $answer || rc=$?
+		if [ $rc == 255 ]; then 
+			step="selectMode"
+			return
+		fi
+
+		sel_dir=`cat $answer`
+
+		if [ ${names[$sel_dir]} == ".." ]; then
+			# ".."
+			dirId=${pathToRoot[-2]}
+			unset pathToRoot[${#pathToRoot[@]}-1]
+		else
+			dirId=${sha1Arr[$sel_dir]}
+			pathToRoot[${#pathToRoot[@]}]=$dirId
+		fi
+
+		if [ $rc == 3 ]; then
+			id=${sha1Arr[$sel_dir]}
+			if [ $id != ".." ]; then
+				step="selectDestination"
+				return
+			fi
+		fi
+	done
+}
+
+
+#
+# Select destination directory
+#
+selectDestination () {
+	dialog --title "Destination directory" --backtitle "$BT" --dselect $dest_dir 22 76 2> $answer || step="selectMode"
+	if [ $step == "selectMode" ]; then return; fi	
+
+	dest_dir=`cat $answer`
+	step="confirmRecovery"
+}
+
+
+#
+# Confirmation
+#
+confirmRecovery () {
+	dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --yesno "Really recover backup file set\n\n    ${id}\n\nto\n\n    ${dest_dir}\n\n?" 13 76 || step="selectDestination"
+	if [ $step == "selectDestination" ]; then return; fi
+
+	step="recover"
+}
+
+
+#
+# Start recovering
+#
+recover () {
+	# Ggf. noch vorher nachfragen?
+	mkdir -p $dest_dir
+
+	cd $dest_dir
+	shaback_error_log=`mktemp`
+	trap "rm -f $shaback_error_log" 0 1 2 5 15
+
+	shaback -r ${SHABACK_REPO} restore --gauge ${id} 2> $shaback_error_log |
+		dialog --title "Shaback Recovery: ${host}" --backtitle "$BT" --gauge "Please wait" 12 76 0
+
+	dialog --title "Shaback Recovery finished" --backtitle "$BT" --tailbox $shaback_error_log 22 76
+
+	clear
+
+	step="done"
+}
+
+
+#
+# Main loop
+#
+while true; do
+	#echo " Step: $step"
+	case $step in
+		"selectRepo" ) selectRepo ;;
+		"selectHost" ) selectHost ;;
+		"selectVersion" ) selectVersion ;;
+		"selectMode" ) selectMode ;;
+		"selectDirectory" ) selectDirectory ;;
+		"selectDestination" ) selectDestination ;;
+		"confirmRecovery" ) confirmRecovery ;;
+		"recover" ) recover ;;
+		* ) exit
+	esac
+done

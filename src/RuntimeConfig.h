@@ -41,13 +41,16 @@ class RuntimeConfig
     bool quiet;
     bool verbose;
     bool debug;
+    bool gauge;
     bool force;
     bool oneFileSystem;
     bool showTotals;
     bool help;
     bool useWriteCache;
     bool skipExisting;
-    bool restoreAsCpio;
+    bool restoreAsCpioStream;
+    bool restoreAsShabackStream;
+    bool gui;
 
     std::string operation;
     std::string repository;

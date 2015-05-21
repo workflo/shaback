@@ -49,7 +49,7 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
   numBytesRestored = 0;
   fileCount = 0;
   bytesToBeRestored = 0;
-  progressCounter = 0;
+  time(&lastProgressTime);
 
   // Open index file to read directory sizes:
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
@@ -59,8 +59,8 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
     bytesToBeRestored += entry.size;
   }
 
-  if (config.restoreAsCpio) {
-    restoreAsCpio(treeId);
+  if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
+    restoreAsCpioStream(treeId);
   } else {
     restore(treeId, destinationDir);
   }
@@ -86,7 +86,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         bool skip = (config.skipExisting && dir.isDir());
 
         if (!skip) {
-          if (config.verbose)
+          if (config.verbose && !config.gauge)
             cerr << "[d] " << dir.path << endl;
 
           dir.mkdirs();
@@ -105,13 +105,13 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       case TREEFILEENTRY_FILE: {
         File file(destinationDir, entry.path);
 
-        if (config.restoreAsCpio) {
+        if (config.restoreAsCpioStream) {
 
         } else {
           if (config.skipExisting && file.isFile())
             break;
 
-          if (config.verbose)
+          if (config.verbose && !config.gauge) 
             cerr << "[f] " << file.path << endl;
 
           // Create base directory:
@@ -131,7 +131,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
             numFilesRestored++;
             numBytesRestored += entry.size;
 
-            if (!config.quiet) progress();
+            if (!config.quiet) progress(entry.path);
           } catch (Exception &ex) {
             reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
           }
@@ -145,7 +145,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
         if (config.skipExisting && file.isSymlink())
           break;
 
-        if (config.verbose)
+        if (config.verbose && !config.gauge)
           cout << "[s] " << file.path << endl;
 
         if (depth == 0)
@@ -163,7 +163,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
   }
 }
 
-void RestoreRun::restoreAsCpio(string& treeId, int depth)
+void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 {
   StandardOutputStream out(stdout);
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
@@ -182,22 +182,35 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
 
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
-        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
-            path.c_str(), 0x0);
-        restoreAsCpio(entry.id, depth + 1);
+        if (config.restoreAsShabackStream) {
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+              path.c_str(), 0x0);
+        } else {
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+              path.c_str(), 0x0);
+        }
+        restoreAsCpioStream(entry.id, depth + 1);
         break;
       }
 
       case TREEFILEENTRY_FILE: {
-        if (entry.size >= 0x7fffffff) {
-          reportError(string("File too large for cpio: ").append(path));
-          break;
-        }
+        if (config.restoreAsShabackStream) {
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              (unsigned int) entry.size, path.c_str(), 0x0);
+        } else {
+          // cpio has a file size limit of 8 GB :(
+          if (entry.size >= CPIO_ODC_MAX_FILE_SIZE) {
+            reportError(string("File too large for cpio: ").append(path));
+            break;
+          }
 
-        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
-            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-            (unsigned int) entry.size, path.c_str(), 0x0);
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              (unsigned int) entry.size, path.c_str(), 0x0);
+        }
         try {
           repository.exportFile(entry, out);
           numFilesRestored ++;
@@ -209,9 +222,15 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
       }
 
       case TREEFILEENTRY_SYMLINK: {
-        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
-            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-            (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
+        if (config.restoreAsShabackStream) {
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++fileCount, entry.fileMode,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
+        } else {
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
+              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+              (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
+        }
         break;
       }
 
@@ -221,7 +240,11 @@ void RestoreRun::restoreAsCpio(string& treeId, int depth)
   }
 
   if (depth == 0) {
-    fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
+    if (config.restoreAsShabackStream) {
+      fprintf(stdout, "ShAbAcKsTrEaM1_000000000000000000000000000000000001000000000000000130000000000000000TRAILER!!!%c", 0x0);
+    } else {
+      fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
+    }
   }
 }
 
@@ -273,11 +296,22 @@ void RestoreRun::showTotals()
   fprintf(stderr, "Errors:           %12d\n", numErrors);
 }
 
-void RestoreRun::progress()
+void RestoreRun::progress(std::string &path)
 {
-  if (++progressCounter > 20) {
+  time_t now;
+  time(&now);
+
+  if (difftime(now, lastProgressTime) >= 1) {
     int percentage = 0;
     if (bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) numBytesRestored / (float) bytesToBeRestored));
-    fprintf(stderr, "%jd of %jd bytes (%d\%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+
+    if (config.gauge) {
+      fprintf(stdout, "XXX\n%d\n%s\nXXX\n", percentage, path.c_str());
+      fflush(stdout);
+    } else {
+      fprintf(stderr, "%jd of %jd bytes (%d%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+    }
+
+    time(&lastProgressTime);
   }
 }

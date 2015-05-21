@@ -1,6 +1,6 @@
 project(shaback)
 set (SHABACK_VERSION_MAJOR 1)
-set (SHABACK_VERSION_MINOR 15)
+set (SHABACK_VERSION_MINOR 16)
 set (CMAKE_MODULE_PATH CMakeModules)
 set (CMAKE_VERBOSE_MAKEFILE true)
 
@@ -11,12 +11,15 @@ find_package(Lzma QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
+find_package(NCurses QUIET)
+find_package(Dialog QUIET)
 
 ADD_SUBDIRECTORY(lib)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
-		BackupRun.cpp 
+		BackupRun.cpp
+		BackupsetSelector.cpp
 		Cache.cpp 
 		GarbageCollection.cpp
 		main.cpp 
@@ -39,6 +42,8 @@ target_link_libraries(shaback
   ${GDBM_LIBRARY}
   ${BZIP2_LIBRARIES}
   ${LZMA_LIBRARIES}
+  ${DIALOG_LIBRARIES}
+  ${NCURSES_LIBRARIES}
 )
 
 add_executable(visichunk
@@ -49,7 +54,7 @@ target_link_libraries(visichunk
   shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
-install(PROGRAMS shaback visichunk DESTINATION bin)
+install(PROGRAMS shaback visichunk shaback-recover DESTINATION bin)
 
 # configure a header file to pass some of the CMake settings
 # to the source code

@@ -63,8 +63,11 @@ void showUsage(string& op)
   if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-S | --skip-existing]\n"
-      "                      [-o | --cpio] [-q | --quiet]\n"
-      "                      <rootfile> | <dir-id>\n\n");
+      "                      [-o | --cpio] [-q | --quiet] [-G | --gauge]\n");
+#if defined(HAVE_DIALOG)
+    printf("                      [-g | --gui]\n");
+#endif
+    printf("                      <rootfile> | <dir-id>\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
       "\t<rootfile> is a filename from the repository's index/ directory.\n"
       "\t<dir-id> is the ID of the directory file to be restored.\n\n"
@@ -73,10 +76,19 @@ void showUsage(string& op)
       "\t-t, --totals\n"
       "\t    Give summary report at the end of the recovery run.\n\n"
       "\t-o, --cpio\n"
-      "\t    Restore to cpio stream on stdout.\n\n"
+      "\t    Restore to cpio stream on stdout.\n"
+      "\t    Limits max file size to (%jd Byte) 8 GB.\n\n"
+      "\t-O, --shaback\n"
+      "\t    Restore to shaback recovery stream on stdout.\n\n"
       "\t-q, --quiet\n"
       "\t    Suppress progress output.\n\n"
-      "\tFiles will always be restored into the CWD.\n");
+      "\t-G, --gauge\n"
+      "\t    Produce output on stdout suitable for dialog --gauge.\n\n", CPIO_ODC_MAX_FILE_SIZE);
+#if defined(HAVE_DIALOG)
+    printf("\t-g, --gui\n"
+      "\t    Start dialog UI to select what to recover.\n\n");
+#endif
+    printf("\tFiles will always be restored into the CWD.\n");
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");

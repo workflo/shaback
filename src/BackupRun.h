@@ -21,6 +21,7 @@
 #define SHABACK_BackupRun_H
 
 #include <string>
+#include <stdint.h>
 #include "Repository.h"
 #include "lib/File.h"
 #include "lib/Exception.h"
@@ -35,15 +36,15 @@ class BackupRun
     void showTotals();
     void reportError(Exception& ex);
 
-    shaback_filesize_t numBytesRead;
-    shaback_filesize_t numBytesStored;
+    intmax_t numBytesRead;
+    intmax_t numBytesStored;
     int numFilesRead;
     int numFilesStored;
     int numErrors;
 
   protected:
-    std::string handleDirectory(File& dir, bool absolutePaths, shaback_filesize_t* totalDirSize, bool skipChildren = false);
-    std::string handleFile(File& dir, bool absolutePaths, shaback_filesize_t* totalDirSize);
+    std::string handleDirectory(File& dir, bool absolutePaths, intmax_t* totalDirSize, bool skipChildren = false);
+    std::string handleFile(File& dir, bool absolutePaths, intmax_t* totalDirSize);
     std::string handleSymlink(File& dir, bool absolutePaths);
     void handleSymlink(File& dir);
 

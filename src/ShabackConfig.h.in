@@ -6,16 +6,18 @@
 #define SHABACK_VERSION_MINOR @SHABACK_VERSION_MINOR@
 #define SHABACK_SYSCONFDIR "@CMAKE_INSTALL_PREFIX@/etc"
 
-#ifdef __APPLE__
-# define shaback_filesize_t intmax_t
-#else
-# define shaback_filesize_t long long
-#endif
-
-
 #include "lib/config.h"
 #if defined(OPENSSL_FOUND)
 # define SHABACK_HAS_BACKUP
 #endif
+
+// #cmakedefine DIALOG_FOUND
+// #cmakedefine NCURSES_FOUND
+
+#if defined(DIALOG_FOUND) && defined(NCURSES_FOUND)
+  #define HAVE_DIALOG
+#endif
+
+#define CPIO_ODC_MAX_FILE_SIZE (077777777777L -1)
 
 #endif // SHABACK_ShabackConfig_H
