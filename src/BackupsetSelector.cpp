@@ -18,7 +18,7 @@
 
 #include "BackupsetSelector.h"
 
- #if defined(HAVE_DIALOG)
+ #if defined(HAVE_NCURSES)
 
 #include <iostream>
 #include <algorithm>
@@ -32,18 +32,50 @@ using namespace std;
 BackupsetSelector::BackupsetSelector(Repository& repository, RuntimeConfig& config)
 	: repository(repository), config(config)
 {
-  init_dialog(stdin, stdout);
+  // init_dialog(stdin, stdout);
 }
 
 
 BackupsetSelector::~BackupsetSelector()
 {
-  end_dialog();
+  // end_dialog();
 }
 
 
 std::string BackupsetSelector::start()
 {
+  initscr();      /* Start curses mode      */
+  keypad(stdscr, TRUE);
+  // raw();
+  noecho();
+  printw("Hello World !!!");  /* Print Hello World      */
+  refresh();      /* Print it on to the real screen */
+  // getch();       Wait for user input 
+  // endwin();     /* End curses mode      */
+
+
+
+
+      printw("Type any character to see it in bold\n");
+  int ch = getch();     /* If raw() hadn't been called
+           * we have to press enter before it
+           * gets to the program    */
+  if(ch == KEY_F(1))    /* Without keypad enabled this will */
+    printw("F1 Key pressed");/*  not get to us either */
+          /* Without noecho() some ugly escape
+           * charachters might have been printed
+           * on screen      */
+  else
+  { printw("The pressed key is ");
+    attron(A_BOLD);
+    printw("%c", ch);
+    attroff(A_BOLD);
+  }
+  refresh();      /* Print it on to the real screen */
+      getch();      /* Wait for user input */
+  endwin();     /* End curses mode      */
+
+
 	selectHost();
 	return "sss";
 }
@@ -69,19 +101,21 @@ void BackupsetSelector::selectHost()
 
   // sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
 
+
+
   int count = setNames.size();
   // char* items[] = {"1", "Erster Eintrag", "2","Zweiter Eintrag", "3","Dritter und letzter Eintrag"};
-  const char** items = (const char**) malloc(count * 2 * sizeof(char*));
+  // const char** items = (const char**) malloc(count * 2 * sizeof(char*));
 
-  int n = 0;
-  for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
-    string setName(*it);
-    items[n++] = "111";
-    items[n++] = setName.c_str();
-  }
+  // int n = 0;
+  // for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
+  //   string setName(*it);
+  //   items[n++] = "111";
+  //   items[n++] = setName.c_str();
+  // }
 
-  int sel = dialog_menu("Shaback recovery", "Select backup set to recover from:", 22, 76, 0, count, (char **) items);
-  free(items);
+  // int sel = dialog_menu("Shaback recovery", "Select backup set to recover from:", 22, 76, 0, count, (char **) items);
+  // free(items);
 }
 
  #endif
