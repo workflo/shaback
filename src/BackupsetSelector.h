@@ -23,7 +23,7 @@
 #include <vector>
 #include "ShabackConfig.h"
 
-#if defined(HAVE_NCURSES)
+#if defined(HAVE_DIALOG)
 
 #include <ncurses.h>
 
@@ -49,5 +49,5 @@ class BackupsetSelector
     void selectHost();
 };
 
-#endif // HAVE_NCURSES
+#endif // HAVE_DIALOG
 #endif // SHABACK_BackupsetSelector_H

@@ -18,7 +18,7 @@
 
 #include "BackupsetSelector.h"
 
- #if defined(HAVE_NCURSES)
+ #if defined(HAVE_DIALOG)
 
 #include <iostream>
 #include <algorithm>

@@ -12,9 +12,9 @@ find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
 find_package(NCurses QUIET)
-find_package(Dialog QUIET)
 
 ADD_SUBDIRECTORY(lib)
+ADD_SUBDIRECTORY(dialog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
@@ -36,22 +36,22 @@ add_executable(shaback
 
 target_link_libraries(shaback 
   shabacklib
+  shabackdialog
   ${ZLIB_LIBRARY}
   ${OPENSSL_CRYPTO_LIBRARIES}
   ${LUA_LIBRARIES}
   ${GDBM_LIBRARY}
   ${BZIP2_LIBRARIES}
   ${LZMA_LIBRARIES}
-  ${DIALOG_LIBRARIES}
   ${NCURSES_LIBRARIES}
 )
 
-add_executable(visichunk
-		VisiChunk.cpp
-		)
+#add_executable(visichunk
+#		VisiChunk.cpp
+#		)
 
-target_link_libraries(visichunk
-  shabacklib)
+#target_link_libraries(visichunk
+#  shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
 install(PROGRAMS shaback visichunk shaback-recover DESTINATION bin)

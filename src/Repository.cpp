@@ -499,7 +499,7 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
 int Repository::restore()
 {
-#if defined(HAVE_NCURSES)
+#if defined(HAVE_DIALOG)
   string treeSpec;
 
   if (config.gui) {
