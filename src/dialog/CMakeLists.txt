@@ -14,6 +14,7 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 set(shaback_dialog_SRCS
 		argv.c
 		arrows.c
+		buttons.c
 		calendar.c
 		checklist.c
 		columns.c
