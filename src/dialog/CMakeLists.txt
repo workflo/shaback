@@ -44,14 +44,14 @@ set(shaback_dialog_SRCS
 		util.c
 		version.c
 		yesno.c
-		     )
+)
 
 
 add_library(shabackdialog STATIC ${shaback_dialog_SRCS})
 
 # configure a header file to pass some of the CMake settings
 # to the source code
-#configure_file (
-#  "config.h.in"
-#  "config.h"
-#  )
+configure_file (
+    "dlg_config.h.in"
+    "dlg_config.h"
+)
