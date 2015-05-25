@@ -47,6 +47,15 @@ BackupsetSelector::~BackupsetSelector()
 }
 
 
+void freeItemList(char** items)
+{
+  for (int idx = 0; items[idx]; idx++) {
+    free(items[idx]);
+  }
+  free(items);
+}
+
+
 std::string BackupsetSelector::start()
 {
   while(true) {
@@ -91,7 +100,7 @@ bool BackupsetSelector::selectSet()
 
 
   int count = setNames.size();
-  char** items = (char**) malloc(count * 2 * sizeof(char*));
+  char** items = (char**) calloc(count + 1, 2 * sizeof(char*));
 
   int n = 0;
   for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
@@ -106,13 +115,15 @@ bool BackupsetSelector::selectSet()
     n++;
   }
 
+  dlg_clr_result();
   int rc = dialog_menu("Shaback recovery", "Select backup set to recover from:", 0, 76, 0, count, (char **) items);
   if (rc == 0) {
     int sel = strtol(dialog_vars.input_result, 0, 10);
-    setName = items[sel *2 +1]; 
-    // printf("selected: \"%s\" = %d; sel=%s\n\n", dialog_vars.input_result, sel, setName.c_str());
+    setName = items[sel *2 +1];
+    freeItemList(items);
     return true;
   } else {
+    freeItemList(items);
     return false;
   }
 }
@@ -139,7 +150,7 @@ bool BackupsetSelector::selectVersion()
 
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
   int count = indexFiles.size();
-  char** items = (char**) malloc(count * 2 * sizeof(char*));
+  char** items = (char**) calloc(count + 1, 2 * sizeof(char*));
 
   int n = 0;
   for (vector<File>::iterator it = indexFiles.begin(); it != indexFiles.end(); it++) {
@@ -154,12 +165,15 @@ bool BackupsetSelector::selectVersion()
     n++;
   }
 
+  dlg_clr_result();
   int rc = dialog_menu("Shaback recovery", "Select backup version to recover from:", 0, 76, 0, count, (char **) items);
   if (rc == 0) {
     int sel = strtol(dialog_vars.input_result, 0, 10);
     indexFile = indexFiles[sel]; 
+    freeItemList(items);
     return true;
   } else {
+    freeItemList(items);
     return false;
   }
 }
