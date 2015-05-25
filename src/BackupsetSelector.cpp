@@ -70,6 +70,7 @@ void BackupsetSelector::selectHost()
 
   // sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
 
+  dialog_yesno("Titel des Dialogs", "Soll ich nun wirklich oder doch lieber nicht?", 8, 70);
 
 
   int count = setNames.size();

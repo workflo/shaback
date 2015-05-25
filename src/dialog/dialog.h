@@ -34,6 +34,8 @@
 #define __HP_CURSES_COMPAT	/* workaround for getattrs, etc. */
 #endif
 
+
+#include <string>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>

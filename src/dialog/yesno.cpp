@@ -1,6 +1,4 @@
 /*
- *  $Id: yesno.c,v 1.54 2011/10/15 12:43:07 tom Exp $
- *
  *  yesno.c -- implements the yes/no box
  *
  *  Copyright 1999-2010,2011	Thomas E. Dickey
@@ -31,7 +29,7 @@
  * Display a dialog box with two buttons - Yes and No.
  */
 int
-dialog_yesno(const char *title, const char *cprompt, int height, int width)
+dialog_yesno(std::string title, std::string cprompt, int height, int width)
 {
     /* *INDENT-OFF* */
     static DLG_KEYS_BINDING binding[] = {

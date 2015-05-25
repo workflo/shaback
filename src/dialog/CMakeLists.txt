@@ -12,39 +12,39 @@ INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 #CHECK_FUNCTION_EXISTS (lstat64           HAVE_LSTAT64)
 
 set(shaback_dialog_SRCS
-		argv.c
-		arrows.c
-		buttons.c
-		calendar.c
-		checklist.c
-		columns.c
-		dialog.c
-		dlg_keys.c
-		editbox.c
-		formbox.c
-		fselect.c
-		gauge.c
-		help.c
-		inputbox.c
-		inputstr.c
-		menubox.c
-		mixedform.c
-		mixedgauge.c
-		mouse.c
-		mousewget.c
-		msgbox.c
-		pause.c
-		prgbox.c
-		progressbox.c
-		rc.c
-		tailbox.c
-		textbox.c
-		timebox.c
-		trace.c
-		ui_getc.c
-		util.c
-		version.c
-		yesno.c
+		argv.cpp
+		arrows.cpp
+		buttons.cpp
+		calendar.cpp
+		checklist.cpp
+		columns.cpp
+		dialog.cpp
+		dlg_keys.cpp
+		editbox.cpp
+		formbox.cpp
+		fselect.cpp
+		gauge.cpp
+		help.cpp
+		inputbox.cpp
+		inputstr.cpp
+		menubox.cpp
+		mixedform.cpp
+		mixedgauge.cpp
+		mouse.cpp
+		mousewget.cpp
+		msgbox.cpp
+		pause.cpp
+		prgbox.cpp
+		progressbox.cpp
+		rc.cpp
+		tailbox.cpp
+		textbox.cpp
+		timebox.cpp
+		trace.cpp
+		ui_getc.cpp
+		util.cpp
+		version.cpp
+		yesno.cpp
 )
 
 
