@@ -61,7 +61,7 @@ dlg_popen(const char *command, const char *type)
 	     * given command.  Also, it needs the command to be parsed into
 	     * tokens.
 	     */
-	    if ((blob = malloc(4 + strlen(command))) != 0) {
+	    if ((blob = (char*) malloc(4 + strlen(command))) != 0) {
 		sprintf(blob, "-c %s", command);
 		argv = dlg_string_to_argv(blob);
 		execvp("sh", argv);

@@ -372,7 +372,7 @@ dialog_gauge(const char *title,
 
 	    dlg_mouse_free_regions();
 
-	    obj = dlg_allocate_gauge(title,
+	    obj = (MY_OBJ*) dlg_allocate_gauge(title,
 				     cprompt,
 				     height,
 				     width,

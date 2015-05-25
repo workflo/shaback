@@ -39,7 +39,7 @@ BackupsetSelector::BackupsetSelector(Repository& repository, RuntimeConfig& conf
 
 BackupsetSelector::~BackupsetSelector()
 {
-  // end_dialog();
+  end_dialog();
 }
 
 
@@ -70,22 +70,31 @@ void BackupsetSelector::selectHost()
 
   // sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
 
-  dialog_yesno("Titel des Dialogs", "Soll ich nun wirklich oder doch lieber nicht?", 8, 70);
+  // dialog_yesno("Titel des Dialogs", "Soll ich nun wirklich oder doch lieber nicht?", 8, 70);
 
 
   int count = setNames.size();
   // char* items[] = {"1", "Erster Eintrag", "2","Zweiter Eintrag", "3","Dritter und letzter Eintrag"};
-  const char** items = (const char**) malloc(count * 2 * sizeof(char*));
+  char** items = (char**) malloc(count * 2 * sizeof(char*));
 
   int n = 0;
   for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
     string setName(*it);
-    items[n++] = "111";
-    items[n++] = setName.c_str();
+    
+    items[n] = (char*) malloc(sizeof(char) * 10);
+    sprintf(items[n], "%d", n/2);
+    n++;
+
+    items[n] = (char*) malloc(sizeof(char) * (1 + setName.size()));
+    strcpy(items[n], setName.c_str());
+    n++;
   }
 
-  int sel = dialog_menu("Shaback recovery", "Select backup set to recover from:", 22, 76, 0, count, (char **) items);
-  free(items);
+  int sel = dialog_menu("Shaback recovery", "Select backup set to recover from:", 0, 76, 0, count, (char **) items);
+  printf("Selected: %d\n\n", sel);
+  end_dialog();
+  exit(0);
+  // free(items);
 }
 
  #endif

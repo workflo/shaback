@@ -29,7 +29,7 @@
  * Display a dialog box with two buttons - Yes and No.
  */
 int
-dialog_yesno(std::string title, std::string cprompt, int height, int width)
+dialog_yesno(const char* title, const char* cprompt, int height, int width)
 {
     /* *INDENT-OFF* */
     static DLG_KEYS_BINDING binding[] = {
