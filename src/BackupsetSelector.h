@@ -45,8 +45,11 @@ class BackupsetSelector
   private:
     Repository& repository;
     RuntimeConfig& config;
+    std::string setName;
+    File indexFile;
     
-    void selectHost();
+    bool selectSet();
+    bool selectVersion();
 };
 
 #endif // HAVE_DIALOG

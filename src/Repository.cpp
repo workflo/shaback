@@ -505,6 +505,7 @@ int Repository::restore()
   if (config.gui) {
     BackupsetSelector sel(*this, config);
     treeSpec = sel.start();
+    if (treeSpec == "") return 0;
   } else if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   } else {

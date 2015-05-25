@@ -24,6 +24,10 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <sys/types.h>
+//#include <limits.h>
+
 #include "Repository.h"
 #include "dialog.h"
 
@@ -45,12 +49,18 @@ BackupsetSelector::~BackupsetSelector()
 
 std::string BackupsetSelector::start()
 {
-	selectHost();
-	return "sss";
+  while(true) {
+  	if (!selectSet()) {
+      return "";
+    }
+    if (!selectVersion()) {
+      continue;
+    }
+  }
 }
 
 
-void BackupsetSelector::selectHost()
+bool BackupsetSelector::selectSet()
 {	
   string pattern("*_????" "-??" "-??_??????.sroot");
 
@@ -63,10 +73,17 @@ void BackupsetSelector::selectHost()
     setNames.insert(setName);
   }
 
-  for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
-    string setName(*it);
-    cout << setName << endl;
+  if (setNames.size() == 0) {
+    dialog_msgbox("Shaback recover", "\n\nNo backup set found to recover from.", 8, 50, 1);
+    return false;
+  } else if (setNames.size() == 1) {
+    return true;
   }
+
+  // for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
+  //   string setName(*it);
+  //   cout << setName << endl;
+  // }
 
   // sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
 
@@ -74,7 +91,6 @@ void BackupsetSelector::selectHost()
 
 
   int count = setNames.size();
-  // char* items[] = {"1", "Erster Eintrag", "2","Zweiter Eintrag", "3","Dritter und letzter Eintrag"};
   char** items = (char**) malloc(count * 2 * sizeof(char*));
 
   int n = 0;
@@ -90,11 +106,61 @@ void BackupsetSelector::selectHost()
     n++;
   }
 
-  int sel = dialog_menu("Shaback recovery", "Select backup set to recover from:", 0, 76, 0, count, (char **) items);
-  printf("Selected: %d\n\n", sel);
-  end_dialog();
-  exit(0);
-  // free(items);
+  int rc = dialog_menu("Shaback recovery", "Select backup set to recover from:", 0, 76, 0, count, (char **) items);
+  if (rc == 0) {
+    int sel = strtol(dialog_vars.input_result, 0, 10);
+    setName = items[sel *2 +1]; 
+    // printf("selected: \"%s\" = %d; sel=%s\n\n", dialog_vars.input_result, sel, setName.c_str());
+    return true;
+  } else {
+    return false;
+  }
 }
 
+
+
+
+bool BackupsetSelector::selectVersion()
+{ 
+  string pattern(setName);
+  pattern += "_????" "-??" "-??_??????.sroot";
+
+  vector<File> indexFiles = config.indexDir.listFiles(pattern);
+
+  if (indexFiles.size() == 0) {
+    dialog_msgbox("Shaback recover", "\n\nNo version found to recover from.", 8, 50, 1);
+    return false;
+  }
+
+  // for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
+  //   string setName(*it);
+  //   cout << setName << endl;
+  // }
+
+  sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+  int count = indexFiles.size();
+  char** items = (char**) malloc(count * 2 * sizeof(char*));
+
+  int n = 0;
+  for (vector<File>::iterator it = indexFiles.begin(); it != indexFiles.end(); it++) {
+    File version(*it);
+    
+    items[n] = (char*) malloc(sizeof(char) * 10);
+    sprintf(items[n], "%d", n/2);
+    n++;
+
+    items[n] = (char*) malloc(sizeof(char) * (1 + version.fname.size()));
+    strcpy(items[n], version.fname.c_str());
+    n++;
+  }
+
+  int rc = dialog_menu("Shaback recovery", "Select backup version to recover from:", 0, 76, 0, count, (char **) items);
+  if (rc == 0) {
+    int sel = strtol(dialog_vars.input_result, 0, 10);
+    indexFile = indexFiles[sel]; 
+    return true;
+  } else {
+    return false;
+  }
+}
  #endif
