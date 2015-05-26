@@ -29,7 +29,9 @@
 //#include <limits.h>
 
 #include "Repository.h"
-#include "dialog.h"
+#include "TreeFileEntry.h"
+#include "lib/FileInputStream.h"
+#include "dialog/dialog.h"
 
 using namespace std;
 
@@ -65,6 +67,9 @@ std::string BackupsetSelector::start()
     if (!selectVersion()) {
       continue;
     }
+    if (!selectDirectory()) {
+      continue;
+    }
   }
 }
 
@@ -88,16 +93,6 @@ bool BackupsetSelector::selectSet()
   } else if (setNames.size() == 1) {
     return true;
   }
-
-  // for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
-  //   string setName(*it);
-  //   cout << setName << endl;
-  // }
-
-  // sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
-
-  // dialog_yesno("Titel des Dialogs", "Soll ich nun wirklich oder doch lieber nicht?", 8, 70);
-
 
   int count = setNames.size();
   char** items = (char**) calloc(count + 1, 2 * sizeof(char*));
@@ -129,8 +124,6 @@ bool BackupsetSelector::selectSet()
 }
 
 
-
-
 bool BackupsetSelector::selectVersion()
 { 
   string pattern(setName);
@@ -142,11 +135,6 @@ bool BackupsetSelector::selectVersion()
     dialog_msgbox("Shaback recover", "\n\nNo version found to recover from.", 8, 50, 1);
     return false;
   }
-
-  // for (set<string>::iterator it = setNames.begin(); it != setNames.end(); it++) {
-  //   string setName(*it);
-  //   cout << setName << endl;
-  // }
 
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
   int count = indexFiles.size();
@@ -169,12 +157,92 @@ bool BackupsetSelector::selectVersion()
   int rc = dialog_menu("Shaback recovery", "Select backup version to recover from:", 0, 76, 0, count, (char **) items);
   if (rc == 0) {
     int sel = strtol(dialog_vars.input_result, 0, 10);
-    indexFile = indexFiles[sel]; 
+    rootFile = indexFiles[sel]; 
     freeItemList(items);
     return true;
   } else {
     freeItemList(items);
     return false;
+  }
+}
+
+
+bool treeFileComparator(TreeFileEntry a,TreeFileEntry b)
+{
+  return (a.filename < b.filename);
+}
+
+
+
+bool BackupsetSelector::selectDirectory()
+{
+  const char* UP = "[..]";
+  vector<string> sha1Path;
+
+  FileInputStream in(rootFile);
+  string sha1;
+  if (!in.readLine(sha1)) {
+    dialog_msgbox("Shaback recovery", string("\nRoot index file is empty:\n\n").append(rootFile.path).c_str(), 10, 76, 1);
+    return false;
+  }
+  in.close();
+
+  sha1Path.push_back(sha1);
+
+  for(;;) {
+    vector<TreeFileEntry> treeFile = repository.loadTreeFile(sha1);
+
+    // FIXME: Remove non-directory entries
+
+    sort(treeFile.begin(), treeFile.end(), treeFileComparator);
+
+    bool isRoot = (sha1Path.size() == 1);
+
+    int count = treeFile.size() + (isRoot ? 0 : 1);
+    char** items = (char**) calloc(count + 1, 2 * sizeof(char*));
+
+    int n = 0;
+
+    if (!isRoot) {
+      items[n] = (char*) malloc(sizeof(char) * 10);
+      sprintf(items[n], "%d", n/2);
+      n++;
+
+      items[n] = (char*) malloc(sizeof(char) * (1 + strlen(UP)));
+      strcpy(items[n], UP);
+      n++;
+    }
+
+    for (vector<TreeFileEntry>::iterator it = treeFile.begin(); it != treeFile.end(); it++) {
+      TreeFileEntry entry(*it);
+      
+      items[n] = (char*) malloc(sizeof(char) * 10);
+      sprintf(items[n], "%d", n/2);
+      n++;
+
+      items[n] = (char*) malloc(sizeof(char) * (1 + entry.path.size()));
+      strcpy(items[n], entry.path.c_str());
+      n++;
+    }
+
+    dlg_clr_result();
+    int rc = dialog_menu("Shaback recovery", "Select directory to recover:", 0, 76, 0, count, (char **) items);
+    if (rc == 0) {
+      int sel = strtol(dialog_vars.input_result, 0, 10);
+
+      if (!isRoot && sel == 0) {
+        sha1Path.pop_back();
+        sha1 = sha1Path.back();
+      } else {
+        if (!isRoot) sel--;
+        sha1 = treeFile[sel].id;
+        sha1Path.push_back(sha1);
+      }
+      freeItemList(items);
+    } else {
+      freeItemList(items);
+      return false;
+    }
   }
 }
  #endif

@@ -503,6 +503,8 @@ int Repository::restore()
   string treeSpec;
 
   if (config.gui) {
+    open();
+
     BackupsetSelector sel(*this, config);
     treeSpec = sel.start();
     if (treeSpec == "") return 0;
@@ -517,9 +519,9 @@ int Repository::restore()
   }
 
   string treeSpec = config.cliArgs.at(0);
-#endif
 
   open();
+#endif
 
   if (Digest::looksLikeDigest(treeSpec)) {
     return restoreByTreeId(treeSpec);
