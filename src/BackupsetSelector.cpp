@@ -144,6 +144,8 @@ bool BackupsetSelector::selectVersion()
   }
 
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+  reverse(indexFiles.begin(),indexFiles.end());
+
   int count = indexFiles.size();
   char** items = (char**) calloc(count + 1, 2 * sizeof(char*));
 
@@ -200,14 +202,18 @@ bool BackupsetSelector::selectDirectory()
 
   for(;;) {
     vector<TreeFileEntry> treeFile = repository.loadTreeFile(sha1);
+    vector<TreeFileEntry> directories;
 
-    // FIXME: Remove non-directory entries
+    for (vector<TreeFileEntry>::iterator it = treeFile.begin(); it != treeFile.end(); it++) {
+      TreeFileEntry entry(*it);
+      if (entry.isDirectory()) directories.push_back(entry);
+    }
 
-    sort(treeFile.begin(), treeFile.end(), treeFileComparator);
+    sort(directories.begin(), directories.end(), treeFileComparator);
 
     bool isRoot = (sha1Path.size() == 1);
 
-    int count = treeFile.size() + (isRoot ? 0 : 1);
+    int count = directories.size() + (isRoot ? 0 : 1);
     char** items = (char**) calloc(count + 1, 2 * sizeof(char*));
 
     int n = 0;
@@ -222,7 +228,7 @@ bool BackupsetSelector::selectDirectory()
       n++;
     }
 
-    for (vector<TreeFileEntry>::iterator it = treeFile.begin(); it != treeFile.end(); it++) {
+    for (vector<TreeFileEntry>::iterator it = directories.begin(); it != directories.end(); it++) {
       TreeFileEntry entry(*it);
       
       items[n] = (char*) malloc(sizeof(char) * 10);
@@ -251,7 +257,7 @@ bool BackupsetSelector::selectDirectory()
         sha1 = sha1Path.back();
       } else {
         if (!isRoot) sel--;
-        sha1 = treeFile[sel].id;
+        sha1 = directories[sel].id;
         sha1Path.push_back(sha1);
       }
     } else if (rc == 3) {
@@ -261,9 +267,11 @@ bool BackupsetSelector::selectDirectory()
         continue;
       } else {
         if (!isRoot) sel--;
-        sha1 = treeFile[sel].id;
+        sha1 = directories[sel].id;
 
-        rc = dialog_yesno("Start recovery", string("Really start recovering\n\n    ").append(treeFile[sel].path).append("\n\n    (").append(sha1).append(")\n\nto current working directory?").c_str(), 14, 76);
+        rc = dialog_yesno("Start recovery", string("Really start recovering\n\n    ")
+          .append(directories[sel].path).append("\n\n    (").append(sha1).append(")\n\nto current working directory\n\n    ")
+          .append(get_current_dir_name()).c_str(), 14, 76);
         if (rc == 0) {
           directoryId = sha1;
           return true;

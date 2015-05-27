@@ -54,6 +54,7 @@ class TreeFileEntry
 
     /** Indicates whether this file is split into blocks. */
     bool isSplitFile;
+    bool isDirectory();
 };
 
 #endif // SHABACK_TreeFileEntry_H

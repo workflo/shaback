@@ -107,3 +107,9 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
     from = until +1;
   }
 }
+
+
+bool TreeFileEntry::isDirectory()
+{
+  return (type == TREEFILEENTRY_DIRECTORY);
+}
