@@ -47,6 +47,10 @@ class BackupsetSelector
     RuntimeConfig& config;
     std::string setName;
     File rootFile;
+    std::string directoryId;
+
+    char recoverLabel[100];
+    char backTitle[100];
     
     bool selectSet();
     bool selectVersion();

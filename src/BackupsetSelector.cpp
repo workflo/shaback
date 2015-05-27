@@ -18,7 +18,7 @@
 
 #include "BackupsetSelector.h"
 
- #if defined(HAVE_DIALOG)
+#if defined(HAVE_DIALOG)
 
 #include <iostream>
 #include <algorithm>
@@ -40,6 +40,11 @@ BackupsetSelector::BackupsetSelector(Repository& repository, RuntimeConfig& conf
 	: repository(repository), config(config)
 {
   init_dialog(stdin, stdout);
+
+  strcpy(backTitle, "Shaback recovery");
+  dialog_vars.backtitle = backTitle;
+  
+  strcpy(recoverLabel, "Recover");
 }
 
 
@@ -67,8 +72,8 @@ std::string BackupsetSelector::start()
     if (!selectVersion()) {
       continue;
     }
-    if (!selectDirectory()) {
-      continue;
+    if (selectDirectory()) {
+      return directoryId;
     }
   }
 }
@@ -111,6 +116,8 @@ bool BackupsetSelector::selectSet()
   }
 
   dlg_clr_result();
+  dlg_clear();
+  dlg_put_backtitle();
   int rc = dialog_menu("Shaback recovery", "Select backup set to recover from:", 0, 76, 0, count, (char **) items);
   if (rc == 0) {
     int sel = strtol(dialog_vars.input_result, 0, 10);
@@ -154,6 +161,8 @@ bool BackupsetSelector::selectVersion()
   }
 
   dlg_clr_result();
+  dlg_clear();
+  dlg_put_backtitle();
   int rc = dialog_menu("Shaback recovery", "Select backup version to recover from:", 0, 76, 0, count, (char **) items);
   if (rc == 0) {
     int sel = strtol(dialog_vars.input_result, 0, 10);
@@ -226,7 +235,14 @@ bool BackupsetSelector::selectDirectory()
     }
 
     dlg_clr_result();
+    dlg_clear();
+    dlg_put_backtitle();
+    dialog_vars.extra_label = recoverLabel;
+    dialog_vars.extra_button = true;
     int rc = dialog_menu("Shaback recovery", "Select directory to recover:", 0, 76, 0, count, (char **) items);
+    dialog_vars.extra_button = false;
+    freeItemList(items);
+
     if (rc == 0) {
       int sel = strtol(dialog_vars.input_result, 0, 10);
 
@@ -238,11 +254,25 @@ bool BackupsetSelector::selectDirectory()
         sha1 = treeFile[sel].id;
         sha1Path.push_back(sha1);
       }
-      freeItemList(items);
+    } else if (rc == 3) {
+      int sel = strtol(dialog_vars.input_result, 0, 10);
+    
+      if (!isRoot && sel == 0) {
+        continue;
+      } else {
+        if (!isRoot) sel--;
+        sha1 = treeFile[sel].id;
+
+        rc = dialog_yesno("Start recovery", string("Really start recovering\n\n    ").append(treeFile[sel].path).append("\n\n    (").append(sha1).append(")\n\nto current working directory?").c_str(), 14, 76);
+        if (rc == 0) {
+          directoryId = sha1;
+          return true;
+        }
+      }
+
     } else {
-      freeItemList(items);
       return false;
     }
   }
 }
- #endif
+#endif
