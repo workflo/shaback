@@ -94,9 +94,8 @@ bool BackupsetSelector::selectSet()
 
   if (setNames.size() == 0) {
     dialog_msgbox("Shaback recover", "\n\nNo backup set found to recover from.", 8, 50, 1);
-    return false;
-  } else if (setNames.size() == 1) {
-    return true;
+    end_dialog();
+    exit(1);
   }
 
   int count = setNames.size();
@@ -139,8 +138,9 @@ bool BackupsetSelector::selectVersion()
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
 
   if (indexFiles.size() == 0) {
-    dialog_msgbox("Shaback recover", "\n\nNo version found to recover from.", 8, 50, 1);
-    return false;
+    dialog_msgbox("Shaback recover", "\nNo version found to recover from.", 7, 50, 1);
+    end_dialog();
+    exit(1);
   }
 
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);

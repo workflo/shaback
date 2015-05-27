@@ -54,7 +54,7 @@ target_link_libraries(shaback
 #  shabacklib)
 
 install(DIRECTORY etc/shaback DESTINATION "${CMAKE_INSTALL_PREFIX}/etc")
-install(PROGRAMS shaback visichunk shaback-recover DESTINATION bin)
+install(PROGRAMS shaback visichunk DESTINATION bin)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
