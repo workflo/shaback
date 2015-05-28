@@ -13,6 +13,10 @@ find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
 find_package(NCurses QUIET)
 
+include(CheckTypeSize)
+check_type_size("long" SIZEOF_LONG)
+check_type_size("long long" SIZEOF_LONG_LONG)
+
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(dialog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})

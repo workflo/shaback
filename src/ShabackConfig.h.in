@@ -17,6 +17,13 @@
   #define HAVE_DIALOG
 #endif
 
-#define CPIO_ODC_MAX_FILE_SIZE (077777777777L -1)
+#cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
+#cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
+
+#if (SIZEOF_LONG >= 8)
+  #define CPIO_ODC_MAX_FILE_SIZE (077777777777L -1)
+#else
+  #define CPIO_ODC_MAX_FILE_SIZE (077777777777LL -1)
+#endif
 
 #endif // SHABACK_ShabackConfig_H
