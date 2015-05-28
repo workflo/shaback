@@ -269,9 +269,12 @@ bool BackupsetSelector::selectDirectory()
         if (!isRoot) sel--;
         sha1 = directories[sel].id;
 
+        char cwd[MAX_PATH_LEN];
+        getcwd(cwd, MAX_PATH_LEN);
+
         rc = dialog_yesno("Start recovery", string("Really start recovering\n\n    ")
           .append(directories[sel].path).append("\n\n    (").append(sha1).append(")\n\nto current working directory\n\n    ")
-          .append(get_current_dir_name()).c_str(), 14, 76);
+          .append(cwd).c_str(), 14, 76);
         if (rc == 0) {
           directoryId = sha1;
           return true;
