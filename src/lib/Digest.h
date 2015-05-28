@@ -20,7 +20,6 @@
 #define SHABACK_Digest_H
 
 #include <string>
-#include <openssl/sha.h>
 
 class Digest
 {
