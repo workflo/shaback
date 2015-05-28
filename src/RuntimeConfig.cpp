@@ -192,7 +192,9 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         break;
 
       default:
-        cerr << "?? getopt returned character code " << c << "??" << std::endl;
+        char cBuf[2];
+        cBuf[0] = c; cBuf[1] = 0;
+        cerr << "Invalid command line option `" << cBuf << "'" << std::endl;
         exit(1);
     }
   }
