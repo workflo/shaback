@@ -20,7 +20,6 @@
 #include <fcntl.h>
 #include "ShabackInputStream.h"
 
-//#include "lib/AesInputStream.h"
 #include "lib/BlowfishInputStream.h"
 #include "lib/BzInputStream.h"
 #include "lib/DeflateInputStream.h"
@@ -116,5 +115,25 @@ int ShabackInputStream::read()
 int ShabackInputStream::read(char* b, int len)
 {
   return inputStream->read(b, len);
+}
+
+
+void ShabackInputStream::copyTo(OutputStream& destination, int maxBytes)
+{
+  char buffer[8192];
+  int bytesToRead = maxBytes;
+
+  for (;;) {
+    int bytesRead = read(buffer, maxBytes == -1 ? 8192 : min(8192, bytesToRead));
+    if (bytesRead <= 0)
+      break;
+    destination.write(buffer, bytesRead);
+    bytesToRead -= bytesRead;
+  }
+}
+
+void ShabackInputStream::copyTo(OutputStream& destination)
+{
+  copyTo(destination, -1);
 }
 

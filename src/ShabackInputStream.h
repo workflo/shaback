@@ -38,6 +38,19 @@ class ShabackInputStream : public InputStream
     int read(char* b, int len);
     int read();
 
+    /**
+     * Copies this InputStream to the specified OutputStream.
+     * An internal 8kB buffer is used.
+     */
+    void copyTo(OutputStream& destination);
+
+    /**
+     * Copies this InputStream to the specified OutputStream.
+     * An internal 8kB buffer is used.
+     * Reads/Writes up to \a maxBytes number of bytes.
+     */
+    void copyTo(OutputStream& destination, int maxBytes);
+
   private:
     int compressionAlgorithm;
     int encryptionAlgorithm;

@@ -41,16 +41,16 @@ add_executable(shaback
 )
 
 target_link_libraries(shaback 
-      shabacklib
-      shabackdialog
-      ${ZLIB_LIBRARY}
-      ${OPENSSL_CRYPTO_LIBRARIES}
-      ${LUA_LIBRARIES}
-      ${GDBM_LIBRARY}
-      ${BZIP2_LIBRARIES}
-      ${LZMA_LIBRARIES}
-      ${NCURSES_LIBRARIES}
-      ${PTHREAD_LIBRARIES}
+    shabacklib
+    shabackdialog
+    ${ZLIB_LIBRARY}
+    ${OPENSSL_CRYPTO_LIBRARIES}
+    ${LUA_LIBRARIES}
+    ${GDBM_LIBRARY}
+    ${BZIP2_LIBRARIES}
+    ${LZMA_LIBRARIES}
+    ${NCURSES_LIBRARIES}
+    ${PTHREAD_LIBRARIES}
 )
 
 #add_executable(visichunk

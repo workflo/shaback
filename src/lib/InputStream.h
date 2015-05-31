@@ -83,14 +83,14 @@ class InputStream
      * Copies this InputStream to the specified OutputStream.
      * An internal 8kB buffer is used.
      */
-    void copyTo(OutputStream& destination);
+    virtual void copyTo(OutputStream& destination);
 
     /**
      * Copies this InputStream to the specified OutputStream.
      * An internal 8kB buffer is used.
      * Reads/Writes up to \a maxBytes number of bytes.
      */
-    void copyTo(OutputStream& destination, int maxBytes);
+    virtual void copyTo(OutputStream& destination, int maxBytes);
 
     static const long SKIP_BUFFER_SIZE;
 
