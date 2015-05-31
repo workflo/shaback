@@ -52,6 +52,9 @@ class RuntimeConfig
     bool restoreAsShabackStream;
     bool gui;
 
+    /** Whether to use multi threading to hopefully speed up rcovery (and backup). */
+    bool multiThreaded;
+
     std::string operation;
     std::string repository;
 

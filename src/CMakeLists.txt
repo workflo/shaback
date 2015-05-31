@@ -1,4 +1,5 @@
 project(shaback)
+
 set (SHABACK_VERSION_MAJOR 1)
 set (SHABACK_VERSION_MINOR 17)
 set (CMAKE_MODULE_PATH CMakeModules)
@@ -12,6 +13,7 @@ find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
 find_package(NCurses QUIET)
+find_package(Pthread REQUIRED)
 
 include(CheckTypeSize)
 check_type_size("long" SIZEOF_LONG)
@@ -22,37 +24,38 @@ ADD_SUBDIRECTORY(dialog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
-		BackupRun.cpp
-		BackupsetSelector.cpp
-		Cache.cpp 
-		GarbageCollection.cpp
-		main.cpp 
-		Repository.cpp
-		RestoreRun.cpp
-		RuntimeConfig.cpp 
-		shaback.cpp 
-		ShabackException.cpp
-		ShabackInputStream.cpp
-		ShabackOutputStream.cpp
-		SplitFileIndexReader.cpp
-		TreeFileEntry.cpp
-		)
+    BackupRun.cpp
+    BackupsetSelector.cpp
+    Cache.cpp 
+    GarbageCollection.cpp
+    main.cpp 
+    Repository.cpp
+    RestoreRun.cpp
+    RuntimeConfig.cpp 
+    shaback.cpp 
+    ShabackException.cpp
+    ShabackInputStream.cpp
+    ShabackOutputStream.cpp
+    SplitFileIndexReader.cpp
+    TreeFileEntry.cpp
+)
 
 target_link_libraries(shaback 
-  shabacklib
-  shabackdialog
-  ${ZLIB_LIBRARY}
-  ${OPENSSL_CRYPTO_LIBRARIES}
-  ${LUA_LIBRARIES}
-  ${GDBM_LIBRARY}
-  ${BZIP2_LIBRARIES}
-  ${LZMA_LIBRARIES}
-  ${NCURSES_LIBRARIES}
+      shabacklib
+      shabackdialog
+      ${ZLIB_LIBRARY}
+      ${OPENSSL_CRYPTO_LIBRARIES}
+      ${LUA_LIBRARIES}
+      ${GDBM_LIBRARY}
+      ${BZIP2_LIBRARIES}
+      ${LZMA_LIBRARIES}
+      ${NCURSES_LIBRARIES}
+      ${PTHREAD_LIBRARIES}
 )
 
 #add_executable(visichunk
-#		VisiChunk.cpp
-#		)
+#   VisiChunk.cpp
+#   )
 
 #target_link_libraries(visichunk
 #  shabacklib)
@@ -63,6 +66,6 @@ install(PROGRAMS shaback DESTINATION bin)
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "${PROJECT_SOURCE_DIR}/ShabackConfig.h.in"
-  "${PROJECT_SOURCE_DIR}/ShabackConfig.h"
-  )
+    "${PROJECT_SOURCE_DIR}/ShabackConfig.h.in"
+    "${PROJECT_SOURCE_DIR}/ShabackConfig.h"
+)

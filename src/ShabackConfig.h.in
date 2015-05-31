@@ -12,9 +12,13 @@
 #endif
 
 #cmakedefine NCURSES_FOUND
-
 #if defined(NCURSES_FOUND)
   #define HAVE_DIALOG
+#endif
+
+#cmakedefine PTHREAD_FOUND
+#if defined(PTHREAD_FOUND)
+  #define HAVE_PTHREAD
 #endif
 
 #cmakedefine SIZEOF_LONG ${SIZEOF_LONG}

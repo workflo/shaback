@@ -67,6 +67,9 @@ void showUsage(string& op)
 #if defined(HAVE_DIALOG)
     printf("                      [-g | --gui]\n");
 #endif
+#if defined(HAVE_PTHREAD)
+    printf("                      [-P | --parallel]\n");
+#endif
     printf("                      <rootfile> | <dir-id>\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
       "\t<rootfile> is a filename from the repository's index/ directory.\n"
@@ -87,6 +90,10 @@ void showUsage(string& op)
 #if defined(HAVE_DIALOG)
     printf("\t-g, --gui\n"
       "\t    Start dialog UI to select what to recover.\n\n");
+#endif
+#if defined(HAVE_PTHREAD)
+    printf("\t-P, --parallel\n"
+      "\t    Use multi-threading to speed up recovery.\n\n");
 #endif
     printf("\tFiles will always be restored into the CWD.\n");
   } else if (op == "gc") {
