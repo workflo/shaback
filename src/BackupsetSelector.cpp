@@ -245,7 +245,7 @@ bool BackupsetSelector::selectDirectory()
     dlg_put_backtitle();
     dialog_vars.extra_label = recoverLabel;
     dialog_vars.extra_button = true;
-    int rc = dialog_menu("Shaback recovery", "Select directory to recover:", 0, 76, 0, count, (char **) items);
+    int rc = dialog_menu("Shaback recovery", "Select directory to recover:", 0, 200, 0, count, (char **) items);
     dialog_vars.extra_button = false;
     freeItemList(items);
 
