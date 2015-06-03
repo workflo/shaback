@@ -54,6 +54,7 @@ RuntimeConfig::RuntimeConfig()
   useWriteCache = true;
   skipExisting = false;
   restoreAsCpioStream = false;
+  restoreAsShabackStream = false;
   gauge = false;
   gui = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
