@@ -12,30 +12,31 @@ CHECK_FUNCTION_EXISTS (stat64            HAVE_STAT64)
 CHECK_FUNCTION_EXISTS (lstat64           HAVE_LSTAT64)
 
 set(shaback_lib_SRCS
-		     BlowfishOutputStream.cpp
-		     BlowfishInputStream.cpp
-		     BufferedWriter.cpp
-		     BufferedReader.cpp
-                     BzInputStream.cpp
-                     BzOutputStream.cpp
-		     Date.cpp
-		     DeflateOutputStream.cpp
-		     DeflateInputStream.cpp
-		     Digest.cpp
-		     Exception.cpp
-		     File.cpp
-		     FileOutputStream.cpp
-		     FileInputStream.cpp
-		     InputStream.cpp
-                     LzmaInputStream.cpp
-                     LzmaOutputStream.cpp
-		     OutputStream.cpp
-		     Properties.cpp
-		     Sha1.cpp
-		     Sha256.cpp
-		     StandardOutputStream.cpp
-		     StandardInputStream.cpp
-		     )
+     BlowfishOutputStream.cpp
+     BlowfishInputStream.cpp
+     BufferedWriter.cpp
+     BufferedReader.cpp
+     BzInputStream.cpp
+     BzOutputStream.cpp
+     Date.cpp
+     DeflateOutputStream.cpp
+     DeflateInputStream.cpp
+     Digest.cpp
+     Exception.cpp
+     File.cpp
+     FileOutputStream.cpp
+     FileInputStream.cpp
+     InputStream.cpp
+     LzmaInputStream.cpp
+     LzmaOutputStream.cpp
+     OutputStream.cpp
+     Properties.cpp
+     Sha1.cpp
+     Sha256.cpp
+     StandardOutputStream.cpp
+     StandardInputStream.cpp
+     StopWatch.cpp
+ )
 
 IF (LZMA_FOUND)
     include_directories(${LZMA_INCLUDE_DIR})
@@ -46,6 +47,6 @@ add_library(shabacklib STATIC ${shaback_lib_SRCS})
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "config.h.in"
-  "config.h"
-  )
+    "config.h.in"
+    "config.h"
+)
