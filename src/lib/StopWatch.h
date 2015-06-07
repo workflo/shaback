@@ -25,7 +25,7 @@
 class StopWatch
 {
   public:
-    StopWatch();
+    StopWatch(std::string name);
 
     void start();
 
@@ -35,7 +35,11 @@ class StopWatch
 
     long long getTotalMillis();
 
-    double getAvgeradeMillis();
+    double getAveragMillis();
+
+    std::string getName();
+
+    std::string toString();
 
     static long long currentTimeMillis();
 
@@ -43,6 +47,7 @@ class StopWatch
     long long milliSeconds;
     long long startTime;
     int counter;
+    std::string name;
 };
 
 #endif // SHABACK_StopWatch_H

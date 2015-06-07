@@ -23,7 +23,8 @@
 
 using namespace std;
 
-StopWatch::StopWatch()
+StopWatch::StopWatch(string name)
+: name(name)
 {
   counter = 0;
   milliSeconds = 0;
@@ -65,7 +66,21 @@ long long StopWatch::getTotalMillis()
 }
 
 
-double StopWatch::getAvgeradeMillis()
+double StopWatch::getAveragMillis()
 {
   return milliSeconds / counter;
+}
+
+
+string StopWatch::getName()
+{
+  return name;
+}
+
+
+string StopWatch::toString()
+{
+  char s[100];
+  sprintf(s, ": n=%d; avg=%f", counter, getAveragMillis());
+  return name.append(s);
 }
