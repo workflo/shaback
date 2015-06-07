@@ -179,8 +179,8 @@ int Shaback::inflate()
 
 
 #if defined(SHABACK_PROFILE)
-    StopWatch* stopWatch_total = new StopWatch();//"total");
-    StopWatch* stopWatch_sha1 = new StopWatch();//"sha1");
-    StopWatch* stopWatch_io_read = new StopWatch();//"io.read");
-    StopWatch* stopWatch_io_write = new StopWatch();//"io.write");
+    StopWatch* stopWatch_total = new StopWatch("total");
+    StopWatch* stopWatch_sha1 = new StopWatch("sha1");
+    StopWatch* stopWatch_io_read = new StopWatch("io.read");
+    StopWatch* stopWatch_io_write = new StopWatch("io.write");
 #endif

@@ -191,11 +191,10 @@ static void interruptHandler(int sig)
 void printProfilingResults()
 {
 #if defined(SHABACK_PROFILE)
-  cerr << stopWatch_total << endl;
-  cerr << stopWatch_sha1 << endl;
-  cerr << stopWatch_io_read << endl;
-  cerr << stopWatch_io_write << endl;
-
+  cerr << stopWatch_sha1->toString() << endl;
+  cerr << stopWatch_io_read->toString() << endl;
+  cerr << stopWatch_io_write->toString() << endl;
+  cerr << stopWatch_total->toString() << endl;
 #endif
 }
 

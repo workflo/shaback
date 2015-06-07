@@ -68,7 +68,7 @@ long long StopWatch::getTotalMillis()
 
 double StopWatch::getAveragMillis()
 {
-  return milliSeconds / counter;
+  return (counter > 0 ? milliSeconds / counter : 0);
 }
 
 
@@ -80,7 +80,7 @@ string StopWatch::getName()
 
 string StopWatch::toString()
 {
-  char s[100];
-  sprintf(s, ": n=%d; avg=%f", counter, getAveragMillis());
-  return name.append(s);
+  char s[200];
+  sprintf(s, "%20s: n=%6d; avg=%03.3f", name.c_str(), counter, getAveragMillis() / 1000.0);
+  return s;
 }
