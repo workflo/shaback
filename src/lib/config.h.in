@@ -6,6 +6,16 @@
 #cmakedefine HAVE_FSTAT64
 #cmakedefine HAVE_LSTAT64
 
+#define SHABACK_PROFILE
+
+#if defined(SHABACK_PROFILE)
+	#define SHABACK_PROFILE_START(sw) sw->start();
+	#define SHABACK_PROFILE_STOP(sw) sw->stop();
+
+#else
+#endif
+
+
 #define SHABACK_lib_config_H
 
 #endif // SHABACK_lib_config_H

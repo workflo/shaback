@@ -26,8 +26,10 @@
 #include "lib/DeflateInputStream.h"
 #include "lib/StandardInputStream.h"
 
+#include "profiling.h"
 #include "shaback.h"
 #include "RuntimeConfig.h"
+
 
 using namespace std;
 
@@ -174,3 +176,11 @@ int Shaback::inflate()
 
   return 0;
 }
+
+
+#if defined(SHABACK_PROFILE)
+    StopWatch* stopWatch_total = new StopWatch();//"total");
+    StopWatch* stopWatch_sha1 = new StopWatch();//"sha1");
+    StopWatch* stopWatch_io_read = new StopWatch();//"io.read");
+    StopWatch* stopWatch_io_write = new StopWatch();//"io.write");
+#endif

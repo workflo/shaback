@@ -35,6 +35,7 @@
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
+#include "profiling.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
 #include "Repository.h"
@@ -210,10 +211,12 @@ bool Repository::contains(string& hashValue)
 #if defined(SHABACK_HAS_BACKUP)
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
 {
+  SHABACK_PROFILE_START(stopWatch_sha1);
   Sha1 sha1;
   sha1.update(treeFile);
   sha1.finalize();
   string hashValue = sha1.toString();
+  SHABACK_PROFILE_STOP(stopWatch_sha1);
 
   if (!contains(hashValue)) {
     File file = hashValueToFile(hashValue);
@@ -261,14 +264,20 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
 
   Sha1 sha1;
   while (true) {
+    SHABACK_PROFILE_START(stopWatch_io_read);
     int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+    SHABACK_PROFILE_STOP(stopWatch_io_read);
     if (bytesRead == -1)
       break;
+    SHABACK_PROFILE_START(stopWatch_sha1);
     sha1.update(readBuffer, bytesRead);
+    SHABACK_PROFILE_STOP(stopWatch_sha1);
   }
 
+  SHABACK_PROFILE_START(stopWatch_sha1);
   sha1.finalize();
   hashValue = sha1.toString();
+  SHABACK_PROFILE_STOP(stopWatch_sha1);
 
   srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
   srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
@@ -286,14 +295,20 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
       }
     }
 
+    SHABACK_PROFILE_START(stopWatch_io_write);
     ShabackOutputStream os = createOutputStream();
     os.open(destFile);
+    SHABACK_PROFILE_STOP(stopWatch_io_write);
 
     while (true) {
+      SHABACK_PROFILE_START(stopWatch_io_read);
       int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      SHABACK_PROFILE_STOP(stopWatch_io_read);
       if (bytesRead == -1)
         break;
+      SHABACK_PROFILE_START(stopWatch_io_write);
       os.write(readBuffer, bytesRead);
+      SHABACK_PROFILE_STOP(stopWatch_io_write);
       run->numBytesStored += bytesRead;
       *totalFileSize += bytesRead;
     }
@@ -327,13 +342,17 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
 
   while (true) {
     Sha1 blockSha1;
+    SHABACK_PROFILE_START(stopWatch_io_read);
     const int bytesRead = in.read(readBuffer, splitBlockSize);
+    SHABACK_PROFILE_STOP(stopWatch_io_read);
     if (bytesRead == -1)
       break;
 
+    SHABACK_PROFILE_START(stopWatch_sha1);
     blockSha1.update(readBuffer, bytesRead);
     blockSha1.finalize();
     string blockHashValue = blockSha1.toString();
+    SHABACK_PROFILE_STOP(stopWatch_sha1);
 
     blockCount++;
 
@@ -346,11 +365,13 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
     if (!contains(blockHashValue)) {
       File blockDestFile = hashValueToFile(blockHashValue);
 
+      SHABACK_PROFILE_START(stopWatch_io_write);
       ShabackOutputStream os = createOutputStream();
       os.open(blockDestFile);
 
       os.write(readBuffer, bytesRead);
       os.finish();
+      SHABACK_PROFILE_STOP(stopWatch_io_write);
 
       writeCache.insert(blockHashValue);
       run->numBytesStored += bytesRead;
@@ -360,22 +381,28 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
     blockList.append("\n");
     *totalFileSize += bytesRead;
 
+    SHABACK_PROFILE_START(stopWatch_sha1);
     totalSha1.update(readBuffer, bytesRead);
+    SHABACK_PROFILE_STOP(stopWatch_sha1);
   }
 
   if (config.verbose)
     cout << endl;
 
+  SHABACK_PROFILE_START(stopWatch_sha1);
   totalSha1.finalize();
   string totalHashValue = totalSha1.toString();
   totalHashValue.append(SPLITFILE_ID_INDICATOR_STR);
+  SHABACK_PROFILE_STOP(stopWatch_sha1);
 
   if (!contains(totalHashValue)) {
     File blockFile = hashValueToFile(totalHashValue);
+    SHABACK_PROFILE_START(stopWatch_io_write);
     ShabackOutputStream os = createOutputStream();
     os.open(blockFile);
     os.write(blockList);
     os.finish();
+    SHABACK_PROFILE_STOP(stopWatch_io_write);
 
     writeCache.insert(totalHashValue);
     run->numBytesStored += blockList.size();

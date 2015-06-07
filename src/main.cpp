@@ -30,6 +30,7 @@ extern "C" {
 #include "lib/config.h"
 #include "lib/Sha1.h"
 #include "lib/Exception.h"
+#include "profiling.h"
 
 using namespace std;
 
@@ -186,6 +187,19 @@ static void interruptHandler(int sig)
   exit(sig);
 }
 
+
+void printProfilingResults()
+{
+#if defined(SHABACK_PROFILE)
+  cerr << stopWatch_total << endl;
+  cerr << stopWatch_sha1 << endl;
+  cerr << stopWatch_io_read << endl;
+  cerr << stopWatch_io_write << endl;
+
+#endif
+}
+
+
 int main(int argc, char** argv)
 {
   try {
@@ -202,6 +216,7 @@ int main(int argc, char** argv)
     if (config.help) {
       showUsage(config.operation);
     } else {
+      SHABACK_PROFILE_START(stopWatch_total);
       Shaback shaback(config);
       globalRepo = &shaback.repository;
 
@@ -219,13 +234,19 @@ int main(int argc, char** argv)
 #endif
       } else if (config.operation == "backup") {
 #if defined(SHABACK_HAS_BACKUP)
-        return shaback.repository.backup();
+        int rc = shaback.repository.backup();
+        SHABACK_PROFILE_STOP(stopWatch_total);
+        printProfilingResults();
+        return rc;
 #else
         cerr << "Command 'backup' not available - missing openssl." << endl;
         exit(1);
 #endif
       } else if (config.operation == "restore") {
-        return shaback.repository.restore();
+        int rc = shaback.repository.restore();
+        SHABACK_PROFILE_STOP(stopWatch_total);
+        printProfilingResults();
+        return rc;
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {
