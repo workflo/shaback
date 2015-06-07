@@ -81,6 +81,6 @@ string StopWatch::getName()
 string StopWatch::toString()
 {
   char s[200];
-  sprintf(s, "%20s: n=%6d; avg=%03.3f", name.c_str(), counter, getAveragMillis() / 1000.0);
+  sprintf(s, "%20s: n=%6d; total=%7jd; avg=%03.3f", name.c_str(), counter, milliSeconds, getAveragMillis() / 1000.0);
   return s;
 }
