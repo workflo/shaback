@@ -54,7 +54,7 @@ void Properties::load(InputStream& in)
 
   while (in.readLine(line)) {
     char c = 0;
-    int pos = 0;
+    size_t pos = 0;
 
     // If empty line or begins with a comment character, skip this line.
     if (line.empty() || line.at(0) == '#' || line.at(0) == '!')

@@ -4,3 +4,11 @@ src/shaback
 **/.kdev4
 *.a
 .lastbuild
+*.suo
+*.obj
+*.tlog
+*.pdb
+src/Debug/vc140.idb
+src/Debug/Shaback.log
+src/Shaback.sdf
+src/Shaback.opensdf

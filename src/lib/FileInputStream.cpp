@@ -18,7 +18,9 @@
 
 #include <fcntl.h>
 #include <iostream>
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+#endif
 
 #include "FileInputStream.h"
 #include "Exception.h"

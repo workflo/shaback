@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -20,12 +20,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,7 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Programme\OpenSSL-Win32\include;C:\Programme\Lua\5.1\include;C:\Programme\GnuWin32\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)win\include;$(LUA_DEV)\include;C:\Programme\OpenSSL-Win32\include;C:\Programme\GnuWin32\include;C:\Program Files %28x86%29\GnuWin32\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Programme\Lua\5.1\lib;C:\Programme\GnuWin32\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,27 +81,47 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BackupRun.cpp" />
+    <ClCompile Include="BackupsetSelector.cpp" />
     <ClCompile Include="Cache.cpp" />
-    <ClCompile Include="DeflateInputStream.cpp" />
-    <ClCompile Include="DeflateOutputStream.cpp" />
-    <ClCompile Include="Exception.cpp" />
-    <ClCompile Include="File.cpp" />
-    <ClCompile Include="FileInputStream.cpp" />
-    <ClCompile Include="FileOutputStream.cpp" />
-    <ClCompile Include="InputStream.cpp" />
+    <ClCompile Include="GarbageCollection.cpp" />
+    <ClCompile Include="lib\AesOutputStream.cpp" />
+    <ClCompile Include="lib\BlowfishInputStream.cpp" />
+    <ClCompile Include="lib\BlowfishOutputStream.cpp" />
+    <ClCompile Include="lib\BufferedReader.cpp" />
+    <ClCompile Include="lib\BufferedWriter.cpp" />
+    <ClCompile Include="lib\BzInputStream.cpp" />
+    <ClCompile Include="lib\BzOutputStream.cpp" />
+    <ClCompile Include="lib\Date.cpp" />
+    <ClCompile Include="lib\DeflateInputStream.cpp" />
+    <ClCompile Include="lib\DeflateOutputStream.cpp" />
+    <ClCompile Include="lib\Digest.cpp" />
+    <ClCompile Include="lib\Exception.cpp" />
+    <ClCompile Include="lib\File.cpp" />
+    <ClCompile Include="lib\FileInputStream.cpp" />
+    <ClCompile Include="lib\FileOutputStream.cpp" />
+    <ClCompile Include="lib\InputStream.cpp" />
+    <ClCompile Include="lib\LzmaInputStream.cpp" />
+    <ClCompile Include="lib\LzmaOutputStream.cpp" />
+    <ClCompile Include="lib\OutputStream.cpp" />
+    <ClCompile Include="lib\Properties.cpp" />
+    <ClCompile Include="lib\Sha1.cpp" />
+    <ClCompile Include="lib\Sha256.cpp" />
+    <ClCompile Include="lib\StandardInputStream.cpp" />
+    <ClCompile Include="lib\StandardOutputStream.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OutputStream.cpp" />
     <ClCompile Include="Repository.cpp" />
+    <ClCompile Include="RestoreRun.cpp" />
     <ClCompile Include="RuntimeConfig.cpp" />
-    <ClCompile Include="Sha1.cpp" />
     <ClCompile Include="Shaback.cpp" />
+    <ClCompile Include="ShabackException.cpp" />
+    <ClCompile Include="ShabackInputStream.cpp" />
     <ClCompile Include="ShabackOutputStream.cpp" />
-    <ClCompile Include="StandardInputStream.cpp" />
-    <ClCompile Include="StandardOutputStream.cpp" />
-    <ClCompile Include="XGetopt.cpp" />
+    <ClCompile Include="SplitFileIndexReader.cpp" />
+    <ClCompile Include="TreeFileEntry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackupRun.h" />
+    <ClInclude Include="BackupsetSelector.h" />
     <ClInclude Include="Cache.h" />
     <ClInclude Include="DeflateInputStream.h" />
     <ClInclude Include="DeflateOutputStream.h" />
@@ -108,15 +130,48 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="FileInputStream.h" />
     <ClInclude Include="FileOutputStream.h" />
+    <ClInclude Include="GarbageCollection.h" />
     <ClInclude Include="InputStream.h" />
+    <ClInclude Include="lib\AesOutputStream.h" />
+    <ClInclude Include="lib\BlowfishInputStream.h" />
+    <ClInclude Include="lib\BlowfishOutputStream.h" />
+    <ClInclude Include="lib\BufferedReader.h" />
+    <ClInclude Include="lib\BufferedWriter.h" />
+    <ClInclude Include="lib\BzInputStream.h" />
+    <ClInclude Include="lib\BzOutputStream.h" />
+    <ClInclude Include="lib\config.h" />
+    <ClInclude Include="lib\Date.h" />
+    <ClInclude Include="lib\DeflateInputStream.h" />
+    <ClInclude Include="lib\DeflateOutputStream.h" />
+    <ClInclude Include="lib\Digest.h" />
+    <ClInclude Include="lib\Exception.h" />
+    <ClInclude Include="lib\File.h" />
+    <ClInclude Include="lib\FileInputStream.h" />
+    <ClInclude Include="lib\FileOutputStream.h" />
+    <ClInclude Include="lib\InputStream.h" />
+    <ClInclude Include="lib\LzmaInputStream.h" />
+    <ClInclude Include="lib\LzmaOutputStream.h" />
+    <ClInclude Include="lib\OutputStream.h" />
+    <ClInclude Include="lib\Properties.h" />
+    <ClInclude Include="lib\Sha1.h" />
+    <ClInclude Include="lib\Sha256.h" />
+    <ClInclude Include="lib\StandardInputStream.h" />
+    <ClInclude Include="lib\StandardOutputStream.h" />
     <ClInclude Include="OutputStream.h" />
     <ClInclude Include="Repository.h" />
+    <ClInclude Include="RestoreRun.h" />
     <ClInclude Include="RuntimeConfig.h" />
     <ClInclude Include="Sha1.h" />
     <ClInclude Include="shaback.h" />
+    <ClInclude Include="ShabackConfig.h" />
+    <ClInclude Include="ShabackException.h" />
+    <ClInclude Include="ShabackInputStream.h" />
     <ClInclude Include="ShabackOutputStream.h" />
+    <ClInclude Include="SplitFileIndexReader.h" />
     <ClInclude Include="StandardInputStream.h" />
     <ClInclude Include="StandardOutputStream.h" />
+    <ClInclude Include="TreeFile.h" />
+    <ClInclude Include="TreeFileEntry.h" />
     <ClInclude Include="XGetopt.h" />
   </ItemGroup>
   <ItemGroup>
