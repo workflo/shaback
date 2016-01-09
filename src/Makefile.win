@@ -1,0 +1,139 @@
+# Project: Shaback
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = BackupRun.o BackupsetSelector.o Cache.o GarbageCollection.o main.o Repository.o RestoreRun.o RuntimeConfig.o shaback.o ShabackException.o ShabackInputStream.o ShabackOutputStream.o SplitFileIndexReader.o TreeFileEntry.o lib/AesOutputStream.o lib/BlowfishInputStream.o lib/BlowfishOutputStream.o lib/BufferedReader.o lib/BufferedWriter.o lib/BzInputStream.o lib/BzOutputStream.o lib/Date.o lib/DeflateInputStream.o lib/DeflateOutputStream.o lib/Digest.o lib/Exception.o lib/File.o lib/FileInputStream.o lib/FileOutputStream.o lib/InputStream.o lib/LzmaInputStream.o lib/LzmaOutputStream.o lib/OutputStream.o lib/Properties.o lib/Sha1.o lib/Sha256.o lib/StandardInputStream.o lib/StandardOutputStream.o
+LINKOBJ  = BackupRun.o BackupsetSelector.o Cache.o GarbageCollection.o main.o Repository.o RestoreRun.o RuntimeConfig.o shaback.o ShabackException.o ShabackInputStream.o ShabackOutputStream.o SplitFileIndexReader.o TreeFileEntry.o lib/AesOutputStream.o lib/BlowfishInputStream.o lib/BlowfishOutputStream.o lib/BufferedReader.o lib/BufferedWriter.o lib/BzInputStream.o lib/BzOutputStream.o lib/Date.o lib/DeflateInputStream.o lib/DeflateOutputStream.o lib/Digest.o lib/Exception.o lib/File.o lib/FileInputStream.o lib/FileOutputStream.o lib/InputStream.o lib/LzmaInputStream.o lib/LzmaOutputStream.o lib/OutputStream.o lib/Properties.o lib/Sha1.o lib/Sha256.o lib/StandardInputStream.o lib/StandardOutputStream.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
+BIN      = Shaback.exe
+CXXFLAGS = $(CXXINCS) 
+CFLAGS   = $(INCS) 
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+BackupRun.o: BackupRun.cpp
+	$(CPP) -c BackupRun.cpp -o BackupRun.o $(CXXFLAGS)
+
+BackupsetSelector.o: BackupsetSelector.cpp
+	$(CPP) -c BackupsetSelector.cpp -o BackupsetSelector.o $(CXXFLAGS)
+
+Cache.o: Cache.cpp
+	$(CPP) -c Cache.cpp -o Cache.o $(CXXFLAGS)
+
+GarbageCollection.o: GarbageCollection.cpp
+	$(CPP) -c GarbageCollection.cpp -o GarbageCollection.o $(CXXFLAGS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+Repository.o: Repository.cpp
+	$(CPP) -c Repository.cpp -o Repository.o $(CXXFLAGS)
+
+RestoreRun.o: RestoreRun.cpp
+	$(CPP) -c RestoreRun.cpp -o RestoreRun.o $(CXXFLAGS)
+
+RuntimeConfig.o: RuntimeConfig.cpp
+	$(CPP) -c RuntimeConfig.cpp -o RuntimeConfig.o $(CXXFLAGS)
+
+shaback.o: shaback.cpp
+	$(CPP) -c shaback.cpp -o shaback.o $(CXXFLAGS)
+
+ShabackException.o: ShabackException.cpp
+	$(CPP) -c ShabackException.cpp -o ShabackException.o $(CXXFLAGS)
+
+ShabackInputStream.o: ShabackInputStream.cpp
+	$(CPP) -c ShabackInputStream.cpp -o ShabackInputStream.o $(CXXFLAGS)
+
+ShabackOutputStream.o: ShabackOutputStream.cpp
+	$(CPP) -c ShabackOutputStream.cpp -o ShabackOutputStream.o $(CXXFLAGS)
+
+SplitFileIndexReader.o: SplitFileIndexReader.cpp
+	$(CPP) -c SplitFileIndexReader.cpp -o SplitFileIndexReader.o $(CXXFLAGS)
+
+TreeFileEntry.o: TreeFileEntry.cpp
+	$(CPP) -c TreeFileEntry.cpp -o TreeFileEntry.o $(CXXFLAGS)
+
+lib/AesOutputStream.o: lib/AesOutputStream.cpp
+	$(CPP) -c lib/AesOutputStream.cpp -o lib/AesOutputStream.o $(CXXFLAGS)
+
+lib/BlowfishInputStream.o: lib/BlowfishInputStream.cpp
+	$(CPP) -c lib/BlowfishInputStream.cpp -o lib/BlowfishInputStream.o $(CXXFLAGS)
+
+lib/BlowfishOutputStream.o: lib/BlowfishOutputStream.cpp
+	$(CPP) -c lib/BlowfishOutputStream.cpp -o lib/BlowfishOutputStream.o $(CXXFLAGS)
+
+lib/BufferedReader.o: lib/BufferedReader.cpp
+	$(CPP) -c lib/BufferedReader.cpp -o lib/BufferedReader.o $(CXXFLAGS)
+
+lib/BufferedWriter.o: lib/BufferedWriter.cpp
+	$(CPP) -c lib/BufferedWriter.cpp -o lib/BufferedWriter.o $(CXXFLAGS)
+
+lib/BzInputStream.o: lib/BzInputStream.cpp
+	$(CPP) -c lib/BzInputStream.cpp -o lib/BzInputStream.o $(CXXFLAGS)
+
+lib/BzOutputStream.o: lib/BzOutputStream.cpp
+	$(CPP) -c lib/BzOutputStream.cpp -o lib/BzOutputStream.o $(CXXFLAGS)
+
+lib/Date.o: lib/Date.cpp
+	$(CPP) -c lib/Date.cpp -o lib/Date.o $(CXXFLAGS)
+
+lib/DeflateInputStream.o: lib/DeflateInputStream.cpp
+	$(CPP) -c lib/DeflateInputStream.cpp -o lib/DeflateInputStream.o $(CXXFLAGS)
+
+lib/DeflateOutputStream.o: lib/DeflateOutputStream.cpp
+	$(CPP) -c lib/DeflateOutputStream.cpp -o lib/DeflateOutputStream.o $(CXXFLAGS)
+
+lib/Digest.o: lib/Digest.cpp
+	$(CPP) -c lib/Digest.cpp -o lib/Digest.o $(CXXFLAGS)
+
+lib/Exception.o: lib/Exception.cpp
+	$(CPP) -c lib/Exception.cpp -o lib/Exception.o $(CXXFLAGS)
+
+lib/File.o: lib/File.cpp
+	$(CPP) -c lib/File.cpp -o lib/File.o $(CXXFLAGS)
+
+lib/FileInputStream.o: lib/FileInputStream.cpp
+	$(CPP) -c lib/FileInputStream.cpp -o lib/FileInputStream.o $(CXXFLAGS)
+
+lib/FileOutputStream.o: lib/FileOutputStream.cpp
+	$(CPP) -c lib/FileOutputStream.cpp -o lib/FileOutputStream.o $(CXXFLAGS)
+
+lib/InputStream.o: lib/InputStream.cpp
+	$(CPP) -c lib/InputStream.cpp -o lib/InputStream.o $(CXXFLAGS)
+
+lib/LzmaInputStream.o: lib/LzmaInputStream.cpp
+	$(CPP) -c lib/LzmaInputStream.cpp -o lib/LzmaInputStream.o $(CXXFLAGS)
+
+lib/LzmaOutputStream.o: lib/LzmaOutputStream.cpp
+	$(CPP) -c lib/LzmaOutputStream.cpp -o lib/LzmaOutputStream.o $(CXXFLAGS)
+
+lib/OutputStream.o: lib/OutputStream.cpp
+	$(CPP) -c lib/OutputStream.cpp -o lib/OutputStream.o $(CXXFLAGS)
+
+lib/Properties.o: lib/Properties.cpp
+	$(CPP) -c lib/Properties.cpp -o lib/Properties.o $(CXXFLAGS)
+
+lib/Sha1.o: lib/Sha1.cpp
+	$(CPP) -c lib/Sha1.cpp -o lib/Sha1.o $(CXXFLAGS)
+
+lib/Sha256.o: lib/Sha256.cpp
+	$(CPP) -c lib/Sha256.cpp -o lib/Sha256.o $(CXXFLAGS)
+
+lib/StandardInputStream.o: lib/StandardInputStream.cpp
+	$(CPP) -c lib/StandardInputStream.cpp -o lib/StandardInputStream.o $(CXXFLAGS)
+
+lib/StandardOutputStream.o: lib/StandardOutputStream.cpp
+	$(CPP) -c lib/StandardOutputStream.cpp -o lib/StandardOutputStream.o $(CXXFLAGS)
