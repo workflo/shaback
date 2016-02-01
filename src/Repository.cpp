@@ -512,6 +512,7 @@ int Repository::restore()
     throw RestoreException("Don't know what to restore.");
   } else {
     treeSpec = config.cliArgs.at(0);
+    open();
   }
 #else
   if (config.cliArgs.empty()) {
