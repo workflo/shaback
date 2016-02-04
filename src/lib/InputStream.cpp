@@ -112,7 +112,7 @@ void InputStream::copyTo(OutputStream& destination, int maxBytes)
 
   for (;;) {
     int bytesRead = read(buffer, maxBytes == -1 ? 8192 : min(8192, bytesToRead));
-    if (bytesRead <= 0)
+    if (bytesRead < 0)
       break;
     destination.write(buffer, bytesRead);
     bytesToRead -= bytesRead;
