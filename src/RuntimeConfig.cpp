@@ -52,6 +52,7 @@ RuntimeConfig::RuntimeConfig()
   force = false;
   haveExclusiveLock = false;
   useWriteCache = true;
+  useSymlinkLock = true;
   skipExisting = false;
   restoreAsCpioStream = false;
   restoreAsShabackStream = false;
@@ -97,6 +98,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"cpio", no_argument, 0, 'o'},
         {"shaback", no_argument, 0, 'O'},
         {"no-write-cache", no_argument, 0, 'W'},
+        {"no-symlink-lock", no_argument, 0, 'L'},
         {"skip-existing", no_argument, 0, 'S'},
         {"quiet", no_argument, 0, 'q'},
         {"gauge", no_argument, 0, 'G'},
@@ -186,6 +188,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'W':
         useWriteCache = false;
+        break;
+
+      case 'L':
+        useSymlinkLock = false;
         break;
 
       case 'S':
