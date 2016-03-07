@@ -54,7 +54,7 @@ void showUsage(string& op)
       "\t    If encryption is enabled, this specifies the password to be used.\n\n"
       "\t-W, --no-write-cache\n"
       "\t    For systems with insufficient RAM: Don't populate write cache.\n\n"
-      "\t-L, --no-symlink=lock\n"
+      "\t-L, --no-symlink-lock\n"
       "\t    For repository file systems that do not support symlinks.\n"
       "\t    Garbage collection will not be supported.\n\n"
       "\t<file>...\n"
