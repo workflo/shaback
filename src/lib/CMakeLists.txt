@@ -11,6 +11,8 @@ CHECK_FUNCTION_EXISTS (fstat64           HAVE_FSTAT64)
 CHECK_FUNCTION_EXISTS (stat64            HAVE_STAT64)
 CHECK_FUNCTION_EXISTS (lstat64           HAVE_LSTAT64)
 
+include_directories(AFTER ${OPENSSL_INCLUDE_DIR})
+
 set(shaback_lib_SRCS
 		     BlowfishOutputStream.cpp
 		     BlowfishInputStream.cpp
