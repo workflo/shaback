@@ -647,32 +647,50 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
   if (entry.isSplitFile) {
     SplitFileIndexReader reader(*this, entry.id);
     string hashValue;
-    while (reader.next(hashValue)) {
-      ShabackInputStream in = createInputStream();
-      File blockFile = hashValueToFile(hashValue);
-      in.open(blockFile);
 
-      // Read file, count bytes and calculate actual hash digest:
-      while (true) {
-        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-        if (bytesRead == -1)
-          break;
-        sha1.update(readBuffer, bytesRead);
-        totalBytesRead += bytesRead;
+    while (reader.next(hashValue)) {
+      File blockFile = hashValueToFile(hashValue);
+
+      if (config.quick && blockFile.isFile()) continue;
+
+      try {
+        ShabackInputStream in = createInputStream();
+        in.open(blockFile);
+
+        // Read file, count bytes and calculate actual hash digest:
+        while (true) {
+          int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+          if (bytesRead == -1)
+            break;
+          sha1.update(readBuffer, bytesRead);
+          totalBytesRead += bytesRead;
+        }
+      } catch (Exception &ex) {
+        cerr << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << endl;
+        restoreRun.numErrors ++;
       }
     }
   } else {
     File inFile = hashValueToFile(entry.id);
-    ShabackInputStream in = createInputStream();
-    in.open(inFile);
 
-    // Read file, count bytes and calculate actual hash digest:
-    while (true) {
-      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-      if (bytesRead == -1)
-        break;
-      sha1.update(readBuffer, bytesRead);
-      totalBytesRead += bytesRead;
+    if (!config.quick || !inFile.isFile()) {
+      try {
+        ShabackInputStream in = createInputStream();
+        in.open(inFile);
+
+        // Read file, count bytes and calculate actual hash digest:
+        while (true) {
+          int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+          if (bytesRead == -1)
+            break;
+          sha1.update(readBuffer, bytesRead);
+          totalBytesRead += bytesRead;
+        }
+      } catch (Exception &ex) {
+        cerr << "FAILED: " << entry.path << ": Error reading " << entry.id << ": " << ex.getMessage() << endl;
+        restoreRun.numErrors ++;
+        return;
+      }
     }
   }
 
@@ -680,10 +698,10 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
   string hashValue = sha1.toString();
 
   // Check actual file size and hash digest:
-  if (totalBytesRead != entry.size) {
+  if (!config.quick && totalBytesRead != entry.size) {
     cerr << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << endl;
     restoreRun.numErrors ++;
-  } else if (hashValue != entry.id.substr(0, 40)) {
+  } else if (!config.quick && hashValue != entry.id.substr(0, 40)) {
     cerr << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << endl;
     restoreRun.numErrors ++;
   } else {
