@@ -92,9 +92,10 @@ void showUsage(string& op)
       "\t    Start dialog UI to select what to recover.\n\n");
 #endif
     printf("\tFiles will always be restored into the CWD.\n");
+
   } else if (op == "test-restore") {
     printf("usage: shaback test-restore [<general_options>] [-p <pw> | --password=<pw>]\n"
-      "                      [-t | --totals]\n");
+      "                      [-t | --totals] [-Q | --quick]\n");
     printf("                      <rootfile> | <dir-id> | [-a | --all]\n\n");
     printf("\tPretends to restore files from the repository.\n"
       "\tChecks sizes and hash digests to ensure the backup set's integrity.\n\n"
@@ -103,7 +104,9 @@ void showUsage(string& op)
       "\t-a, --all\n"
       "\t    Check all backup sets from the repo's index/ directory.\n\n"
       "\t-t, --totals\n"
-      "\t    Give summary report at the end of the recovery run.\n\n");
+      "\t    Give summary report at the end of the recovery run.\n\n"
+      "\t-Q, --quick\n"
+      "\t    Just check existence of all files, don't recalculate hashes.\n\n");
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
