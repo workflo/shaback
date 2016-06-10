@@ -44,7 +44,7 @@ RuntimeConfig::RuntimeConfig()
 {
   repository = ".";
   quiet = false;
-  verbose = false;
+  verbose = 0;
   debug = false;
   oneFileSystem = false;
   showTotals = false;
@@ -58,6 +58,7 @@ RuntimeConfig::RuntimeConfig()
   restoreAsShabackStream = false;
   gauge = false;
   gui = false;
+  all = false;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -102,18 +103,19 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"skip-existing", no_argument, 0, 'S'},
         {"quiet", no_argument, 0, 'q'},
         {"gauge", no_argument, 0, 'G'},
+        {"all", no_argument, 0, 'a'},
 #if defined(HAVE_DIALOG)        
         {"gui", no_argument, 0, 'g'},
 #endif
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGg", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGga", long_options, &option_index);
     if (c == -1)
       break;
 
     switch (c) {
       case 'v':
-        verbose = true;
+        verbose++;
         break;
 
       case 't':
@@ -158,6 +160,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'G':
         gauge = true;
+        break;
+
+      case 'a':
+        all = true;
         break;
 
 #if defined(HAVE_DIALOG)

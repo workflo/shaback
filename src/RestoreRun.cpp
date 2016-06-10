@@ -30,8 +30,8 @@
 
 using namespace std;
 
-RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository) :
-    repository(repository), config(config)
+RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, bool testRestore) :
+    repository(repository), config(config), testRestore(testRestore)
 {
   // TODO Move out of constructor!!
   repository.lock();
@@ -81,33 +81,37 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
-        File dir(destinationDir, entry.path);
-
-        bool skip = (config.skipExisting && dir.isDir());
-
-        if (!skip) {
-          if (config.verbose && !config.gauge)
-            cerr << "[d] " << dir.path << endl;
-
-          dir.mkdirs();
-        }
-        if (dir.isDir()) {
+        if (testRestore) {
           restore(entry.id, destinationDir, depth + 1);
-          if (!skip) {
-            restoreMetaData(dir, entry);
-          }
         } else {
-          reportError(string("Cannot create destination directory: ").append(dir.path));
+          File dir(destinationDir, entry.path);
+
+          bool skip = (config.skipExisting && dir.isDir());
+
+          if (!skip) {
+            if (config.verbose && !config.gauge)
+              cerr << "[d] " << dir.path << endl;
+
+            dir.mkdirs();
+          }
+          if (dir.isDir()) {
+            restore(entry.id, destinationDir, depth + 1);
+            if (!skip) {
+              restoreMetaData(dir, entry);
+            }
+          } else {
+            reportError(string("Cannot create destination directory: ").append(dir.path));
+          }
         }
         break;
       }
 
       case TREEFILEENTRY_FILE: {
-        File file(destinationDir, entry.path);
-
-        if (config.restoreAsCpioStream) {
-
+        if (testRestore) {
+          repository.testExportFile(*this, entry);
         } else {
+          File file(destinationDir, entry.path);
+
           if (config.skipExisting && file.isFile())
             break;
 
@@ -140,6 +144,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
       }
 
       case TREEFILEENTRY_SYMLINK: {
+        if (testRestore) break;
+
         File file(destinationDir, entry.path);
 
         if (config.skipExisting && file.isSymlink())
@@ -176,7 +182,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
       path = ".";
     } else {
       while (path.size() > 1 && path[0] == '/') {
-	path.erase(0, 1);
+	      path.erase(0, 1);
       }
     }
 

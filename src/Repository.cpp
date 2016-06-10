@@ -534,31 +534,70 @@ int Repository::restore()
 #endif
 
   if (Digest::looksLikeDigest(treeSpec)) {
-    return restoreByTreeId(treeSpec);
+    return restoreByTreeId(treeSpec, false);
   } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
     string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
     File rootFile(config.indexDir, fname);
 
-    return restoreByRootFile(rootFile);
+    return restoreByRootFile(rootFile, false);
   } else {
     throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
   }
 }
 
-int Repository::restoreByRootFile(File& rootFile)
+int Repository::testRestore()
+{
+  if (!config.all && config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to restore.");
+  }
+
+  open();
+
+  if (config.all) {
+    int numErrors = 0;
+
+    vector<File> indexFiles = config.indexDir.listFiles("*.sroot");
+
+    for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+      File file(*it);
+      if (config.verbose) cerr << "*** " << file.path << " ***" << endl;
+      if (restoreByRootFile(file, true) > 0) {
+        numErrors ++;
+        cerr << "ERROR DETECTED: " << file.path << " contains errors!" << endl;
+      }
+    }
+
+    return numErrors;
+  } else {
+    string treeSpec = config.cliArgs.at(0);
+
+    if (Digest::looksLikeDigest(treeSpec)) {
+      return restoreByTreeId(treeSpec, true);
+    } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
+      string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
+      File rootFile(config.indexDir, fname);
+
+      return restoreByRootFile(rootFile, true);
+    } else {
+      throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
+    }
+  }
+}
+
+int Repository::restoreByRootFile(File& rootFile, bool testRestore)
 {
   FileInputStream in(rootFile);
   string hashValue;
   if (in.readLine(hashValue)) {
-    return restoreByTreeId(hashValue);
+    return restoreByTreeId(hashValue, testRestore);
   } else {
     throw RestoreException(string("Root index file is empty: ").append(rootFile.path));
   }
 }
 
-int Repository::restoreByTreeId(string& treeId)
+int Repository::restoreByTreeId(string& treeId, bool testRestore)
 {
-  RestoreRun run(config, *this);
+  RestoreRun run(config, *this, testRestore);
   File destinationDir(".");
 
   return run.start(treeId, destinationDir);
@@ -599,6 +638,61 @@ void Repository::exportSymlink(TreeFileEntry& entry, File& linkFile)
   if (ret != 0)
     throw Exception::errnoToException(linkFile.path);
 }
+
+void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
+{
+  Sha1 sha1;
+  intmax_t totalBytesRead = 0;
+
+  if (entry.isSplitFile) {
+    SplitFileIndexReader reader(*this, entry.id);
+    string hashValue;
+    while (reader.next(hashValue)) {
+      ShabackInputStream in = createInputStream();
+      File blockFile = hashValueToFile(hashValue);
+      in.open(blockFile);
+
+      // Read file, count bytes and calculate actual hash digest:
+      while (true) {
+        int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+        if (bytesRead == -1)
+          break;
+        sha1.update(readBuffer, bytesRead);
+        totalBytesRead += bytesRead;
+      }
+    }
+  } else {
+    File inFile = hashValueToFile(entry.id);
+    ShabackInputStream in = createInputStream();
+    in.open(inFile);
+
+    // Read file, count bytes and calculate actual hash digest:
+    while (true) {
+      int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+      if (bytesRead == -1)
+        break;
+      sha1.update(readBuffer, bytesRead);
+      totalBytesRead += bytesRead;
+    }
+  }
+
+  sha1.finalize();
+  string hashValue = sha1.toString();
+
+  // Check actual file size and hash digest:
+  if (totalBytesRead != entry.size) {
+    cerr << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << endl;
+    restoreRun.numErrors ++;
+  } else if (hashValue != entry.id.substr(0, 40)) {
+    cerr << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << endl;
+    restoreRun.numErrors ++;
+  } else {
+    if (config.verbose >= 2) cerr << "OK: " << entry.path << endl;
+    restoreRun.numFilesRestored ++;
+    restoreRun.numBytesRestored += totalBytesRead;
+  }
+}
+
 
 void Repository::show()
 {

@@ -31,6 +31,7 @@
 #include "TreeFileEntry.h"
 
 class BackupRun;
+class RestoreRun;
 
 class Repository
 {
@@ -42,7 +43,16 @@ class Repository
     int backup();
 #endif
 
+    /**
+     * Restores files from a specified backup run.
+     */
     int restore();
+
+    /**
+     * Pretends to restore a given (or all) backups and checks 
+     * hashes and dumps file listings.
+     */
+    int testRestore();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -97,6 +107,8 @@ class Repository
      */
     void exportFile(std::string& id, OutputStream& out);
     void exportSymlink(TreeFileEntry& entry, File& outFile);
+
+    void testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry);
 
     /**
      * Lazily opens the read cache.
@@ -183,8 +195,8 @@ class Repository
     int splitMinBlocks;
     Date startDate;
 
-    int restoreByRootFile(File& rootFile);
-    int restoreByTreeId(std::string& treeId);
+    int restoreByRootFile(File& rootFile, bool testRestore);
+    int restoreByTreeId(std::string& treeId, bool testRestore);
 
 #if defined(SHABACK_HAS_BACKUP)
     void checkPassword();
