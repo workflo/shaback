@@ -645,30 +645,36 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
   intmax_t totalBytesRead = 0;
 
   if (entry.isSplitFile) {
-    SplitFileIndexReader reader(*this, entry.id);
-    string hashValue;
+    try {
+      SplitFileIndexReader reader(*this, entry.id);
+      string hashValue;
 
-    while (reader.next(hashValue)) {
-      File blockFile = hashValueToFile(hashValue);
+      while (reader.next(hashValue)) {
+        File blockFile = hashValueToFile(hashValue);
 
-      if (config.quick && blockFile.isFile()) continue;
+        if (config.quick && blockFile.isFile()) continue;
 
-      try {
-        ShabackInputStream in = createInputStream();
-        in.open(blockFile);
+        try {
+          ShabackInputStream in = createInputStream();
+          in.open(blockFile);
 
-        // Read file, count bytes and calculate actual hash digest:
-        while (true) {
-          int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
-          if (bytesRead == -1)
-            break;
-          sha1.update(readBuffer, bytesRead);
-          totalBytesRead += bytesRead;
+          // Read file, count bytes and calculate actual hash digest:
+          while (true) {
+            int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
+            if (bytesRead == -1)
+              break;
+            sha1.update(readBuffer, bytesRead);
+            totalBytesRead += bytesRead;
+          }
+        } catch (Exception &ex) {
+          cerr << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << endl;
+          restoreRun.numErrors ++;
         }
-      } catch (Exception &ex) {
-        cerr << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << endl;
-        restoreRun.numErrors ++;
       }
+    } catch (Exception &ex) {
+      cerr << "FAILED: " << entry.path << ": Error reading block list " << entry.id << ": " << ex.getMessage() << endl;
+      restoreRun.numErrors ++;
+      return;
     }
   } else {
     File inFile = hashValueToFile(entry.id);

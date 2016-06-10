@@ -108,12 +108,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 
       case TREEFILEENTRY_FILE: {
         if (testRestore) {
-          try {
-            repository.testExportFile(*this, entry);
-          } catch (Exception &ex) {
-            numErrors ++;
-            cerr << "FAILED: " << entry.path << ": " << ex.getMessage() << endl;
-          }
+          repository.testExportFile(*this, entry);
         } else {
           File file(destinationDir, entry.path);
 
