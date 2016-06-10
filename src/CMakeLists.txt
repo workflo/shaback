@@ -12,6 +12,7 @@ find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
 find_package(NCurses QUIET)
+find_package(Threads QUIET)
 
 include(CheckTypeSize)
 check_type_size("long" SIZEOF_LONG)

@@ -39,7 +39,12 @@ void showUsage(string& op)
   if (op == "backup") {
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-t | --totals] [-p <pw> | --password=<pw>]\n"
-      "                      [-W | --no-write-cache] [-L | --no-symlink-lock]\n"
+      "                      [-W | --no-write-cache] [-L | --no-symlink-lock]\n");
+#if defined(CMAKE_HAVE_PTHREAD_H)
+    printf(
+      "                      [-P <num> | --parallel=<num>]\n");
+#endif
+    printf(
       "                      [<file> ...]\n\n"
       "\tPerforms backup run. If no filenames are specified on the command line,\n"
       "\tfiles and directories are backed up as specified in the config file\n"
@@ -56,7 +61,14 @@ void showUsage(string& op)
       "\t    For systems with insufficient RAM: Don't populate write cache.\n\n"
       "\t-L, --no-symlink-lock\n"
       "\t    For repository file systems that do not support symlinks.\n"
-      "\t    Garbage collection will not be supported.\n\n"
+      "\t    Garbage collection will not be supported.\n\n");
+#if defined(CMAKE_HAVE_PTHREAD_H)
+    printf(
+      "\t-P <num> | --parallel=<num>\n"
+      "\t    Try to perform compression and encryption of large files in parallel\n"
+      "\t    with up to <num> threads.\n\n");
+#endif
+    printf(
       "\t<file>...\n"
       "\t    An arbitrary number of files and directories to be backed up.\n"
       "\t    If no files are specified here, the directory list from the config\n"

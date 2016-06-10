@@ -5,6 +5,7 @@
 #cmakedefine HAVE_STAT64
 #cmakedefine HAVE_FSTAT64
 #cmakedefine HAVE_LSTAT64
+#cmakedefine CMAKE_HAVE_PTHREAD_H
 
 #define SHABACK_lib_config_H
 

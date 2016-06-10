@@ -53,6 +53,7 @@ class RuntimeConfig
     bool restoreAsShabackStream;
     bool gui;
     bool all;
+    int parallel;
 
     std::string operation;
     std::string repository;

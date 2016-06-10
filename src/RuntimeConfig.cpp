@@ -59,6 +59,7 @@ RuntimeConfig::RuntimeConfig()
   gauge = false;
   gui = false;
   all = false;
+  parallel = 0;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -104,12 +105,13 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"quiet", no_argument, 0, 'q'},
         {"gauge", no_argument, 0, 'G'},
         {"all", no_argument, 0, 'a'},
+        {"parallel", required_argument, 0, 'P'},
 #if defined(HAVE_DIALOG)        
         {"gui", no_argument, 0, 'g'},
 #endif
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGga", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaP:", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -164,6 +166,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'a':
         all = true;
+        break;
+
+      case 'P':
+        parallel = min(max(0, atoi(optarg)), 8);
         break;
 
 #if defined(HAVE_DIALOG)
