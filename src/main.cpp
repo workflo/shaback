@@ -92,6 +92,21 @@ void showUsage(string& op)
       "\t    Start dialog UI to select what to recover.\n\n");
 #endif
     printf("\tFiles will always be restored into the CWD.\n");
+
+  } else if (op == "test-restore") {
+    printf("usage: shaback test-restore [<general_options>] [-p <pw> | --password=<pw>]\n"
+      "                      [-t | --totals] [-Q | --quick]\n");
+    printf("                      <rootfile> | <dir-id> | [-a | --all]\n\n");
+    printf("\tPretends to restore files from the repository.\n"
+      "\tChecks sizes and hash digests to ensure the backup set's integrity.\n\n"
+      "\t<rootfile> is a filename from the repository's index/ directory.\n"
+      "\t<dir-id> is the ID of the directory file to be restored.\n\n"
+      "\t-a, --all\n"
+      "\t    Check all backup sets from the repo's index/ directory.\n\n"
+      "\t-t, --totals\n"
+      "\t    Give summary report at the end of the recovery run.\n\n"
+      "\t-Q, --quick\n"
+      "\t    Just check existence of all files, don't recalculate hashes.\n\n");
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
@@ -140,18 +155,19 @@ void showUsage(string& op)
     printf("\n");
     printf("Valid commands are:\n");
 #if defined(SHABACK_HAS_BACKUP)
-    printf("   backup      Backup a set of files or directories.\n");
+    printf("   backup        Backup a set of files or directories.\n");
 #endif
-    printf("   gc          Garbage collection: Delete unused files from archive.\n");
+    printf("   gc            Garbage collection: Delete unused files from archive.\n");
 #if defined(SHABACK_HAS_BACKUP)
-    printf("   init        Create a new repository.\n");
+    printf("   init          Create a new repository.\n");
 #endif
-    printf("   restore     Restore files from repository.\n");
+    printf("   restore       Restore files from repository.\n");
+    printf("   test-restore  Pretend to restore files, check hash digests and dump file listing.\n");
     //    printf("   cleanup     Delete old index files\n");
-    printf("   show        Decompress and decrypt a certain object from the repository.\n");
-    printf("   deflate     Compress data from stdin to stdout using `Deflate' compression.\n");
-    printf("   inflate     Decompress data from stdin to stdout using `Deflate' compression.\n");
-    printf("   version     Print version information.\n");
+    printf("   show          Decompress and decrypt a certain object from the repository.\n");
+    printf("   deflate       Compress data from stdin to stdout using `Deflate' compression.\n");
+    printf("   inflate       Decompress data from stdin to stdout using `Deflate' compression.\n");
+    printf("   version       Print version information.\n");
     printf("\n");
     printf("General options are:\n");
     printf("\t-c <file>, --config=<file>\n"
@@ -222,6 +238,8 @@ int main(int argc, char** argv)
 #endif
       } else if (config.operation == "restore") {
         return shaback.repository.restore();
+      } else if (config.operation == "test-restore") {
+        return shaback.repository.testRestore();
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {

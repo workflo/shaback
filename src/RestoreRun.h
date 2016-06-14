@@ -27,7 +27,7 @@
 class RestoreRun
 {
   public:
-    RestoreRun(RuntimeConfig& config, Repository& Repository);
+    RestoreRun(RuntimeConfig& config, Repository& Repository, bool testRestore);
     ~RestoreRun();
 
     void restore(std::string& treeId, File& destinationDir, int depth = 0);
@@ -51,6 +51,7 @@ class RestoreRun
     unsigned int fileCount;
     void progress(std::string &path);
     time_t lastProgressTime;
+    bool testRestore;
 };
 
 #endif // SHABACK_RestoreRun_H

@@ -39,7 +39,7 @@ class RuntimeConfig
     virtual void loadConfigFile(std::string filename);
 
     bool quiet;
-    bool verbose;
+    int verbose;
     bool debug;
     bool gauge;
     bool force;
@@ -52,6 +52,8 @@ class RuntimeConfig
     bool restoreAsCpioStream;
     bool restoreAsShabackStream;
     bool gui;
+    bool all;
+    bool quick;
 
     std::string operation;
     std::string repository;
