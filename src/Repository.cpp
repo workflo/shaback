@@ -37,6 +37,7 @@
 
 #include "BackupRun.h"
 #include "GarbageCollection.h"
+#include "History.h"
 #include "Repository.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
@@ -736,6 +737,12 @@ void Repository::gc()
   open();
   GarbageCollection gc(config, *this);
   gc.run();
+}
+
+void Repository::history()
+{
+  History history(config, *this);
+  history.run();
 }
 
 int Repository::encryptionByName(string name)

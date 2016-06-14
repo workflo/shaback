@@ -83,6 +83,13 @@ class Repository
      */
     void gc();
 
+    /**
+     * Perform operations on the backup history.
+     * --list: List available backup sets
+     * --keep: Delete excessive backup sets
+     */
+    void history();
+
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
 #if defined(SHABACK_HAS_BACKUP)
