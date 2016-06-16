@@ -81,7 +81,21 @@ void History::list(string& backupName)
 
 void History::keep(int backupsToKeep)
 {
-  vector<File> indexFiles = listIndexFiled(config.backupName);
+  if (config.all) {
+    vector<string> backupNames = listBackupNames();
+
+    for (vector<string>::iterator it = backupNames.begin(); it < backupNames.end(); it++) {
+      string backupName(*it);
+      keep(backupName, backupsToKeep);
+    }
+  } else {
+    keep(config.backupName, backupsToKeep);
+  }
+}
+
+void History::keep(string& backupName, int backupsToKeep)
+{
+  vector<File> indexFiles = listIndexFiled(backupName);
 
   int idx = 0;
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
