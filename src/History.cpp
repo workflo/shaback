@@ -47,16 +47,31 @@ void History::run()
   repository.lock(true);
   repository.open();
 
+  if (config.backupsToKeep > 0) {
+    keep(config.backupsToKeep);
+  }
   if (config.actionList) {
     list();
-  } else if (config.backupsToKeep > 0) {
-    keep(config.backupsToKeep);
   }
 }
 
 void History::list()
 {
-  vector<File> indexFiles = listIndexFiled(config.backupName);
+  if (config.all) {
+    vector<string> backupNames = listBackupNames();
+
+    for (vector<string>::iterator it = backupNames.begin(); it < backupNames.end(); it++) {
+      string backupName(*it);
+      list(backupName);
+    }
+  } else {
+    list(config.backupName);
+  }
+}
+
+void History::list(string& backupName)
+{
+  vector<File> indexFiles = listIndexFiled(backupName);
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
@@ -83,7 +98,7 @@ void History::keep(int backupsToKeep)
 
 vector<File> History::listIndexFiled(string& backupName)
 {
-  string pattern(config.backupName);
+  string pattern(backupName);
   pattern.append("_????" "-??" "-??_??????.sroot");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
@@ -91,4 +106,26 @@ vector<File> History::listIndexFiled(string& backupName)
   reverse(indexFiles.begin(), indexFiles.end());
 
   return indexFiles;
+}
+
+vector<string> History::listBackupNames()
+{
+  set<string> backupNames;
+
+  vector<File> indexFiles = config.indexDir.listFiles("*_????" "-??" "-??_??????.sroot");
+  for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    File file(*it);
+    string name(basename(file.path.c_str()));
+    name = name.substr(0, name.size() - 24);
+    backupNames.insert(name);
+  }
+
+  vector<string> backupNamesVector;
+
+  for (std::set<string>::iterator it = backupNames.begin(); it != backupNames.end(); ++it) {
+    backupNamesVector.push_back(*it);
+  }
+  sort(backupNamesVector.begin(), backupNamesVector.end(), filePathComparator);
+
+  return backupNamesVector;
 }

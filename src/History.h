@@ -39,8 +39,10 @@ class History
     RuntimeConfig& config;
 
     void list();
+    void list(std::string& backupName);
     void keep(int backupsToKeep);
     std::vector<File> listIndexFiled(std::string& backupName);
+    std::vector<std::string> listBackupNames();
 };
 
 #endif // SHABACK_History_H
