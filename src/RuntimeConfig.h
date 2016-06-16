@@ -54,6 +54,8 @@ class RuntimeConfig
     bool gui;
     bool all;
     bool quick;
+    bool actionList;
+    int backupsToKeep;
 
     std::string operation;
     std::string repository;

@@ -1,6 +1,6 @@
 project(shaback)
 set (SHABACK_VERSION_MAJOR 1)
-set (SHABACK_VERSION_MINOR 19)
+set (SHABACK_VERSION_MINOR 20)
 set (CMAKE_MODULE_PATH CMakeModules)
 set (CMAKE_VERBOSE_MAKEFILE true)
 
@@ -26,6 +26,7 @@ add_executable(shaback
 		BackupsetSelector.cpp
 		Cache.cpp 
 		GarbageCollection.cpp
+                History.cpp
 		main.cpp 
 		Repository.cpp
 		RestoreRun.cpp

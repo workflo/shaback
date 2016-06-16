@@ -220,6 +220,7 @@ void BackupRun::reportError(Exception& ex)
 
 void BackupRun::deleteOldIndexFiles()
 {
+  // TODO: Move to new class History!
   string pattern(config.backupName);
   pattern.append("_????" "-??" "-??_??????.sroot");
 

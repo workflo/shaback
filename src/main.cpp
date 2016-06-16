@@ -110,6 +110,21 @@ void showUsage(string& op)
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
+  } else if (op == "history") {
+    printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
+      "                      [-l | --list] [-k <num> | --keep=<num>]\n\n"
+      "\tPerforms operations to view or maintain the backup history.\n\n"
+      "Actions:\n"
+      "\t-l, --list\n"
+      "\t    Lists available backups/versions for the selected backup set.\n\n"
+      "\t-k <num>, --keep=<num>\n"
+      "\t    Specifies the number of backups/versions to keep.\n"
+      "\t    The latest <num> backups will be preserved,\n"
+      "\t    excessive (older) backups will be deleted!\n\n"
+      "Options:\n"
+      "\t-n <name>, --name=<name>\n"
+      "\t    Specifies the backup set's name. The name will be reflected as the index\n"
+      "\t    file's name prefix.\n\n");
   } else if (op == "show") {
     printf("usage: shaback show [<general_options>] [-p <pw> | --password=<pw>] <id>\n\n");
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
@@ -158,6 +173,7 @@ void showUsage(string& op)
     printf("   backup        Backup a set of files or directories.\n");
 #endif
     printf("   gc            Garbage collection: Delete unused files from archive.\n");
+    printf("   history       View / maintain backup history.\n");
 #if defined(SHABACK_HAS_BACKUP)
     printf("   init          Create a new repository.\n");
 #endif
@@ -244,6 +260,8 @@ int main(int argc, char** argv)
         shaback.repository.show();
       } else if (config.operation == "gc") {
         shaback.repository.gc();
+      } else if (config.operation == "history") {
+        shaback.repository.history();
       } else if (config.operation == "deflate") {
         return shaback.deflate();
       } else if (config.operation == "inflate") {
