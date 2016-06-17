@@ -32,7 +32,7 @@ class Sha256: public Digest
 
     void reset();
 
-    void update(const void* data, unsigned long len);
+    void update(const unsigned char* data, unsigned long len);
     void update(std::string& data);
 
     std::string toString();

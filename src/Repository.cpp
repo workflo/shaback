@@ -664,7 +664,7 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
             int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
             if (bytesRead == -1)
               break;
-            sha1.update(readBuffer, bytesRead);
+            sha1.update((const unsigned char*) readBuffer, bytesRead);
             totalBytesRead += bytesRead;
           }
         } catch (Exception &ex) {
@@ -690,7 +690,7 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
           int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
           if (bytesRead == -1)
             break;
-          sha1.update(readBuffer, bytesRead);
+          sha1.update((const unsigned char*) readBuffer, bytesRead);
           totalBytesRead += bytesRead;
         }
       } catch (Exception &ex) {

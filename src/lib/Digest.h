@@ -26,7 +26,7 @@ class Digest
   public:
     virtual void reset() = 0;
 
-    virtual void update(const void* data, unsigned long len) = 0;
+    virtual void update(const unsigned char* data, unsigned long len) = 0;
     virtual void update(std::string& data) = 0;
 
     virtual std::string toString() = 0;
