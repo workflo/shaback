@@ -252,6 +252,12 @@ void RuntimeConfig::load()
   if (localConfig.isFile()) {
     loadConfigFile(localConfig.path);
   }
+
+  File repoConfig(repository, "repo.lua");
+  cout << repoConfig.path << endl;
+  if (repoConfig.isFile()) {
+    loadConfigFile(repoConfig.path);
+  }
 }
 
 void RuntimeConfig::tryToLoadFrom(string dir)
