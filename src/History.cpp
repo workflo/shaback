@@ -115,7 +115,7 @@ void History::keep(string& backupName, int backupsToKeep)
 
 void History::details()
 {
-  printf("|BACKUP NAME                                                 |DATE                    |\n");
+  printf("|BACKUP NAME                                                 |DATE                    |FILES               |SIZE             |\n");
   if (config.all) {
     vector<string> backupNames = listBackupNames();
 
@@ -132,14 +132,13 @@ void History::details(string& backupName)
 {
   vector<File> indexFiles = listIndexFiled(backupName);
 
-  if (indexFiles.size() > 0) {
-    File file(indexFiles.at(0));
+  for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    File file(*it);
     string fname = file.getName();
     string bname = fname.substr(0, fname.size() - 6);
     string name = bname.substr(0, bname.size() - 18);
     Date date(bname.substr(bname.size() - 17));
     printf("|%-60s|%s|\n", name.c_str(), date.toString().substr(0, 24).c_str());
-  } else {
 
   }
 }
