@@ -405,6 +405,23 @@ void File::utime(int mtime)
     throw Exception::errnoToException(path);
 }
 
+string File::getName()
+{
+  return fname;
+}
+
+string File::getBasename(string suffix)
+{
+  int pos = fname.rfind(suffix);
+
+  cout << "pos=" <<pos <<endl;
+  if (pos == string::npos && pos != fname.size() - suffix.size()) {
+    return fname;
+  } else {
+    return fname.substr(0, fname.size() - suffix.size());
+  }
+}
+
 bool filePathComparator(File a,File b)
 {
   return (a.path < b.path);

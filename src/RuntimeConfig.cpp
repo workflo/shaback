@@ -61,6 +61,7 @@ RuntimeConfig::RuntimeConfig()
   all = false;
   quick = false;
   actionList = false;
+  actionDetails = false;
   backupsToKeep = -1;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
@@ -109,13 +110,14 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"all", no_argument, 0, 'a'},
         {"quick", no_argument, 0, 'Q'},
         {"list", no_argument, 0, 'l'},
+        {"details", no_argument, 0, 'D'},
         {"keep", required_argument, 0, 'k'},
 #if defined(HAVE_DIALOG)        
         {"gui", no_argument, 0, 'g'},
 #endif
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -216,6 +218,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'l':
         actionList = true;
+        break;
+
+      case 'D':
+        actionDetails = true;
         break;
 
       case 'k':

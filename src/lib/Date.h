@@ -43,6 +43,7 @@ class Date
     void setTimeOfDay(int h, int m, int s);
 
     std::string toFilename();
+    std::string toString();
 
     /**
      * Returns the difference between this Date and \c other in fractions of

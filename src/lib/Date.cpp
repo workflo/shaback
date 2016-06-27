@@ -62,6 +62,11 @@ string Date::toFilename()
   return filename;
 }
 
+string Date::toString()
+{
+  return ctime(&rawtime);
+}
+
 void Date::addYears(int x)
 {
   struct tm * ptm;

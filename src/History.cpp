@@ -53,6 +53,9 @@ void History::run()
   if (config.actionList) {
     list();
   }
+  if (config.actionDetails) {
+    details();
+  }
 }
 
 void History::list()
@@ -75,7 +78,7 @@ void History::list(string& backupName)
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
-    cout << basename(file.path.c_str()) << endl;
+    cout << file.getName() << endl;
   }
 }
 
@@ -101,12 +104,43 @@ void History::keep(string& backupName, int backupsToKeep)
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
     if (idx < backupsToKeep) {
-      if (config.verbose) cout << "Keeping " << basename(file.path.c_str()) << endl;
+      if (config.verbose) cout << "Keeping " << file.getName() << endl;
     } else {
-      if (config.verbose) cout << "Deleting " << basename(file.path.c_str()) << endl;
+      if (config.verbose) cout << "Deleting " << file.getName() << endl;
       file.remove();
     }
     idx++;
+  }
+}
+
+void History::details()
+{
+  printf("|BACKUP NAME                                                 |DATE                    |\n");
+  if (config.all) {
+    vector<string> backupNames = listBackupNames();
+
+    for (vector<string>::iterator it = backupNames.begin(); it < backupNames.end(); it++) {
+      string backupName(*it);
+      details(backupName);
+    }
+  } else {
+    details(config.backupName);
+  }
+}
+
+void History::details(string& backupName)
+{
+  vector<File> indexFiles = listIndexFiled(backupName);
+
+  if (indexFiles.size() > 0) {
+    File file(indexFiles.at(0));
+    string fname = file.getName();
+    string bname = fname.substr(0, fname.size() - 6);
+    string name = bname.substr(0, bname.size() - 18);
+    Date date(bname.substr(bname.size() - 17));
+    printf("|%-60s|%s|\n", name.c_str(), date.toString().substr(0, 24).c_str());
+  } else {
+
   }
 }
 
@@ -129,7 +163,7 @@ vector<string> History::listBackupNames()
   vector<File> indexFiles = config.indexDir.listFiles("*_????" "-??" "-??_??????.sroot");
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
-    string name(basename(file.path.c_str()));
+    string name(file.getName());
     name = name.substr(0, name.size() - 24);
     backupNames.insert(name);
   }

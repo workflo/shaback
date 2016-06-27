@@ -55,6 +55,7 @@ class RuntimeConfig
     bool all;
     bool quick;
     bool actionList;
+    bool actionDetails;
     int backupsToKeep;
 
     std::string operation;
