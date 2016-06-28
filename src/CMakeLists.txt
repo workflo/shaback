@@ -26,10 +26,11 @@ add_executable(shaback
 		BackupsetSelector.cpp
 		Cache.cpp 
 		GarbageCollection.cpp
-                History.cpp
+        History.cpp
 		main.cpp 
 		Repository.cpp
-		RestoreRun.cpp
+        RestoreReport.cpp
+        RestoreRun.cpp
 		RuntimeConfig.cpp 
 		shaback.cpp 
 		ShabackException.cpp
@@ -37,7 +38,7 @@ add_executable(shaback
 		ShabackOutputStream.cpp
 		SplitFileIndexReader.cpp
 		TreeFileEntry.cpp
-		)
+	)
 
 target_link_libraries(shaback 
   shabacklib

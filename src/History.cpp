@@ -115,7 +115,12 @@ void History::keep(string& backupName, int backupsToKeep)
 
 void History::details()
 {
-  printf("|BACKUP NAME                                                 |DATE                    |FILES               |SIZE             |\n");
+  printf("|BACKUP NAME                                                 |DATE                    |FILES       |");
+  if (!config.quick) {
+    printf("SIZE        |");
+  }
+  printf("\n");
+
   if (config.all) {
     vector<string> backupNames = listBackupNames();
 
@@ -138,8 +143,13 @@ void History::details(string& backupName)
     string bname = fname.substr(0, fname.size() - 6);
     string name = bname.substr(0, bname.size() - 18);
     Date date(bname.substr(bname.size() - 17));
-    printf("|%-60s|%s|\n", name.c_str(), date.toString().substr(0, 24).c_str());
 
+    RestoreReport report = repository.restoreByRootFile(file, true);
+    printf("|%-60s|%s|%12u|", name.c_str(), date.toString().c_str(), report.numFilesRestored);
+    if (!config.quick) {
+      printf("%12jd|", report.numBytesRestored);
+    }
+    printf("\n");
   }
 }
 

@@ -29,6 +29,7 @@
 #include "ShabackOutputStream.h"
 #include "ShabackInputStream.h"
 #include "TreeFileEntry.h"
+#include "RestoreReport.h"
 
 class BackupRun;
 class RestoreRun;
@@ -46,13 +47,13 @@ class Repository
     /**
      * Restores files from a specified backup run.
      */
-    int restore();
+    RestoreReport restore();
 
     /**
      * Pretends to restore a given (or all) backups and checks 
      * hashes and dumps file listings.
      */
-    int testRestore();
+    RestoreReport testRestore();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -139,6 +140,9 @@ class Repository
      */
     ShabackOutputStream createOutputStream();
 
+    RestoreReport restoreByRootFile(File& rootFile, bool testRestore);
+    RestoreReport restoreByTreeId(std::string& treeId, bool testRestore);
+
     /**
      * Maps the given name of an encryption algorithm to its respective
      * constant.
@@ -201,9 +205,6 @@ class Repository
     int splitBlockSize;
     int splitMinBlocks;
     Date startDate;
-
-    int restoreByRootFile(File& rootFile, bool testRestore);
-    int restoreByTreeId(std::string& treeId, bool testRestore);
 
 #if defined(SHABACK_HAS_BACKUP)
     void checkPassword();

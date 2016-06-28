@@ -256,9 +256,11 @@ int main(int argc, char** argv)
         exit(1);
 #endif
       } else if (config.operation == "restore") {
-        return shaback.repository.restore();
+        RestoreReport report = shaback.repository.restore();
+        return report.hasErrors() ? 1 : 0;
       } else if (config.operation == "test-restore") {
-        return shaback.repository.testRestore();
+        RestoreReport report(shaback.repository.testRestore());
+        return report.hasErrors() ? 1 : 0;
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {
