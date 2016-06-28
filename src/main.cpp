@@ -113,7 +113,8 @@ void showUsage(string& op)
   } else if (op == "history") {
     printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-l | --list] [-k <num> | --keep=<num>]\n"
-      "                      [-D | --details]\n\n"
+      "                      [-D | --details]\n"
+      "                      [-1]\n\n"
       "\tPerforms operations to view or maintain the backup history.\n\n"
       "Actions:\n"
       "\t-l, --list\n"
@@ -124,6 +125,8 @@ void showUsage(string& op)
       "\t    excessive (older) backups will be deleted!\n\n"
       "\t-D, --details\n"
       "\t    Displays detailed human-readable information about the latest backup.\n\n"
+      "\t-1\n"
+      "\t    Limits --details to the newest backup for each set.\n\n"
       "Options:\n"
       "\t-n <name>, --name=<name>\n"
       "\t    Specifies the backup set's name. The name will be reflected as the index\n"

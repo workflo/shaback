@@ -57,6 +57,7 @@ class RuntimeConfig
     bool actionList;
     bool actionDetails;
     int backupsToKeep;
+    int number;
 
     std::string operation;
     std::string repository;

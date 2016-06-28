@@ -32,6 +32,19 @@
 
 using namespace std;
 
+
+char* readable_fs(double size, char *buf) {
+    int i = 0;
+    const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+    while (size > 1024) {
+        size /= 1024;
+        i++;
+    }
+    sprintf(buf, "%.*f %s", i, size, units[i]);
+    return buf;
+}
+
+
 History::History(RuntimeConfig& config, Repository& repository) :
     repository(repository), config(config)
 {
@@ -140,20 +153,33 @@ void History::details()
 void History::details(string& backupName)
 {
   vector<File> indexFiles = listIndexFiled(backupName);
+  int n = 0;
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
-    File file(*it);
+    File file(*it); n++;
     string fname = file.getName();
     string bname = fname.substr(0, fname.size() - 6);
     string name = bname.substr(0, bname.size() - 18);
     Date date(bname.substr(bname.size() - 17));
 
     RestoreReport report = repository.restoreByRootFile(file, true);
-    printf("|%-60s|%s|%12u|", name.c_str(), date.toString().c_str(), report.numFilesRestored);
-    if (!config.quick) {
-      printf("%12jd|", report.numBytesRestored);
+    printf("|%-60s|%s|", name.c_str(), date.toString().c_str());
+    if (report.hasErrors()) {
+      printf("   ERRORS   |");
+      if (!config.quick) {
+        printf("   ERRORS   |");
+      }
+    } else {
+      printf("%12u|", report.numFilesRestored);
+      if (!config.quick) {
+        char sizeBuf[30];
+        readable_fs(report.numBytesRestored, sizeBuf);
+        printf("%12s|", sizeBuf);
+      }
     }
     printf("\n");
+
+    if (config.number > 0 && n >= config.number) break;
   }
 }
 

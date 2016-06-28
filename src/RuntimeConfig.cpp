@@ -64,6 +64,7 @@ RuntimeConfig::RuntimeConfig()
   actionList = false;
   actionDetails = false;
   backupsToKeep = -1;
+  number = 0;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -113,12 +114,13 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"list", no_argument, 0, 'l'},
         {"details", no_argument, 0, 'D'},
         {"keep", required_argument, 0, 'k'},
+        {"1", no_argument, 0, '1'},
 #if defined(HAVE_DIALOG)        
         {"gui", no_argument, 0, 'g'},
 #endif
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D1", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -227,6 +229,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'k':
         backupsToKeep = atoi(optarg);
+        break;
+
+      case '1':
+        number = 1;
         break;
 
       default:
