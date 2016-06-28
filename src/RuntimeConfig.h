@@ -102,6 +102,7 @@ class RuntimeConfig
     File cacheDir;
     File repoDir;
     bool haveExclusiveLock;
+    int lockCount;
     
     /** Set of errors to be ignored. */
     std::set<std::string> ignoreErrors;

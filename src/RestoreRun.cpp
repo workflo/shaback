@@ -26,7 +26,6 @@
 #include "lib/StandardOutputStream.h"
 
 #include "RestoreRun.h"
-// #include "RestoreReport.h"
 #include "ShabackInputStream.h"
 
 using namespace std;
@@ -34,13 +33,12 @@ using namespace std;
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, bool testRestore) :
     repository(repository), config(config), testRestore(testRestore)
 {
-  // TODO Move out of constructor!!
-  // repository.lock();
+  repository.lock();
 }
 
 RestoreRun::~RestoreRun()
 {
-  // repository.unlock();
+  repository.unlock();
 }
 
 RestoreReport RestoreRun::start(std::string& treeId, File& destinationDir)

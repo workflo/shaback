@@ -44,7 +44,11 @@ History::~History()
 
 void History::run()
 {
-  repository.lock(true);
+  if (config.backupsToKeep > 0) {
+    repository.lock(true);
+  } else {
+    repository.lock();    
+  }
   repository.open();
 
   if (config.backupsToKeep > 0) {

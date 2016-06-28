@@ -116,6 +116,13 @@ void Repository::checkPassword()
 
 void Repository::lock(bool exclusive)
 {
+  if (config.lockCount > 0) {
+    if (exclusive && !config.haveExclusiveLock) throw LockingException("Upgrading a non-exclusive lock to an exclusive lock is not implemented.");
+    // Be reentrant:
+    config.lockCount++;
+    return;
+  }
+
   int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP);
   if (lockFileFh == -1)
     throw Exception::errnoToException(config.lockFile.path);
@@ -153,10 +160,17 @@ void Repository::lock(bool exclusive)
       throw LockingException(string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
     }
   }
+
+  config.lockCount = 1;
 }
 
-void Repository::unlock()
+void Repository::unlock(bool force)
 {
+  if (config.lockCount > 1 && !force) {
+    config.lockCount--;
+    return;
+  }
+
   config.lockFile.remove();
   if (config.haveExclusiveLock) {
     config.exclusiveLockFile.remove();

@@ -72,7 +72,7 @@ class Repository
     /**
      * Releases the acquired lock.
      */
-    void unlock();
+    void unlock(bool force = false);
 
     /**
      * 'show' command. Exports a file or tree file from the repository.

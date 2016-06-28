@@ -43,6 +43,7 @@ using namespace std;
 RuntimeConfig::RuntimeConfig()
 {
   repository = ".";
+  lockCount = 0;
   quiet = false;
   verbose = 0;
   debug = false;

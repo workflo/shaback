@@ -213,7 +213,7 @@ static Repository* globalRepo;
 static void interruptHandler(int sig)
 {
   cerr << "Operation cancelled." << endl;
-  globalRepo->unlock();
+  globalRepo->unlock(true);
   exit(sig);
 }
 
