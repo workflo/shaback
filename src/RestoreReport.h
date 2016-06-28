@@ -19,6 +19,9 @@
 #ifndef SHABACK_RestoreReport_H
 #define SHABACK_RestoreReport_H
 
+#include <stdint.h>
+
+
 class RestoreReport
 {
   public:
