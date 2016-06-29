@@ -36,11 +36,6 @@ class RestoreRun
     void showTotals();
 
     RestoreReport start(std::string& treeId, File& destinationDir);
-
-    // intmax_t numBytesRestored;
-    // intmax_t bytesToBeRestored;
-    // int numFilesRestored;
-    // int numErrors;
     RestoreReport report;
 
   protected:
@@ -50,7 +45,6 @@ class RestoreRun
   private:
     Repository& repository;
     RuntimeConfig& config;
-    // unsigned int fileCount;
     void progress(std::string &path);
     time_t lastProgressTime;
     bool testRestore;
