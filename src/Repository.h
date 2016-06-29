@@ -29,6 +29,7 @@
 #include "ShabackOutputStream.h"
 #include "ShabackInputStream.h"
 #include "TreeFileEntry.h"
+#include "RestoreReport.h"
 
 class BackupRun;
 class RestoreRun;
@@ -39,20 +40,18 @@ class Repository
     Repository(RuntimeConfig& config);
     ~Repository();
 
-#if defined(SHABACK_HAS_BACKUP)
     int backup();
-#endif
 
     /**
      * Restores files from a specified backup run.
      */
-    int restore();
+    RestoreReport restore();
 
     /**
      * Pretends to restore a given (or all) backups and checks 
      * hashes and dumps file listings.
      */
-    int testRestore();
+    RestoreReport testRestore();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -71,7 +70,7 @@ class Repository
     /**
      * Releases the acquired lock.
      */
-    void unlock();
+    void unlock(bool force = false);
 
     /**
      * 'show' command. Exports a file or tree file from the repository.
@@ -92,11 +91,9 @@ class Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-#if defined(SHABACK_HAS_BACKUP)
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     std::string storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize);
     void storeRootTreeFile(std::string& rootHashValue);
-#endif
     void importCacheFile();
 
     /**
@@ -139,6 +136,9 @@ class Repository
      */
     ShabackOutputStream createOutputStream();
 
+    RestoreReport restoreByRootFile(File& rootFile, bool testRestore);
+    RestoreReport restoreByTreeId(std::string& treeId, bool testRestore);
+
     /**
      * Maps the given name of an encryption algorithm to its respective
      * constant.
@@ -163,7 +163,7 @@ class Repository
      */
     static int repoFormatByName(std::string name);
 
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
     /**
      * Returns the hash digest for the given password as a hex string.
      */
@@ -202,10 +202,7 @@ class Repository
     int splitMinBlocks;
     Date startDate;
 
-    int restoreByRootFile(File& rootFile, bool testRestore);
-    int restoreByTreeId(std::string& treeId, bool testRestore);
-
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
     void checkPassword();
 #endif
 

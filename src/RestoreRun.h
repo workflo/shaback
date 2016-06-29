@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <time.h>
 #include "Repository.h"
+#include "RestoreReport.h"
 
 class RestoreRun
 {
@@ -34,12 +35,8 @@ class RestoreRun
     void restoreAsCpioStream(std::string& treeId, int depth = 0);
     void showTotals();
 
-    int start(std::string& treeId, File& destinationDir);
-
-    intmax_t numBytesRestored;
-    intmax_t bytesToBeRestored;
-    int numFilesRestored;
-    int numErrors;
+    RestoreReport start(std::string& treeId, File& destinationDir);
+    RestoreReport report;
 
   protected:
     void restoreMetaData(File& file, TreeFileEntry& entry);
@@ -48,7 +45,6 @@ class RestoreRun
   private:
     Repository& repository;
     RuntimeConfig& config;
-    unsigned int fileCount;
     void progress(std::string &path);
     time_t lastProgressTime;
     bool testRestore;

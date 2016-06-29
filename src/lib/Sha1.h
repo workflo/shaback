@@ -17,11 +17,31 @@
  */
 
 #include "config.h"
-#if !defined(SHABACK_Sha1_H) && defined(OPENSSL_FOUND)
+#if !defined(SHABACK_Sha1_H)
 #define SHABACK_Sha1_H
 
 #include <string>
-#include <openssl/sha.h>
+
+#if defined(OPENSSL_FOUND)
+    #include <openssl/sha.h>
+#else
+    #include <stdint.h>
+
+    #define SHA_DIGEST_LENGTH 20
+ 
+    typedef struct {
+        uint32_t state[5];
+        uint32_t count[2];
+        unsigned char buffer[64];
+    } SHA_CTX;
+
+    void SHA1_Transform(uint32_t state[5], const unsigned char buffer[64]);
+    void SHA1_Init(SHA_CTX* context);
+    void SHA1_Update(SHA_CTX* context, const unsigned char* data, unsigned long len);
+    void SHA1_Final(unsigned char digest[20], SHA_CTX* context);
+
+#endif
+
 #include "Digest.h"
 
 class Sha1: public Digest
@@ -32,7 +52,7 @@ class Sha1: public Digest
 
     void reset();
 
-    void update(const void* data, unsigned long len);
+    void update(const unsigned char* data, unsigned long len);
     void update(std::string& data);
 
     std::string toString();
@@ -41,6 +61,7 @@ class Sha1: public Digest
 
   private:
     std::string hexStr;
+
     SHA_CTX *ctx;
     unsigned char bytes[SHA_DIGEST_LENGTH];
 };

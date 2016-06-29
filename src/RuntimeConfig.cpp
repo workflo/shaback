@@ -43,6 +43,7 @@ using namespace std;
 RuntimeConfig::RuntimeConfig()
 {
   repository = ".";
+  lockCount = 0;
   quiet = false;
   verbose = 0;
   debug = false;
@@ -61,7 +62,9 @@ RuntimeConfig::RuntimeConfig()
   all = false;
   quick = false;
   actionList = false;
+  actionDetails = false;
   backupsToKeep = -1;
+  number = 0;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -109,13 +112,15 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"all", no_argument, 0, 'a'},
         {"quick", no_argument, 0, 'Q'},
         {"list", no_argument, 0, 'l'},
+        {"details", no_argument, 0, 'D'},
         {"keep", required_argument, 0, 'k'},
+        {"1", no_argument, 0, '1'},
 #if defined(HAVE_DIALOG)        
         {"gui", no_argument, 0, 'g'},
 #endif
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D1", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -218,8 +223,16 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         actionList = true;
         break;
 
+      case 'D':
+        actionDetails = true;
+        break;
+
       case 'k':
         backupsToKeep = atoi(optarg);
+        break;
+
+      case '1':
+        number = 1;
         break;
 
       default:
@@ -528,7 +541,6 @@ void RuntimeConfig::runPreBackupCallbacks()
 }
 
 
-#if defined(SHABACK_HAS_BACKUP)
 void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
 {
   lua_getglobal(this->luaState, "_runPostBackupCallbacks");
@@ -555,4 +567,3 @@ void RuntimeConfig::runLeaveDirCallbacks(File &dir)
   lua_pushstring(this->luaState, dir.path.c_str());
   lua_call(this->luaState, 1, 0);
 }
-#endif

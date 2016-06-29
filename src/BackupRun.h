@@ -17,7 +17,7 @@
  */
 
 #include "ShabackConfig.h"
-#if !defined(SHABACK_BackupRun_H) && defined(SHABACK_HAS_BACKUP)
+#if !defined(SHABACK_BackupRun_H)
 #define SHABACK_BackupRun_H
 
 #include <string>

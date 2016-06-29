@@ -7,9 +7,6 @@
 #define SHABACK_SYSCONFDIR "@CMAKE_INSTALL_PREFIX@/etc"
 
 #include "lib/config.h"
-#if defined(OPENSSL_FOUND)
-# define SHABACK_HAS_BACKUP
-#endif
 
 #cmakedefine NCURSES_FOUND
 

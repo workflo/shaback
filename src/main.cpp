@@ -35,7 +35,6 @@ using namespace std;
 
 void showUsage(string& op)
 {
-#if defined(SHABACK_HAS_BACKUP)
   if (op == "backup") {
     printf("usage: shaback backup [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-t | --totals] [-p <pw> | --password=<pw>]\n"
@@ -61,9 +60,7 @@ void showUsage(string& op)
       "\t    An arbitrary number of files and directories to be backed up.\n"
       "\t    If no files are specified here, the directory list from the config\n"
       "\t    file takes effect.\n\n");
-  } else
-#endif
-  if (op == "restore") {
+  } else if (op == "restore") {
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-S | --skip-existing]\n"
       "                      [-o | --cpio] [-q | --quiet] [-G | --gauge]\n");
@@ -112,7 +109,9 @@ void showUsage(string& op)
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
   } else if (op == "history") {
     printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
-      "                      [-l | --list] [-k <num> | --keep=<num>]\n\n"
+      "                      [-l | --list] [-k <num> | --keep=<num>]\n"
+      "                      [-D | --details]\n"
+      "                      [-1]\n\n"
       "\tPerforms operations to view or maintain the backup history.\n\n"
       "Actions:\n"
       "\t-l, --list\n"
@@ -121,6 +120,10 @@ void showUsage(string& op)
       "\t    Specifies the number of backups/versions to keep.\n"
       "\t    The latest <num> backups will be preserved,\n"
       "\t    excessive (older) backups will be deleted!\n\n"
+      "\t-D, --details\n"
+      "\t    Displays detailed human-readable information about the latest backup.\n\n"
+      "\t-1\n"
+      "\t    Limits --details to the newest backup for each set.\n\n"
       "Options:\n"
       "\t-n <name>, --name=<name>\n"
       "\t    Specifies the backup set's name. The name will be reflected as the index\n"
@@ -128,7 +131,6 @@ void showUsage(string& op)
   } else if (op == "show") {
     printf("usage: shaback show [<general_options>] [-p <pw> | --password=<pw>] <id>\n\n");
     printf("\tDecompresses and decrypts the specified object from the repository to stdout.\n\n");
-#if defined(SHABACK_HAS_BACKUP)
   } else if (op == "init") {
     printf("usage: shaback init [<general_options>] [-f | --force]\n"
       "                      [-E <enc> | --encryption=<enc>]\n"
@@ -160,7 +162,6 @@ void showUsage(string& op)
       "\t    <fmt> must be one of: `2-2' or `3', where `2-2' is the default.\n\n"
       "\t-p <pw>, --password=<pw>\n"
       "\t    If encryption is enabled, this specifies the password to be used.\n\n");
-#endif
   } else if (op == "deflate") {
     printf("usage: shaback deflate\n\n");
   } else if (op == "inflate") {
@@ -169,14 +170,10 @@ void showUsage(string& op)
     printf("usage: shaback <command> [<options>] [<args>]\n");
     printf("\n");
     printf("Valid commands are:\n");
-#if defined(SHABACK_HAS_BACKUP)
     printf("   backup        Backup a set of files or directories.\n");
-#endif
     printf("   gc            Garbage collection: Delete unused files from archive.\n");
     printf("   history       View / maintain backup history.\n");
-#if defined(SHABACK_HAS_BACKUP)
     printf("   init          Create a new repository.\n");
-#endif
     printf("   restore       Restore files from repository.\n");
     printf("   test-restore  Pretend to restore files, check hash digests and dump file listing.\n");
     //    printf("   cleanup     Delete old index files\n");
@@ -210,7 +207,7 @@ static Repository* globalRepo;
 static void interruptHandler(int sig)
 {
   cerr << "Operation cancelled." << endl;
-  globalRepo->unlock();
+  globalRepo->unlock(true);
   exit(sig);
 }
 
@@ -239,23 +236,15 @@ int main(int argc, char** argv)
       signal(SIGPIPE, interruptHandler);
 
       if (config.operation == "init") {
-#if defined(SHABACK_HAS_BACKUP)
         shaback.createRepository();
-#else
-        cerr << "Command 'init' not available - missing openssl." << endl;
-        exit(1);
-#endif
       } else if (config.operation == "backup") {
-#if defined(SHABACK_HAS_BACKUP)
         return shaback.repository.backup();
-#else
-        cerr << "Command 'backup' not available - missing openssl." << endl;
-        exit(1);
-#endif
       } else if (config.operation == "restore") {
-        return shaback.repository.restore();
+        RestoreReport report = shaback.repository.restore();
+        return report.hasErrors() ? 1 : 0;
       } else if (config.operation == "test-restore") {
-        return shaback.repository.testRestore();
+        RestoreReport report(shaback.repository.testRestore());
+        return report.hasErrors() ? 1 : 0;
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {

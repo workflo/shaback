@@ -55,7 +55,9 @@ class RuntimeConfig
     bool all;
     bool quick;
     bool actionList;
+    bool actionDetails;
     int backupsToKeep;
+    int number;
 
     std::string operation;
     std::string repository;
@@ -101,6 +103,7 @@ class RuntimeConfig
     File cacheDir;
     File repoDir;
     bool haveExclusiveLock;
+    int lockCount;
     
     /** Set of errors to be ignored. */
     std::set<std::string> ignoreErrors;

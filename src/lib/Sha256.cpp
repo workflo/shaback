@@ -44,7 +44,7 @@ void Sha256::reset()
 }
 
 
-void Sha256::update(const void* data, unsigned long len)
+void Sha256::update(const unsigned char* data, unsigned long len)
 {
   SHA256_Update(ctx, data, len);
 }

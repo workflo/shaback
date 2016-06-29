@@ -16,26 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_H
-#define SHABACK_H
+#ifndef SHABACK_RestoreReport_H
+#define SHABACK_RestoreReport_H
 
-#include "RuntimeConfig.h"
-#include "Repository.h"
+#include <stdint.h>
 
-class Shaback
+
+class RestoreReport
 {
-public:
-    Shaback(RuntimeConfig& config);
-    virtual ~Shaback();
+  public:
+    RestoreReport();
+    RestoreReport(const RestoreReport& report);
+    RestoreReport& operator=(const RestoreReport& report);
 
-    virtual void createRepository();
-    static int deflate();
-    static int inflate();
+    bool inline hasErrors() { return numErrors > 0; }
 
-    Repository repository;
-    
-  protected:
-    RuntimeConfig& config;
+    intmax_t numBytesRestored;
+    intmax_t bytesToBeRestored;
+    int numFilesRestored;
+    int numErrors;
+    unsigned int fileCount;
 };
 
-#endif // SHABACK_H
+#endif // SHABACK_RestoreReport_H

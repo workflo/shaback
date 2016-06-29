@@ -33,7 +33,6 @@ using namespace std;
 RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, bool testRestore) :
     repository(repository), config(config), testRestore(testRestore)
 {
-  // TODO Move out of constructor!!
   repository.lock();
 }
 
@@ -42,13 +41,8 @@ RestoreRun::~RestoreRun()
   repository.unlock();
 }
 
-int RestoreRun::start(std::string& treeId, File& destinationDir)
+RestoreReport RestoreRun::start(std::string& treeId, File& destinationDir)
 {
-  numErrors = 0;
-  numFilesRestored = 0;
-  numBytesRestored = 0;
-  fileCount = 0;
-  bytesToBeRestored = 0;
   time(&lastProgressTime);
 
   // Open index file to read directory sizes:
@@ -56,7 +50,7 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
 
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
-    bytesToBeRestored += entry.size;
+    report.bytesToBeRestored += entry.size;
   }
 
   if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
@@ -69,7 +63,7 @@ int RestoreRun::start(std::string& treeId, File& destinationDir)
     showTotals();
   }
 
-  return (numErrors > 0 ? 1 : 0);
+  return report;
 }
 
 void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
@@ -132,8 +126,8 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
             repository.exportFile(entry, out);
             out.close();
             restoreMetaData(file, entry);
-            numFilesRestored++;
-            numBytesRestored += entry.size;
+            report.numFilesRestored++;
+            report.numBytesRestored += entry.size;
 
             if (!config.quiet) progress(entry.path);
           } catch (Exception &ex) {
@@ -159,7 +153,7 @@ void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
 
         repository.exportSymlink(entry, file);
         restoreMetaData(file, entry);
-        numFilesRestored++;
+        report.numFilesRestored++;
         break;
       }
 
@@ -189,11 +183,11 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
     switch (entry.type) {
       case TREEFILEENTRY_DIRECTORY: {
         if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++report.fileCount, entry.fileMode,
               entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
               path.c_str(), 0x0);
         } else {
-          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++report.fileCount, entry.fileMode,
               entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
               path.c_str(), 0x0);
         }
@@ -203,7 +197,7 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 
       case TREEFILEENTRY_FILE: {
         if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++report.fileCount, entry.fileMode,
               entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.size, path.c_str(), 0x0);
         } else {
@@ -213,14 +207,14 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
             break;
           }
 
-          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++report.fileCount, entry.fileMode,
               entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.size, path.c_str(), 0x0);
         }
         try {
           repository.exportFile(entry, out);
-          numFilesRestored ++;
-          numBytesRestored += entry.size;
+          report.numFilesRestored ++;
+          report.numBytesRestored += entry.size;
         } catch (Exception &ex) {
           reportError(string("Cannot restore file ").append(path).append(": ").append(ex.getMessage()));
         }
@@ -229,11 +223,11 @@ void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
 
       case TREEFILEENTRY_SYMLINK: {
         if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++report.fileCount, entry.fileMode,
               entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         } else {
-          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++fileCount, entry.fileMode,
+          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++report.fileCount, entry.fileMode,
               entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
               (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
         }
@@ -287,19 +281,19 @@ void RestoreRun::restoreMetaData(File& file, TreeFileEntry& entry)
 
 void RestoreRun::reportError(string msg)
 {
-  numErrors++;
+  report.numErrors++;
   cerr << "[E] " << msg << endl;
 }
 
 void RestoreRun::showTotals()
 {
-  fprintf(stderr, "Files restored:   %12d                      \n", numFilesRestored);
+  fprintf(stderr, "Files restored:   %12d                      \n", report.numFilesRestored);
   #ifdef __APPLE__
-  fprintf(stderr, "Bytes restored:   %12jd\n", numBytesRestored);
+  fprintf(stderr, "Bytes restored:   %12jd\n", report.numBytesRestored);
   #else
-  fprintf(stderr, "Bytes restored:   %12jd\n", numBytesRestored);
+  fprintf(stderr, "Bytes restored:   %12jd\n", report.numBytesRestored);
   #endif
-  fprintf(stderr, "Errors:           %12d\n", numErrors);
+  fprintf(stderr, "Errors:           %12d\n", report.numErrors);
 }
 
 void RestoreRun::progress(std::string &path)
@@ -309,13 +303,13 @@ void RestoreRun::progress(std::string &path)
 
   if (difftime(now, lastProgressTime) >= 1) {
     int percentage = 0;
-    if (bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) numBytesRestored / (float) bytesToBeRestored));
+    if (report.bytesToBeRestored > 0) percentage = min(100.0, (100.0 * (float) report.numBytesRestored / (float) report.bytesToBeRestored));
 
     if (config.gauge) {
       fprintf(stdout, "XXX\n%d\n%s\nXXX\n", percentage, path.c_str());
       fflush(stdout);
     } else {
-      fprintf(stderr, "%jd of %jd bytes (%d%%) restored.\r", numBytesRestored, bytesToBeRestored, percentage);
+      fprintf(stderr, "%jd of %jd bytes (%d%%) restored.\r", report.numBytesRestored, report.bytesToBeRestored, percentage);
     }
 
     time(&lastProgressTime);
