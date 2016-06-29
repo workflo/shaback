@@ -132,7 +132,7 @@ void History::keep(string& backupName, int backupsToKeep)
 
 void History::details()
 {
-  printf("|BACKUP NAME                                                 |DATE                    |SIZE        |\n");
+  printf("|BACKUP NAME                                                                     |DATE                    |SIZE        |\n");
 
   if (config.all) {
     vector<string> backupNames = listBackupNames();
@@ -175,7 +175,7 @@ void History::details(string& backupName)
     }
 
     readable_fs(totalBytes, sizeBuf);
-    printf("|%-60s|%s|%12s|\n", name.c_str(), date.toString().c_str(), sizeBuf);
+    printf("|%-80s|%s|%12s|\n", name.c_str(), date.toString().c_str(), sizeBuf);
 
     if (config.number > 0 && n >= config.number) break;
   }
