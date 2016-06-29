@@ -125,11 +125,16 @@ void Shaback::createRepository()
   }
 
   if (config.init_encryptionAlgorithm != ENCRYPTION_NONE && !config.passwordCheckFile.isFile()) {
+#if defined(OPENSSL_FOUND)
     // Create "password" file:
     string hash = Repository::hashPassword(config.cryptoPassword);
     FileOutputStream os(config.passwordCheckFile);
     os.write(hash.data(), hash.size());
     os.close();
+#else
+    cerr << "Cannot handle encrypted repositories - missing openssl." << endl;
+    exit(1);
+#endif
   }
 
   cout << "Repository created: " << config.repository << endl;
