@@ -288,7 +288,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
     int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
     if (bytesRead == -1)
       break;
-    sha1.update(readBuffer, bytesRead);
+    sha1.update((unsigned char*) readBuffer, bytesRead);
   }
 
   sha1.finalize();
@@ -355,7 +355,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
     if (bytesRead == -1)
       break;
 
-    blockSha1.update(readBuffer, bytesRead);
+    blockSha1.update((unsigned char*) readBuffer, bytesRead);
     blockSha1.finalize();
     string blockHashValue = blockSha1.toString();
 
@@ -384,7 +384,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
     blockList.append("\n");
     *totalFileSize += bytesRead;
 
-    totalSha1.update(readBuffer, bytesRead);
+    totalSha1.update((unsigned char*) readBuffer, bytesRead);
   }
 
   if (config.verbose)
