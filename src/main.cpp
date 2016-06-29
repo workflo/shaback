@@ -112,7 +112,9 @@ void showUsage(string& op)
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
   } else if (op == "history") {
     printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
-      "                      [-l | --list] [-k <num> | --keep=<num>]\n\n"
+      "                      [-l | --list] [-k <num> | --keep=<num>]\n"
+      "                      [-D | --details]\n"
+      "                      [-1]\n\n"
       "\tPerforms operations to view or maintain the backup history.\n\n"
       "Actions:\n"
       "\t-l, --list\n"
@@ -121,6 +123,10 @@ void showUsage(string& op)
       "\t    Specifies the number of backups/versions to keep.\n"
       "\t    The latest <num> backups will be preserved,\n"
       "\t    excessive (older) backups will be deleted!\n\n"
+      "\t-D, --details\n"
+      "\t    Displays detailed human-readable information about the latest backup.\n\n"
+      "\t-1\n"
+      "\t    Limits --details to the newest backup for each set.\n\n"
       "Options:\n"
       "\t-n <name>, --name=<name>\n"
       "\t    Specifies the backup set's name. The name will be reflected as the index\n"
@@ -210,7 +216,7 @@ static Repository* globalRepo;
 static void interruptHandler(int sig)
 {
   cerr << "Operation cancelled." << endl;
-  globalRepo->unlock();
+  globalRepo->unlock(true);
   exit(sig);
 }
 
@@ -253,9 +259,11 @@ int main(int argc, char** argv)
         exit(1);
 #endif
       } else if (config.operation == "restore") {
-        return shaback.repository.restore();
+        RestoreReport report = shaback.repository.restore();
+        return report.hasErrors() ? 1 : 0;
       } else if (config.operation == "test-restore") {
-        return shaback.repository.testRestore();
+        RestoreReport report(shaback.repository.testRestore());
+        return report.hasErrors() ? 1 : 0;
       } else if (config.operation == "show") {
         shaback.repository.show();
       } else if (config.operation == "gc") {

@@ -116,6 +116,13 @@ void Repository::checkPassword()
 
 void Repository::lock(bool exclusive)
 {
+  if (config.lockCount > 0) {
+    if (exclusive && !config.haveExclusiveLock) throw LockingException("Upgrading a non-exclusive lock to an exclusive lock is not implemented.");
+    // Be reentrant:
+    config.lockCount++;
+    return;
+  }
+
   int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP);
   if (lockFileFh == -1)
     throw Exception::errnoToException(config.lockFile.path);
@@ -153,10 +160,17 @@ void Repository::lock(bool exclusive)
       throw LockingException(string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
     }
   }
+
+  config.lockCount = 1;
 }
 
-void Repository::unlock()
+void Repository::unlock(bool force)
 {
+  if (config.lockCount > 1 && !force) {
+    config.lockCount--;
+    return;
+  }
+
   config.lockFile.remove();
   if (config.haveExclusiveLock) {
     config.exclusiveLockFile.remove();
@@ -507,7 +521,7 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 }
 #endif
 
-int Repository::restore()
+RestoreReport Repository::restore()
 {
 #if defined(HAVE_DIALOG)
   string treeSpec;
@@ -517,7 +531,7 @@ int Repository::restore()
 
     BackupsetSelector sel(*this, config);
     treeSpec = sel.start();
-    if (treeSpec == "") return 0;
+    if (treeSpec == "") return RestoreReport();
   } else if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   } else {
@@ -546,7 +560,7 @@ int Repository::restore()
   }
 }
 
-int Repository::testRestore()
+RestoreReport Repository::testRestore()
 {
   if (!config.all && config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
@@ -555,20 +569,21 @@ int Repository::testRestore()
   open();
 
   if (config.all) {
-    int numErrors = 0;
-
+    RestoreReport report;
+   
     vector<File> indexFiles = config.indexDir.listFiles("*.sroot");
 
     for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
       File file(*it);
       if (config.verbose) cerr << "*** " << file.path << " ***" << endl;
-      if (restoreByRootFile(file, true) > 0) {
-        numErrors ++;
+      RestoreReport r = restoreByRootFile(file, true);
+      if (r.hasErrors()) {
+        report.numErrors ++;
         cerr << "ERROR DETECTED: " << file.path << " contains errors!" << endl;
       }
     }
 
-    return numErrors;
+    return report;
   } else {
     string treeSpec = config.cliArgs.at(0);
 
@@ -585,7 +600,7 @@ int Repository::testRestore()
   }
 }
 
-int Repository::restoreByRootFile(File& rootFile, bool testRestore)
+RestoreReport Repository::restoreByRootFile(File& rootFile, bool testRestore)
 {
   FileInputStream in(rootFile);
   string hashValue;
@@ -596,7 +611,7 @@ int Repository::restoreByRootFile(File& rootFile, bool testRestore)
   }
 }
 
-int Repository::restoreByTreeId(string& treeId, bool testRestore)
+RestoreReport Repository::restoreByTreeId(string& treeId, bool testRestore)
 {
   RestoreRun run(config, *this, testRestore);
   File destinationDir(".");
@@ -669,12 +684,12 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
           }
         } catch (Exception &ex) {
           cerr << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << endl;
-          restoreRun.numErrors ++;
+          restoreRun.report.numErrors ++;
         }
       }
     } catch (Exception &ex) {
       cerr << "FAILED: " << entry.path << ": Error reading block list " << entry.id << ": " << ex.getMessage() << endl;
-      restoreRun.numErrors ++;
+      restoreRun.report.numErrors ++;
       return;
     }
   } else {
@@ -695,7 +710,7 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
         }
       } catch (Exception &ex) {
         cerr << "FAILED: " << entry.path << ": Error reading " << entry.id << ": " << ex.getMessage() << endl;
-        restoreRun.numErrors ++;
+        restoreRun.report.numErrors ++;
         return;
       }
     }
@@ -707,14 +722,14 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
   // Check actual file size and hash digest:
   if (!config.quick && totalBytesRead != entry.size) {
     cerr << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << endl;
-    restoreRun.numErrors ++;
+    restoreRun.report.numErrors ++;
   } else if (!config.quick && hashValue != entry.id.substr(0, 40)) {
     cerr << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << endl;
-    restoreRun.numErrors ++;
+    restoreRun.report.numErrors ++;
   } else {
     if (config.verbose >= 2) cerr << "OK: " << entry.path << endl;
-    restoreRun.numFilesRestored ++;
-    restoreRun.numBytesRestored += totalBytesRead;
+    restoreRun.report.numFilesRestored ++;
+    restoreRun.report.numBytesRestored += totalBytesRead;
   }
 }
 

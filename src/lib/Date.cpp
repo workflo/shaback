@@ -62,6 +62,12 @@ string Date::toFilename()
   return filename;
 }
 
+string Date::toString()
+{
+  string d(ctime(&rawtime));
+  return d.substr(0, d.size() -1); // Strip trailing newline
+}
+
 void Date::addYears(int x)
 {
   struct tm * ptm;

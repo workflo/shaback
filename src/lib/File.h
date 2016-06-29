@@ -153,6 +153,9 @@ class File
 #endif
     }
 
+    std::string getName();
+    std::string getBasename(std::string suffix);
+
   protected:
     void canonicalize();
 

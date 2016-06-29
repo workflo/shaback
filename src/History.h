@@ -42,6 +42,8 @@ class History
     void list(std::string& backupName);
     void keep(int backupsToKeep);
     void keep(std::string& backupName, int backupsToKeep);
+    void details();
+    void details(std::string& backupName);
     std::vector<File> listIndexFiled(std::string& backupName);
     std::vector<std::string> listBackupNames();
 };
