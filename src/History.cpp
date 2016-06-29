@@ -132,11 +132,7 @@ void History::keep(string& backupName, int backupsToKeep)
 
 void History::details()
 {
-  printf("|BACKUP NAME                                                 |DATE                    |FILES       |");
-  if (!config.quick) {
-    printf("SIZE        |");
-  }
-  printf("\n");
+  printf("|BACKUP NAME                                                 |DATE                    |SIZE        |\n");
 
   if (config.all) {
     vector<string> backupNames = listBackupNames();
@@ -153,31 +149,33 @@ void History::details()
 void History::details(string& backupName)
 {
   vector<File> indexFiles = listIndexFiled(backupName);
+  char sizeBuf[30];
   int n = 0;
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
-    File file(*it); n++;
-    string fname = file.getName();
+    File rootFile(*it); n++;
+    string fname = rootFile.getName();
     string bname = fname.substr(0, fname.size() - 6);
     string name = bname.substr(0, bname.size() - 18);
     Date date(bname.substr(bname.size() - 17));
 
-    RestoreReport report = repository.restoreByRootFile(file, true);
-    printf("|%-60s|%s|", name.c_str(), date.toString().c_str());
-    if (report.hasErrors()) {
-      printf("   ERRORS   |");
-      if (!config.quick) {
-        printf("   ERRORS   |");
-      }
-    } else {
-      printf("%12u|", report.numFilesRestored);
-      if (!config.quick) {
-        char sizeBuf[30];
-        readable_fs(report.numBytesRestored, sizeBuf);
-        printf("%12s|", sizeBuf);
-      }
+    // Read treeId from root file:
+    FileInputStream in(rootFile);
+    string treeId;
+    in.readLine(treeId);
+
+    // Read root files / directories:
+    vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+
+    // Sum up total number of bytes:
+    intmax_t totalBytes = 0;
+    for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
+      TreeFileEntry entry(*it);
+      totalBytes += entry.size;
     }
-    printf("\n");
+
+    readable_fs(totalBytes, sizeBuf);
+    printf("|%-60s|%s|%12s|\n", name.c_str(), date.toString().c_str(), sizeBuf);
 
     if (config.number > 0 && n >= config.number) break;
   }
