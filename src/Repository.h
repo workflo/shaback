@@ -40,9 +40,7 @@ class Repository
     Repository(RuntimeConfig& config);
     ~Repository();
 
-#if defined(SHABACK_HAS_BACKUP)
     int backup();
-#endif
 
     /**
      * Restores files from a specified backup run.
@@ -93,11 +91,9 @@ class Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-#if defined(SHABACK_HAS_BACKUP)
     std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     std::string storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize);
     void storeRootTreeFile(std::string& rootHashValue);
-#endif
     void importCacheFile();
 
     /**
@@ -167,7 +163,7 @@ class Repository
      */
     static int repoFormatByName(std::string name);
 
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
     /**
      * Returns the hash digest for the given password as a hex string.
      */
@@ -206,7 +202,7 @@ class Repository
     int splitMinBlocks;
     Date startDate;
 
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
     void checkPassword();
 #endif
 

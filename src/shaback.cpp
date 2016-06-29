@@ -40,7 +40,6 @@ Shaback::~Shaback()
 {
 }
 
-#if defined(SHABACK_HAS_BACKUP)
 void Shaback::createRepository()
 {
   if (!config.force) {
@@ -135,7 +134,6 @@ void Shaback::createRepository()
 
   cout << "Repository created: " << config.repository << endl;
 }
-#endif
 
 int Shaback::deflate()
 {

@@ -541,7 +541,6 @@ void RuntimeConfig::runPreBackupCallbacks()
 }
 
 
-#if defined(SHABACK_HAS_BACKUP)
 void RuntimeConfig::runPostBackupCallbacks(BackupRun *run)
 {
   lua_getglobal(this->luaState, "_runPostBackupCallbacks");
@@ -568,4 +567,3 @@ void RuntimeConfig::runLeaveDirCallbacks(File &dir)
   lua_pushstring(this->luaState, dir.path.c_str());
   lua_call(this->luaState, 1, 0);
 }
-#endif

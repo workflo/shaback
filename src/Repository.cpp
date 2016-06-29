@@ -85,7 +85,7 @@ void Repository::open()
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
     checkPassword();
 #else
     cerr << "Cannot handle encrypted repositories - missing openssl." << endl;
@@ -94,7 +94,7 @@ void Repository::open()
   }
 }
 
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
 void Repository::checkPassword()
 {
   FileInputStream in(config.passwordCheckFile);
@@ -186,7 +186,6 @@ void Repository::openReadCache()
   }
 }
 
-#if defined(SHABACK_HAS_BACKUP)
 int Repository::backup()
 {
   open();
@@ -205,7 +204,6 @@ int Repository::backup()
 
   return rc;
 }
-#endif
 
 File Repository::hashValueToFile(string hashValue)
 {
@@ -231,7 +229,6 @@ bool Repository::contains(string& hashValue)
   return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
-#if defined(SHABACK_HAS_BACKUP)
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
 {
   Sha1 sha1;
@@ -411,7 +408,6 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
 
   return totalHashValue;
 }
-#endif
 
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
@@ -503,7 +499,6 @@ void Repository::importCacheFile()
   }
 }
 
-#if defined(SHABACK_HAS_BACKUP)
 void Repository::storeRootTreeFile(string& rootHashValue)
 {
   string filename = config.backupName;
@@ -519,7 +514,6 @@ void Repository::storeRootTreeFile(string& rootHashValue)
   cout << "ID:         " << rootHashValue << endl;
   cout << "Index file: " << file.path << endl;
 }
-#endif
 
 RestoreReport Repository::restore()
 {
@@ -857,7 +851,7 @@ string Repository::repoFormatToName(int fmt)
   }
 }
 
-#if defined(SHABACK_HAS_BACKUP)
+#if defined(OPENSSL_FOUND)
 string Repository::hashPassword(string password)
 {
   Sha256 sha;
