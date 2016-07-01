@@ -17,7 +17,8 @@
  */
 
 #include <iostream>
-
+#include <inttypes.h>
+ 
 #include "lib/File.h"
 
 #include "ShabackException.h"
@@ -94,7 +95,7 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file size");
   n = line.substr(from, until - from);
   from = until +1;
-  size = strtol(n.c_str(), 0, 10);
+  size = strtoimax(n.c_str(), 0, 10);
 
   if (type == TREEFILEENTRY_SYMLINK) {
     // Symlink destination

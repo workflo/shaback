@@ -65,6 +65,7 @@ class File
     bool mkdirs();
     std::string readlink();
     std::vector<File> listFiles(std::string pattern);
+    std::string listFilesToString(std::string pattern, std::string delimiter);
     bool move(File& destination);
     bool setXAttr(std::string key, std::string value);
     bool setXAttr(std::string key, int value);
