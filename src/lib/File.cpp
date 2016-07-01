@@ -288,6 +288,20 @@ vector<File> File::listFiles(string p)
   return list;
 }
 
+string File::listFilesToString(string p, string delimiter)
+{
+  vector<File> list = listFiles(p);
+  string str;
+
+  for (vector<File>::iterator it = list.begin(); it < list.end(); it++) {
+    File file(*it);
+    if (str.size() > 0) str.append(delimiter);
+    str.append(file.getName());
+  }
+
+  return str;
+}
+
 bool File::move(File& destination)
 {
   return (::rename(path.c_str(), destination.path.c_str()) == 0);

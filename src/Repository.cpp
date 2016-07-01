@@ -123,6 +123,8 @@ void Repository::lock(bool exclusive)
     return;
   }
 
+  string existingLocks = config.locksDir.listFilesToString("*.lock", "; ");
+
   int lockFileFh = ::open(config.lockFile.path.c_str(), O_CREAT | O_EXCL, S_IRWXU | S_IROTH | S_IRGRP);
   if (lockFileFh == -1)
     throw Exception::errnoToException(config.lockFile.path);
@@ -132,7 +134,7 @@ void Repository::lock(bool exclusive)
     if (ret != 0) {
       if (errno == EEXIST) {
         throw LockingException(
-            string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
+            string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path).append(": ").append(existingLocks));
         // TODO: EPERM: symlinks not supported!
       } else {
         throw Exception::errnoToException(config.exclusiveLockFile.path);
@@ -147,7 +149,7 @@ void Repository::lock(bool exclusive)
       if (lockFiles.size() > 1) {
         throw LockingException(
             string("Cannot exclusively lock repository while other locks exist. Check lock files in ").append(
-                config.locksDir.path));
+                config.locksDir.path).append(": ").append(existingLocks));
       }
     } else {
       config.exclusiveLockFile.remove();
@@ -157,7 +159,8 @@ void Repository::lock(bool exclusive)
       throw LockingException(string("Cannot aquire exclusive lock with --no-symlink-lock."));
     }
     if (File(config.exclusiveLockFile).isFile()) {
-      throw LockingException(string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path));
+      throw LockingException(string("Repository is locked exclusively. Check lock files in ")
+        .append(config.locksDir.path).append(": ").append(existingLocks));
     }
   }
 
