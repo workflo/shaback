@@ -49,7 +49,7 @@ def main():
             for file22 in os.listdir(dir22):
                 file3 = os.path.join(dir3, prefix3 + file22)
                 sys.stdout.write("   - " + file22 + " -> " + file3 + "\n")
-                shutil.move(file22, file3)
+                shutil.move(os.path.join(dir22, file22), file3)
 
             os.rmdir(dir22)
         os.rmdir(level0Path)
