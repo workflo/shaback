@@ -304,7 +304,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
     File destFile = hashValueToFile(hashValue);
 
     if (config.verbose || config.debug) {
-      cout << "[m] " << srcFile.path << endl;
+      cout << config.color_filename << "[m] " << srcFile.path << config.color_default << endl;
       if (config.debug) {
         cout << "[f] " << destFile.path << endl;
       }
@@ -344,7 +344,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
   int blockCount = 0;
 
   if (config.verbose || config.debug) {
-    cout << "[s] " << srcFile.path << endl;
+    cout << config.color_filename << "[s] " << srcFile.path << config.color_default << endl;
   }
 
   *totalFileSize = 0;
@@ -514,8 +514,10 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
   os.close();
 
+  cout << config.color_success;
   cout << "ID:         " << rootHashValue << endl;
   cout << "Index file: " << file.path << endl;
+  cout << config.color_default;
 }
 
 RestoreReport Repository::restore()

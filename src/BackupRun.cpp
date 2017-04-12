@@ -196,6 +196,8 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
 
 void BackupRun::showTotals()
 {
+  cerr << (numErrors == 0 ? config.color_stats : config.color_error);
+  cerr << config.style_bold;
   fprintf(stderr, "Files inspected:  %12d\n", numFilesRead);
 #ifdef __APPLE__
   fprintf(stderr, "Bytes inspected:  %12jd\n", numBytesRead);
@@ -209,12 +211,14 @@ void BackupRun::showTotals()
   fprintf(stderr, "Bytes stored:     %12lu\n", numBytesStored);
 #endif
   fprintf(stderr, "Errors:           %12d\n", numErrors);
+
+  cerr << config.style_default;
 }
 
 void BackupRun::reportError(Exception& ex)
 {
   numErrors++;
-  cerr << "[E] " << ex.getMessage() << endl;
+  cerr << config.color_error << "[E] " << ex.getMessage() << config.color_default << endl;
 }
 
 void BackupRun::deleteOldIndexFiles()

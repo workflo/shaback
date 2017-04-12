@@ -22,6 +22,7 @@
 #include "RuntimeConfig.h"
 #include "Repository.h"
 
+
 class Shaback
 {
 public:

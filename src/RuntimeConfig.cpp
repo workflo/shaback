@@ -22,6 +22,7 @@
 #else
 # include <getopt.h>
 # include <fnmatch.h>
+# include <termios.h>
 #endif
 #include <stdlib.h>
 
@@ -139,6 +140,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'q':
         quiet = true;
+        gauge = true;
         break;
 
       case 'h':
@@ -252,6 +254,19 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         cliArgs.push_back(argv[optind++]);
       }
     }
+  }
+
+  struct termios terminal;
+  if (tcgetattr(0, &terminal) != -1 && tcgetattr(1, &terminal) != -1) {
+    // Colors (See http://misc.flogisoft.com/bash/tip_colors_and_formatting)
+    color_error = "\e[31m";
+    color_success = "\e[32m";
+    color_filename = "\e[36m";
+    color_stats = "\e[34m";
+    color_default = "\e[39m";
+
+    style_bold = "\e[1m";
+    style_default = "\e[0m";
   }
 }
 

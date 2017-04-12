@@ -59,6 +59,15 @@ class RuntimeConfig
     int backupsToKeep;
     int number;
 
+    std::string color_error;
+    std::string color_success;
+    std::string color_filename;
+    std::string color_stats;
+    std::string color_default;
+
+    std::string style_bold;
+    std::string style_default;
+
     std::string operation;
     std::string repository;
 
