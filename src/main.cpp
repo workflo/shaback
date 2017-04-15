@@ -150,12 +150,15 @@ void showUsage(string& op)
       "\t-C <comp>, --compression=<comp>\n"
       "\t    Enable data compression for this repository. You cannot alter this setting\n"
       "\t    after the repository has been created!\n"
-      "\t    <comp> must be one of: `None', `BZip', `BZip-1', `BZip-9'"
-#if defined(LZMA_FOUND)
-           ", `LZMA',\n"
-      "\t    `LZMA-0', `LZMA-5', `LZMA-9'"
+      "\t    <comp> must be one of: `None',\n"
+      "\t    `BZip', `BZip-1', `BZip-9'"
+#if defined(ZSTD_FOUND)
+           ",\n\t    `ZStd', `ZStd-1', `ZStd-5', `ZStd-9'"
 #endif
-           " or `Deflate'.\n"
+#if defined(LZMA_FOUND)
+           ",\n\t    `LZMA', `LZMA-0', `LZMA-5', `LZMA-9'"
+#endif
+           "\n\t    or `Deflate'.\n"
       "\t    Defaults to `Deflate'.\n\n"
       "\t-F <fmt>, --repo-format=<fmt>\n"
       "\t    Select an alternative repository format.\n"

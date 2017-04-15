@@ -761,15 +761,18 @@ void Repository::history()
 
 int Repository::encryptionByName(string name)
 {
-  if (name == "Blowfish") {
+  string lcName(name);
+  std::transform(lcName.begin(), lcName.end(), lcName.begin(), ::tolower);
+
+  if (lcName == "blowfish") {
     return ENCRYPTION_BLOWFISH;
-    //  } else if (name == "Twofish") {
+    //  } else if (lcName == "twofish") {
     //    return ENCRYPTION_TWOFISH;
-    //  } else if (name == "AES") {
+    //  } else if (lcName == "aes") {
     //    return ENCRYPTION_AES;
-    //  } else if (name == "DES") {
+    //  } else if (lcName == "des") {
     //    return ENCRYPTION_DES;
-  } else if (name == "None" || name.empty()) {
+  } else if (lcName == "none" || name.empty()) {
     return ENCRYPTION_NONE;
   } else {
     throw UnsupportedEncryptionAlgorithm(name);
@@ -778,23 +781,34 @@ int Repository::encryptionByName(string name)
 
 int Repository::compressionByName(string name)
 {
-  if (name == "Deflate") {
+  string lcName(name);
+  std::transform(lcName.begin(), lcName.end(), lcName.begin(), ::tolower);
+
+  if (lcName == "deflate") {
     return COMPRESSION_DEFLATE;
-  } else if (name == "BZ" || name == "Bz" || name == "BZip" || name == "BZip-5") {
+  } else if (lcName == "bz" || lcName == "bzip" || lcName == "bzip-5") {
     return COMPRESSION_BZip5;
-  } else if (name == "BZ1" || name == "Bz1" || name == "BZip-1" || name == "BZip1") {
+  } else if (lcName == "bz1" || lcName == "bzip-1" || lcName == "bzip1") {
     return COMPRESSION_BZip1;
-  } else if (name == "BZ9" || name == "Bz9" || name == "BZip-9" || name == "BZip9") {
+  } else if (lcName == "bz9" || lcName == "bz9" || lcName == "bzip-9" || lcName == "bzip9") {
     return COMPRESSION_BZip9;
+#if defined(ZSTD_FOUND)
+  } else if (lcName == "zstd1" || lcName == "zstd-1") {
+    return COMPRESSION_ZSTD1;
+  } else if (lcName == "zstd5" || lcName == "zstd-5" || lcName == "zstd") {
+    return COMPRESSION_ZSTD5;
+  } else if (lcName == "zstd9" || lcName == "zstd-9") {
+    return COMPRESSION_ZSTD9;
+#endif
 #if defined(LZMA_FOUND)
-  } else if (name == "LZMA0" || name == "LZMA-0" || name == "Lzma0" || name == "Lzma-0") {
+  } else if (lcName == "lzma0" || lcName == "lzma-0") {
     return COMPRESSION_LZMA0;
-  } else if (name == "LZMA" || name == "LZMA-5" || name == "Lzma" || name == "Lzma-5") {
+  } else if (lcName == "lzma5" || lcName == "lzma-5" || lcName == "lzma") {
     return COMPRESSION_LZMA5;
-  } else if (name == "LZMA9" || name == "LZMA-9" || name == "Lzma9" || name == "Lzma-9") {
+  } else if (lcName == "lzma9" || lcName == "lzma-9") {
     return COMPRESSION_LZMA9;
 #endif
-  } else if (name == "None" || name.empty()) {
+  } else if (lcName == "none" || lcName.empty()) {
     return COMPRESSION_NONE;
   } else {
     throw UnsupportedCompressionAlgorithm(name);
@@ -823,6 +837,14 @@ string Repository::compressionToName(int compression)
       return "BZip-1";
     case COMPRESSION_BZip9:
       return "BZip-9";
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD5:
+      return "ZStd";
+    case COMPRESSION_ZSTD1:
+      return "ZStd-1";
+    case COMPRESSION_ZSTD9:
+      return "ZStd-9";
+#endif
 #if defined(LZMA_FOUND)
     case COMPRESSION_LZMA0:
       return "Lzma-0";
