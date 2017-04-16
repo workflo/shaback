@@ -17,7 +17,6 @@
  */
 
 #include <iostream>
-#include <math.h>
 #include "ZStdOutputStream.h"
 
 #if defined(ZSTD_FOUND)
@@ -48,7 +47,6 @@ ZStdOutputStream::ZStdOutputStream(OutputStream* out, int compressionLevel)
 
   inBuffer.size = ZSTD_CStreamInSize();
   inBuffer.pos = 0;
-  inBuffer.src = (char*) malloc(inBuffer.size);
 }
 
 ZStdOutputStream::~ZStdOutputStream()
@@ -57,7 +55,6 @@ ZStdOutputStream::~ZStdOutputStream()
   ZSTD_freeCStream(zipStream);
   zipStream = 0;
   free(outBuffer.dst);
-  free((void*) inBuffer.src);
 }
 
 
@@ -113,46 +110,27 @@ void ZStdOutputStream::writeChunk(const char* b, size_t len)
 
   ZSTD_inBuffer input = { b, len, 0 };
   while (input.pos < input.size) {
-    ZSTD_outBuffer output = { outBuffer.dst, outBuffer.size, 0 };
-    toRead = ZSTD_compressStream(zipStream, &output , &input);   /* toRead is guaranteed to be <= ZSTD_CStreamInSize() */
+    outBuffer.pos = 0;
+    toRead = ZSTD_compressStream(zipStream, &outBuffer , &input);
 
     if (ZSTD_isError(toRead)) { 
        throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(toRead));
     }
 
-    out->write((char*)outBuffer.dst, output.pos);
+    out->write((char*)outBuffer.dst, outBuffer.pos);
   }
 }
 
 
 void ZStdOutputStream::finish()
 {
-
-  ZSTD_outBuffer output = { outBuffer.dst, outBuffer.size, 0 };
+  outBuffer.pos = 0;
   size_t const remainingToFlush = ZSTD_endStream(zipStream, &outBuffer);
   if (remainingToFlush) {
     throw ZStdException("ZSTD_endStream: not fully flushed"); 
   }
 
-  // if (ret == LZMA_STREAM_END) return;
-
-  // char inBuf[1];
-
-  // zipStream.avail_in = 0;
-  // zipStream.next_in = (uint8_t*) inBuf;
-    
-  // do {
-  //   zipStream.avail_out = LZMA_CHUNK_SIZE;
-  //   zipStream.next_out = (uint8_t*) outputBuffer;
-     
-  //   ret = lzma_code(&zipStream, LZMA_FINISH);
-  //   if (ret < 0) {
-  //     throw LzmaException("lzma_code failed", ret);
-  //   }
-  //   out->write((const char*) outputBuffer, LZMA_CHUNK_SIZE - zipStream.avail_out);
-  // } while (zipStream.avail_out == 0);
-
-  // lzma_end(&zipStream);
+  out->write((char*)outBuffer.dst, outBuffer.pos);
 }
 
 
@@ -162,7 +140,6 @@ void ZStdOutputStream::close()
     finish();
     out->close();
     out = 0;
-    // ret = LZMA_STREAM_END;
   }
 }
 

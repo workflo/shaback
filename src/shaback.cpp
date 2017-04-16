@@ -44,7 +44,7 @@ void Shaback::createRepository()
 {
   if (!config.force) {
     if (config.filesDir.isDir() || config.indexDir.isDir() || config.locksDir.isDir()) {
-      cerr << "Looks like a shaback repository already: " << config.repository << endl;
+      cerr << config.color_error << "Looks like a shaback repository already: " << config.repository << config.color_default << endl;
       exit(3);
     }
     if (!config.repoDir.listFiles("*").empty()) {
@@ -132,12 +132,12 @@ void Shaback::createRepository()
     os.write(hash.data(), hash.size());
     os.close();
 #else
-    cerr << "Cannot handle encrypted repositories - missing openssl." << endl;
+    cerr << config.color_error << "Cannot handle encrypted repositories - missing openssl." << config.color_default << endl;
     exit(1);
 #endif
   }
 
-  cout << "Repository created: " << config.repository << endl;
+  cout << config.color_success << "Repository created: " << config.repository << config.color_default << endl;
 }
 
 int Shaback::deflate()
