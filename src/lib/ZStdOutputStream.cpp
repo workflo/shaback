@@ -1,6 +1,6 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2012 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2017 Florian Wolff (florian@donuz.de)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <math.h>
 #include "ZStdOutputStream.h"
 
 #if defined(ZSTD_FOUND)
@@ -30,21 +31,24 @@ ZStdOutputStream::ZStdOutputStream(OutputStream* out, int compressionLevel)
   : out(out)
 {
   zipStream = ZSTD_createCStream();
-  ZSTD_initCStream(zipStream, compressionLevel);
 
-  // lzma_stream tmp = LZMA_STREAM_INIT;
-  // memcpy(&zipStream, &tmp, sizeof(lzma_stream));
+  if (zipStream == 0) {
+    throw ZStdException("ZSTD_createCStream failed");
+  }
 
-  // if ((ret = lzma_easy_encoder(&zipStream, compressionLevel, LZMA_CHECK_CRC64)) != LZMA_OK) {
-  //   throw LzmaException("lzma_easy_encoder failed", ret);
-  // }
+  size_t const initResult = ZSTD_initCStream(zipStream, compressionLevel);
 
-  // outputBufferSize = ZSTD_CStreamOutSize();
-  // buffInSize = ZSTD_CStreamInSize(); 
-  
+  if (ZSTD_isError(initResult)) {
+    throw ZStdException("ZSTD_initCStream failed", ZSTD_getErrorName(initResult));
+  } 
+
   outBuffer.size = ZSTD_CStreamOutSize();
   outBuffer.pos = 0;
   outBuffer.dst = (char*) malloc(outBuffer.size);
+
+  inBuffer.size = ZSTD_CStreamInSize();
+  inBuffer.pos = 0;
+  inBuffer.src = (char*) malloc(inBuffer.size);
 }
 
 ZStdOutputStream::~ZStdOutputStream()
@@ -53,6 +57,7 @@ ZStdOutputStream::~ZStdOutputStream()
   ZSTD_freeCStream(zipStream);
   zipStream = 0;
   free(outBuffer.dst);
+  free((void*) inBuffer.src);
 }
 
 
@@ -65,47 +70,89 @@ void ZStdOutputStream::write(int b)
 
 void ZStdOutputStream::write(const char* b, int len)
 {
-  if (len <= 0) return;
+  size_t pos = 0;
 
-  zipStream.avail_in = len;
-  zipStream.next_in = (uint8_t*) b;
-    
-  do {
-    zipStream.avail_out = LZMA_CHUNK_SIZE;
-    zipStream.next_out = (uint8_t*) outputBuffer;
+  while (len > 0) {
+    size_t nextChunkLen = min((size_t) len, inBuffer.size);
+    writeChunk(b, nextChunkLen);
+    b += nextChunkLen;
+    len -= nextChunkLen;
+  }
+  // char*  buffIn = (char*) inBuffer.src;
+  // size_t leftToRead = len;
 
-    ZSTD_compressStream(zipStream, outputBuffer, b);
+  // while (leftToRead > 0) {
+  //   if (inBuffer.pos < inBuffer.size) {
+  //     size_t toCopy = min((size_t) len, inBuffer.size - inBuffer.pos);
+  //     memcpy(&buffIn[inBuffer.pos], b, toCopy);
+  //     inBuffer.pos += toCopy;
+  //     leftToRead = len - toCopy;
+  //     cout << "memcpy: toCopy=" << toCopy << "; leftToRead=" << leftToRead << endl;
+  //   }
 
-    ret = lzma_code(&zipStream, LZMA_RUN);
-    if (ret < 0) {
-      throw LzmaException("lzma_code failed", ret);
+  //   cout << "inBuffer 1: p=" << inBuffer.pos << endl;
+  //   size_t compressStatus = ZSTD_compressStream(zipStream, &outBuffer , &inBuffer);
+  //   if (ZSTD_isError(compressStatus)) { 
+  //      throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(compressStatus));
+  //   }
+  //     cout << "outBuffer: p=" << outBuffer.pos << endl;
+
+  //   if (outBuffer.pos > 0) {
+  //     out->write((char*)outBuffer.dst, outBuffer.pos);
+  //     outBuffer.pos = 0;
+  //   }
+
+  //   cout << "inBuffer 2: p=" << inBuffer.pos << endl;
+  //   // ZSTD_flushStream(zipStream, &outBuffer);
+  // }
+}
+
+void ZStdOutputStream::writeChunk(const char* b, size_t len)
+{
+  size_t toRead = len;
+
+  ZSTD_inBuffer input = { b, len, 0 };
+  while (input.pos < input.size) {
+    ZSTD_outBuffer output = { outBuffer.dst, outBuffer.size, 0 };
+    toRead = ZSTD_compressStream(zipStream, &output , &input);   /* toRead is guaranteed to be <= ZSTD_CStreamInSize() */
+
+    if (ZSTD_isError(toRead)) { 
+       throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(toRead));
     }
-    out->write((const char*) outputBuffer, LZMA_CHUNK_SIZE - zipStream.avail_out);
-  } while (zipStream.avail_out == 0 && zipStream.avail_in > 0);
+
+    out->write((char*)outBuffer.dst, output.pos);
+  }
 }
 
 
 void ZStdOutputStream::finish()
 {
-  if (ret == LZMA_STREAM_END) return;
 
-  char inBuf[1];
+  ZSTD_outBuffer output = { outBuffer.dst, outBuffer.size, 0 };
+  size_t const remainingToFlush = ZSTD_endStream(zipStream, &outBuffer);
+  if (remainingToFlush) {
+    throw ZStdException("ZSTD_endStream: not fully flushed"); 
+  }
 
-  zipStream.avail_in = 0;
-  zipStream.next_in = (uint8_t*) inBuf;
+  // if (ret == LZMA_STREAM_END) return;
+
+  // char inBuf[1];
+
+  // zipStream.avail_in = 0;
+  // zipStream.next_in = (uint8_t*) inBuf;
     
-  do {
-    zipStream.avail_out = LZMA_CHUNK_SIZE;
-    zipStream.next_out = (uint8_t*) outputBuffer;
+  // do {
+  //   zipStream.avail_out = LZMA_CHUNK_SIZE;
+  //   zipStream.next_out = (uint8_t*) outputBuffer;
      
-    ret = lzma_code(&zipStream, LZMA_FINISH);
-    if (ret < 0) {
-      throw LzmaException("lzma_code failed", ret);
-    }
-    out->write((const char*) outputBuffer, LZMA_CHUNK_SIZE - zipStream.avail_out);
-  } while (zipStream.avail_out == 0);
+  //   ret = lzma_code(&zipStream, LZMA_FINISH);
+  //   if (ret < 0) {
+  //     throw LzmaException("lzma_code failed", ret);
+  //   }
+  //   out->write((const char*) outputBuffer, LZMA_CHUNK_SIZE - zipStream.avail_out);
+  // } while (zipStream.avail_out == 0);
 
-  lzma_end(&zipStream);
+  // lzma_end(&zipStream);
 }
 
 
@@ -115,7 +162,7 @@ void ZStdOutputStream::close()
     finish();
     out->close();
     out = 0;
-    ret = LZMA_STREAM_END;
+    // ret = LZMA_STREAM_END;
   }
 }
 

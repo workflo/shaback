@@ -41,16 +41,15 @@ class ZStdOutputStream: public OutputStream
     void close();
 
   protected:
+    void writeChunk(const char* b, size_t len);
+
     OutputStream* out;
     ZSTD_CStream* zipStream;
-    // char* outputBuffer;
-    // size_t outputBufferSize;
-    // lzma_ret ret;
 
     ZSTD_inBuffer inBuffer;
     ZSTD_outBuffer outBuffer;
 
-    // size_t buffInSize;
-    // size_t buffOutSize;
+    // void* buffIn;
+    // void* buffOut;
 };
 #endif // SHABACK_ZStdOutputStream_H

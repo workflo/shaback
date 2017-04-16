@@ -193,3 +193,14 @@ LzmaException::LzmaException(string msg, int err)
   }
 }
 
+
+ZStdException::ZStdException(string msg) :
+  Exception(msg)
+{
+}
+
+ZStdException::ZStdException(string msg, string details)
+{
+  this->msg = msg.append(": ").append(details);
+}
+
