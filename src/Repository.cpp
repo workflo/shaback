@@ -578,7 +578,7 @@ RestoreReport Repository::testRestore()
       RestoreReport r = restoreByRootFile(file, true);
       if (r.hasErrors()) {
         report.numErrors ++;
-        cerr << "ERROR DETECTED: " << file.path << " contains errors!" << endl;
+        cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
       }
     }
 
@@ -682,12 +682,12 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
             totalBytesRead += bytesRead;
           }
         } catch (Exception &ex) {
-          cerr << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << endl;
+          cerr << config.color_error << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << config.color_default << endl;
           restoreRun.report.numErrors ++;
         }
       }
     } catch (Exception &ex) {
-      cerr << "FAILED: " << entry.path << ": Error reading block list " << entry.id << ": " << ex.getMessage() << endl;
+      cerr << config.color_error << "FAILED: " << entry.path << ": Error reading block list " << entry.id << ": " << ex.getMessage() << config.color_default << endl;
       restoreRun.report.numErrors ++;
       return;
     }
@@ -708,7 +708,7 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
           totalBytesRead += bytesRead;
         }
       } catch (Exception &ex) {
-        cerr << "FAILED: " << entry.path << ": Error reading " << entry.id << ": " << ex.getMessage() << endl;
+        cerr << config.color_error << "FAILED: " << entry.path << ": Error reading " << entry.id << ": " << ex.getMessage() << config.color_default << endl;
         restoreRun.report.numErrors ++;
         return;
       }
@@ -720,10 +720,10 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
 
   // Check actual file size and hash digest:
   if (!config.quick && totalBytesRead != entry.size) {
-    cerr << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << endl;
+    cerr << config.color_error << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << config.color_default << endl;
     restoreRun.report.numErrors ++;
   } else if (!config.quick && hashValue != entry.id.substr(0, 40)) {
-    cerr << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << endl;
+    cerr << config.color_error << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << config.color_default << endl;
     restoreRun.report.numErrors ++;
   } else {
     if (config.verbose >= 2) cerr << "OK: " << entry.path << endl;

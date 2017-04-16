@@ -327,7 +327,7 @@ void BackupRun::deleteOldIndexFiles()
     fname.append("_").append(d.toFilename()).append(".sroot");
     File file(config.indexDir, fname);
     if (config.verbose) {
-      cout << "Deleting old index file " << file.path.c_str() << endl;
+      cout << config.color_deleted << "Deleting old index file " << file.path.c_str() << config.color_default << endl;
     }
     file.remove();
   }

@@ -63,6 +63,7 @@ class RuntimeConfig
     std::string color_success;
     std::string color_filename;
     std::string color_stats;
+    std::string color_deleted;
     std::string color_default;
 
     std::string style_bold;

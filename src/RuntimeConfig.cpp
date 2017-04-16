@@ -94,6 +94,7 @@ RuntimeConfig::RuntimeConfig()
     color_success = "\e[32m";
     color_filename = "\e[36m";
     color_stats = "\e[34m";
+    color_deleted = "\e[45m";
     color_default = "\e[39m";
 
     style_bold = "\e[1m";
