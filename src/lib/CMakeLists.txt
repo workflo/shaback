@@ -41,6 +41,7 @@ set(shaback_lib_SRCS
              StandardOutputStream.cpp
              StandardInputStream.cpp
              ZStdOutputStream.cpp
+             ZStdInputStream.cpp
              )
 
 IF (LZMA_FOUND)

@@ -67,41 +67,12 @@ void ZStdOutputStream::write(int b)
 
 void ZStdOutputStream::write(const char* b, int len)
 {
-  size_t pos = 0;
-
   while (len > 0) {
     size_t nextChunkLen = min((size_t) len, inBuffer.size);
     writeChunk(b, nextChunkLen);
     b += nextChunkLen;
     len -= nextChunkLen;
   }
-  // char*  buffIn = (char*) inBuffer.src;
-  // size_t leftToRead = len;
-
-  // while (leftToRead > 0) {
-  //   if (inBuffer.pos < inBuffer.size) {
-  //     size_t toCopy = min((size_t) len, inBuffer.size - inBuffer.pos);
-  //     memcpy(&buffIn[inBuffer.pos], b, toCopy);
-  //     inBuffer.pos += toCopy;
-  //     leftToRead = len - toCopy;
-  //     cout << "memcpy: toCopy=" << toCopy << "; leftToRead=" << leftToRead << endl;
-  //   }
-
-  //   cout << "inBuffer 1: p=" << inBuffer.pos << endl;
-  //   size_t compressStatus = ZSTD_compressStream(zipStream, &outBuffer , &inBuffer);
-  //   if (ZSTD_isError(compressStatus)) { 
-  //      throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(compressStatus));
-  //   }
-  //     cout << "outBuffer: p=" << outBuffer.pos << endl;
-
-  //   if (outBuffer.pos > 0) {
-  //     out->write((char*)outBuffer.dst, outBuffer.pos);
-  //     outBuffer.pos = 0;
-  //   }
-
-  //   cout << "inBuffer 2: p=" << inBuffer.pos << endl;
-  //   // ZSTD_flushStream(zipStream, &outBuffer);
-  // }
 }
 
 void ZStdOutputStream::writeChunk(const char* b, size_t len)

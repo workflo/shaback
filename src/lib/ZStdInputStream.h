@@ -17,36 +17,40 @@
  */
 
 #include "config.h"
-#if !defined(SHABACK_ZStdOutputStream_H) && defined(ZSTD_FOUND)
-#define SHABACK_ZStdOutputStream_H
+#if !defined(SHABACK_ZStdInputStream_H) && defined(ZSTD_FOUND)
+#define SHABACK_ZStdInputStream_H
 
 #include <string.h>
 #include <zstd.h>
-#include "OutputStream.h"
+#include "InputStream.h"
 
 /**
- * An OutputStream that performs ZStandard data compression.
+ * An InputStream that performs ZStandard data decompression.
  *
- * @class ZStdOutputStream
+ * @class ZStdInputStream
  */
-class ZStdOutputStream: public OutputStream
+class ZStdInputStream: public InputStream
 {
   public:
-    ZStdOutputStream(OutputStream* out, int compressionLevel = 5);
-    ~ZStdOutputStream();
+    ZStdInputStream(InputStream* in);
+    ~ZStdInputStream();
 
-    void write(int b);
-    void write(const char* b, int len);
-    void finish();
+    int read();
+    int read(char* b, int len);
     void close();
 
-  protected:
-    void writeChunk(const char* b, size_t len);
+    void setBlocking(bool on)
+    {
+    }
+    ;
 
-    OutputStream* out;
-    ZSTD_CStream* zipStream;
+  protected:
+    size_t readChunk(char* b, size_t len);
+    
+    InputStream* in;
+    ZSTD_DStream* zipStream;
 
     ZSTD_inBuffer inBuffer;
     ZSTD_outBuffer outBuffer;
 };
-#endif // SHABACK_ZStdOutputStream_H
+#endif // SHABACK_ZStdInputStream_H

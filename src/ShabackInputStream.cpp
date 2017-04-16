@@ -27,6 +27,7 @@
 #include "lib/Exception.h"
 #include "lib/FileInputStream.h"
 #include "lib/LzmaInputStream.h"
+#include "lib/ZStdInputStream.h"
 #include "Repository.h"
 
 using namespace std;
@@ -87,6 +88,15 @@ void ShabackInputStream::open(File& file)
       compressionInputStream = new BzInputStream(inputStream);
       inputStream = compressionInputStream;
       break;
+
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD1:
+    case COMPRESSION_ZSTD5:
+    case COMPRESSION_ZSTD9:
+      compressionInputStream = new ZStdInputStream(inputStream);
+      inputStream = compressionInputStream;
+      break;
+#endif
 
 #if defined(LZMA_FOUND)
     case COMPRESSION_LZMA0:
