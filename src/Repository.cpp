@@ -793,9 +793,9 @@ int Repository::compressionByName(string name)
   } else if (lcName == "bz9" || lcName == "bz9" || lcName == "bzip-9" || lcName == "bzip9") {
     return COMPRESSION_BZip9;
 #if defined(ZSTD_FOUND)
-  } else if (lcName == "zstd1" || lcName == "zstd-1") {
+  } else if (lcName == "zstd1" || lcName == "zstd-1" || lcName == "zstd") {
     return COMPRESSION_ZSTD1;
-  } else if (lcName == "zstd5" || lcName == "zstd-5" || lcName == "zstd") {
+  } else if (lcName == "zstd5" || lcName == "zstd-5") {
     return COMPRESSION_ZSTD5;
   } else if (lcName == "zstd9" || lcName == "zstd-9") {
     return COMPRESSION_ZSTD9;
