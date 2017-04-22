@@ -157,6 +157,18 @@ int Shaback::deflate()
 
   // TODO: Mit ShabackOutputStream::open zusammenfassen
   switch (config.init_compressionAlgorithm) {
+    case COMPRESSION_BZip5:
+      compressionOutputStream = new BzOutputStream(&out);
+      break;
+
+    case COMPRESSION_BZip1:
+      compressionOutputStream = new BzOutputStream(&out, 1);
+      break;
+
+    case COMPRESSION_BZip9:
+      compressionOutputStream = new BzOutputStream(&out, 9);
+      break;
+      
 #if defined(ZSTD_FOUND)
     case COMPRESSION_ZSTD1:
       compressionOutputStream = new ZStdOutputStream(&out, 0);
@@ -168,6 +180,20 @@ int Shaback::deflate()
 
     case COMPRESSION_ZSTD9:
       compressionOutputStream = new ZStdOutputStream(&out, 9);
+      break;
+#endif
+
+#if defined(LZMA_FOUND)
+    case COMPRESSION_LZMA0:
+      compressionOutputStream = new LzmaOutputStream(&out, 0);
+      break;
+
+    case COMPRESSION_LZMA5:
+      compressionOutputStream = new LzmaOutputStream(&out, 5);
+      break;
+
+    case COMPRESSION_LZMA9:
+      compressionOutputStream = new LzmaOutputStream(&out, 9);
       break;
 #endif
 
@@ -200,10 +226,6 @@ int Shaback::inflate()
 
   // TODO: Mit ShabackInputStream::open zusammenfassen
   switch (config.init_compressionAlgorithm) {
-    case COMPRESSION_DEFLATE:
-      compressionInputStream = new DeflateInputStream(&in);
-      break;
-
     case COMPRESSION_BZip5:
     case COMPRESSION_BZip1:
     case COMPRESSION_BZip9:
@@ -226,7 +248,8 @@ int Shaback::inflate()
       break;
 #endif
 
-    case COMPRESSION_NONE:
+    default:
+      compressionInputStream = new DeflateInputStream(&in);
       break;
   }
 
