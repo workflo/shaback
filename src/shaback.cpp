@@ -24,6 +24,8 @@
 #include "lib/StandardOutputStream.h"
 #include "lib/FileOutputStream.h"
 #include "lib/DeflateInputStream.h"
+#include "lib/ZStdInputStream.h"
+#include "lib/ZStdOutputStream.h"
 #include "lib/StandardInputStream.h"
 
 #include "shaback.h"
@@ -146,15 +148,39 @@ int Shaback::deflate()
   StandardOutputStream out(stdout);
 
   char buf[DEFLATE_CHUNK_SIZE];
-  DeflateOutputStream def(&out);
+
+  OutputStream* compressionOutputStream;
+
+  // TODO: Mit ShabackOutputStream::open zusammenfassen
+  switch (config.init_compressionAlgorithm) {
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD1:
+      compressionOutputStream = new ZStdOutputStream(&out, 0);
+      break;
+
+    case COMPRESSION_ZSTD5:
+      compressionOutputStream = new ZStdOutputStream(&out, 5);
+      break;
+
+    case COMPRESSION_ZSTD9:
+      compressionOutputStream = new ZStdOutputStream(&out, 9);
+      break;
+#endif
+
+    default:
+      compressionOutputStream = new DeflateOutputStream(&out);
+  }
   int bytesRead;
 
   while (true) {
     bytesRead = in.read(buf, DEFLATE_CHUNK_SIZE);
     if (bytesRead == -1)
       break;
-    def.write(buf, bytesRead);
+    compressionOutputStream->write(buf, bytesRead);
   }
+
+  compressionOutputStream->close();
+  delete compressionOutputStream;
 
   return 0;
 }
