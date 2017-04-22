@@ -66,21 +66,20 @@ int ZStdInputStream::read(char* b, int len)
 {
   if (inBuffer.pos >= inBuffer.size) {
     int read = in->read((char*)inBuffer.src, inbufferSize);
-    cerr << "read " << read << endl;
     if (read <= 0) return -1;
+    inBuffer.pos = 0;
     inBuffer.size = read;
   }
 
   ZSTD_outBuffer output = { b, len, 0 };
 
   while (inBuffer.pos < inBuffer.size && output.pos < output.size) {
-    size_t ret = ZSTD_decompressStream(zipStream, &output , &inBuffer);
+    size_t ret = ZSTD_decompressStream(zipStream, &output, &inBuffer);
 
     if (ZSTD_isError(ret)) { 
        throw ZStdException("ZSTD_decompressStream failed", ZSTD_getErrorName(ret));
     }
   }
-cerr << "written " << output.pos << endl;
   return output.pos;
 }
 
