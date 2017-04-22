@@ -45,12 +45,10 @@ class ZStdInputStream: public InputStream
     ;
 
   protected:
-    size_t readChunk(char* b, size_t len);
-    
     InputStream* in;
     ZSTD_DStream* zipStream;
+    size_t inbufferSize;
 
     ZSTD_inBuffer inBuffer;
-    ZSTD_outBuffer outBuffer;
 };
 #endif // SHABACK_ZStdInputStream_H

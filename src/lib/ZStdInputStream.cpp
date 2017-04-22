@@ -41,12 +41,10 @@ ZStdInputStream::ZStdInputStream(InputStream* in)
     throw ZStdException("ZSTD_initDStream failed", ZSTD_getErrorName(initResult));
   } 
 
-  inBuffer.size = ZSTD_DStreamInSize();
+  inbufferSize = ZSTD_DStreamInSize();
+  inBuffer.size = 0;
   inBuffer.pos = 0;
-  inBuffer.src = (char*) malloc(inBuffer.size);
-
-  outBuffer.size = ZSTD_DStreamOutSize();
-  outBuffer.pos = 0;
+  inBuffer.src = (char*) malloc(inbufferSize);
 }
 
 ZStdInputStream::~ZStdInputStream()
@@ -66,34 +64,24 @@ int ZStdInputStream::read()
 
 int ZStdInputStream::read(char* b, int len)
 {
-  size_t read = 0;
-
-  while (len > 0) {
-    size_t nextChunkLen = min((size_t) len, inBuffer.size);
-    read = readChunk(b, nextChunkLen);
-    b += nextChunkLen;
-    len -= nextChunkLen;
+  if (inBuffer.pos >= inBuffer.size) {
+    int read = in->read((char*)inBuffer.src, inbufferSize);
+    cerr << "read " << read << endl;
+    if (read <= 0) return -1;
+    inBuffer.size = read;
   }
-}
 
-size_t ZStdInputStream::readChunk(char* b, size_t len)
-{
-  int bytesRead = in->read((char*)inBuffer.src, len);
+  ZSTD_outBuffer output = { b, len, 0 };
 
-  if (bytesRead == -1) return -1;
+  while (inBuffer.pos < inBuffer.size && output.pos < output.size) {
+    size_t ret = ZSTD_decompressStream(zipStream, &output , &inBuffer);
 
-
-  size_t toRead = len;
-
-  ZSTD_inBuffer input = { b, len, 0 };
-  while (input.pos < input.size) {
-    outBuffer.pos = 0;
-    toRead = ZSTD_decompressStream(zipStream, &outBuffer , &input);
-
-    if (ZSTD_isError(toRead)) { 
-       throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(toRead));
+    if (ZSTD_isError(ret)) { 
+       throw ZStdException("ZSTD_decompressStream failed", ZSTD_getErrorName(ret));
     }
   }
+cerr << "written " << output.pos << endl;
+  return output.pos;
 }
 
 
