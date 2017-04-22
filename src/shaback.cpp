@@ -20,13 +20,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "lib/DeflateOutputStream.h"
+#include "lib/StandardInputStream.h"
 #include "lib/StandardOutputStream.h"
 #include "lib/FileOutputStream.h"
+#include "lib/DeflateOutputStream.h"
 #include "lib/DeflateInputStream.h"
+#include "lib/BzInputStream.h"
+#include "lib/BzOutputStream.h"
+#include "lib/LzmaInputStream.h"
+#include "lib/LzmaOutputStream.h"
 #include "lib/ZStdInputStream.h"
 #include "lib/ZStdOutputStream.h"
-#include "lib/StandardInputStream.h"
 
 #include "shaback.h"
 #include "RuntimeConfig.h"
@@ -191,15 +195,52 @@ int Shaback::inflate()
   StandardOutputStream out(stdout);
 
   char buf[DEFLATE_CHUNK_SIZE];
-  DeflateInputStream def(&in);
+
+  InputStream* compressionInputStream;
+
+  // TODO: Mit ShabackInputStream::open zusammenfassen
+  switch (config.init_compressionAlgorithm) {
+    case COMPRESSION_DEFLATE:
+      compressionInputStream = new DeflateInputStream(&in);
+      break;
+
+    case COMPRESSION_BZip5:
+    case COMPRESSION_BZip1:
+    case COMPRESSION_BZip9:
+      compressionInputStream = new BzInputStream(&in);
+      break;
+
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD1:
+    case COMPRESSION_ZSTD5:
+    case COMPRESSION_ZSTD9:
+      compressionInputStream = new ZStdInputStream(&in);
+      break;
+#endif
+
+#if defined(LZMA_FOUND)
+    case COMPRESSION_LZMA0:
+    case COMPRESSION_LZMA5:
+    case COMPRESSION_LZMA9:
+      compressionInputStream = new LzmaInputStream(&in);
+      break;
+#endif
+
+    case COMPRESSION_NONE:
+      break;
+  }
+
   int bytesRead;
 
   while (true) {
-    bytesRead = def.read(buf, DEFLATE_CHUNK_SIZE);
+    bytesRead = compressionInputStream->read(buf, DEFLATE_CHUNK_SIZE);
     if (bytesRead == -1)
       break;
     out.write(buf, bytesRead);
   }
+
+  compressionInputStream->close();
+  delete compressionInputStream;
 
   return 0;
 }

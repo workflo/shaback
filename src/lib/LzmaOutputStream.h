@@ -24,7 +24,7 @@
 #include <lzma.h>
 #include "OutputStream.h"
 
-#define LZMA_CHUNK_SIZE (1024 * 16)
+#define LZMA_CHUNK_SIZE (16 * 1024)
 
 /**
  * An OutputStream that performs LZMA data compression.
