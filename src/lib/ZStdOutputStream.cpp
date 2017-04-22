@@ -44,9 +44,6 @@ ZStdOutputStream::ZStdOutputStream(OutputStream* out, int compressionLevel)
   outBuffer.size = ZSTD_CStreamOutSize();
   outBuffer.pos = 0;
   outBuffer.dst = (char*) malloc(outBuffer.size);
-
-  inBuffer.size = ZSTD_CStreamInSize();
-  inBuffer.pos = 0;
 }
 
 ZStdOutputStream::~ZStdOutputStream()
@@ -67,25 +64,14 @@ void ZStdOutputStream::write(int b)
 
 void ZStdOutputStream::write(const char* b, int len)
 {
-  while (len > 0) {
-    size_t nextChunkLen = min((size_t) len, inBuffer.size);
-    writeChunk(b, nextChunkLen);
-    b += nextChunkLen;
-    len -= nextChunkLen;
-  }
-}
-
-void ZStdOutputStream::writeChunk(const char* b, size_t len)
-{
-  size_t toRead = len;
-
   ZSTD_inBuffer input = { b, len, 0 };
+  
   while (input.pos < input.size) {
     outBuffer.pos = 0;
-    toRead = ZSTD_compressStream(zipStream, &outBuffer , &input);
+    size_t ret = ZSTD_compressStream(zipStream, &outBuffer , &input);
 
-    if (ZSTD_isError(toRead)) { 
-       throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(toRead));
+    if (ZSTD_isError(ret)) { 
+       throw ZStdException("ZSTD_compressStream failed", ZSTD_getErrorName(ret));
     }
 
     out->write((char*)outBuffer.dst, outBuffer.pos);
