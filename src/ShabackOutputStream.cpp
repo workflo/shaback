@@ -53,6 +53,53 @@ ShabackOutputStream::~ShabackOutputStream()
     delete fileOutputStream;
 }
 
+
+OutputStream* ShabackOutputStream::createCompressionStream(OutputStream* outputStream, int compressionAlgorithm)
+{
+  switch (compressionAlgorithm) {
+    case COMPRESSION_DEFLATE:
+      return new DeflateOutputStream(outputStream);
+
+    case COMPRESSION_BZip5:
+      return new BzOutputStream(outputStream);
+
+    case COMPRESSION_BZip1:
+      return new BzOutputStream(outputStream, 1);
+
+    case COMPRESSION_BZip9:
+      return new BzOutputStream(outputStream, 9);
+
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD1:
+      return new ZStdOutputStream(outputStream, 0);
+
+    case COMPRESSION_ZSTD5:
+      return new ZStdOutputStream(outputStream, 5);
+
+    case COMPRESSION_ZSTD9:
+      return new ZStdOutputStream(outputStream, 9);
+#endif
+
+#if defined(LZMA_FOUND)
+    case COMPRESSION_LZMA0:
+      return new LzmaOutputStream(outputStream, 0);
+
+    case COMPRESSION_LZMA5:
+      return new LzmaOutputStream(outputStream, 5);
+
+    case COMPRESSION_LZMA9:
+      return new LzmaOutputStream(outputStream, 9);
+#endif
+
+    case COMPRESSION_NONE:
+      return 0;
+
+    default:
+      throw Exception("Unexpected compression algorithm");
+  }
+}
+
+
 void ShabackOutputStream::open(File& file)
 {
   this->file = file;
@@ -71,78 +118,23 @@ void ShabackOutputStream::open(File& file)
       outputStream = encryptionOutputStream;
       break;
 
-      //    case ENCRYPTION_AES:
-      //      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
-      //      outputStream = encryptionOutputStream;
-      //      break;
-
     case ENCRYPTION_NONE:
       break;
   }
 #endif
 
-  switch (compressionAlgorithm) {
-    case COMPRESSION_DEFLATE:
-      compressionOutputStream = new DeflateOutputStream(outputStream);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_BZip5:
-      compressionOutputStream = new BzOutputStream(outputStream);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_BZip1:
-      compressionOutputStream = new BzOutputStream(outputStream, 1);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_BZip9:
-      compressionOutputStream = new BzOutputStream(outputStream, 9);
-      outputStream = compressionOutputStream;
-      break;
-
-#if defined(ZSTD_FOUND)
-    case COMPRESSION_ZSTD1:
-      compressionOutputStream = new ZStdOutputStream(outputStream, 0);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_ZSTD5:
-      compressionOutputStream = new ZStdOutputStream(outputStream, 5);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_ZSTD9:
-      compressionOutputStream = new ZStdOutputStream(outputStream, 9);
-      outputStream = compressionOutputStream;
-      break;
-#endif
-
-#if defined(LZMA_FOUND)
-    case COMPRESSION_LZMA0:
-      compressionOutputStream = new LzmaOutputStream(outputStream, 0);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_LZMA5:
-      compressionOutputStream = new LzmaOutputStream(outputStream, 5);
-      outputStream = compressionOutputStream;
-      break;
-
-    case COMPRESSION_LZMA9:
-      compressionOutputStream = new LzmaOutputStream(outputStream, 9);
-      outputStream = compressionOutputStream;
-      break;
-#endif
-
-    case COMPRESSION_NONE:
-      break;
-  }
+  compressionOutputStream = createCompressionStream(outputStream, compressionAlgorithm);
+  if (compressionOutputStream) {
+    outputStream = compressionOutputStream;
+  } 
 }
 
 void ShabackOutputStream::close()
 {
+  if (compressionOutputStream) {
+    compressionOutputStream->close();
+    compressionOutputStream = 0;
+  }
   if (outputStream) {
     outputStream->close();
     outputStream = 0;

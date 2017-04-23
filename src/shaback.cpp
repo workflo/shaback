@@ -153,53 +153,8 @@ int Shaback::deflate()
 
   char buf[DEFLATE_CHUNK_SIZE];
 
-  OutputStream* compressionOutputStream;
+  OutputStream* compressionOutputStream = ShabackOutputStream::createCompressionStream(&out, config.init_compressionAlgorithm);
 
-  // TODO: Mit ShabackOutputStream::open zusammenfassen
-  switch (config.init_compressionAlgorithm) {
-    case COMPRESSION_BZip5:
-      compressionOutputStream = new BzOutputStream(&out);
-      break;
-
-    case COMPRESSION_BZip1:
-      compressionOutputStream = new BzOutputStream(&out, 1);
-      break;
-
-    case COMPRESSION_BZip9:
-      compressionOutputStream = new BzOutputStream(&out, 9);
-      break;
-      
-#if defined(ZSTD_FOUND)
-    case COMPRESSION_ZSTD1:
-      compressionOutputStream = new ZStdOutputStream(&out, 0);
-      break;
-
-    case COMPRESSION_ZSTD5:
-      compressionOutputStream = new ZStdOutputStream(&out, 5);
-      break;
-
-    case COMPRESSION_ZSTD9:
-      compressionOutputStream = new ZStdOutputStream(&out, 9);
-      break;
-#endif
-
-#if defined(LZMA_FOUND)
-    case COMPRESSION_LZMA0:
-      compressionOutputStream = new LzmaOutputStream(&out, 0);
-      break;
-
-    case COMPRESSION_LZMA5:
-      compressionOutputStream = new LzmaOutputStream(&out, 5);
-      break;
-
-    case COMPRESSION_LZMA9:
-      compressionOutputStream = new LzmaOutputStream(&out, 9);
-      break;
-#endif
-
-    default:
-      compressionOutputStream = new DeflateOutputStream(&out);
-  }
   int bytesRead;
 
   while (true) {
@@ -222,36 +177,7 @@ int Shaback::inflate()
 
   char buf[DEFLATE_CHUNK_SIZE];
 
-  InputStream* compressionInputStream;
-
-  // TODO: Mit ShabackInputStream::open zusammenfassen
-  switch (config.init_compressionAlgorithm) {
-    case COMPRESSION_BZip5:
-    case COMPRESSION_BZip1:
-    case COMPRESSION_BZip9:
-      compressionInputStream = new BzInputStream(&in);
-      break;
-
-#if defined(ZSTD_FOUND)
-    case COMPRESSION_ZSTD1:
-    case COMPRESSION_ZSTD5:
-    case COMPRESSION_ZSTD9:
-      compressionInputStream = new ZStdInputStream(&in);
-      break;
-#endif
-
-#if defined(LZMA_FOUND)
-    case COMPRESSION_LZMA0:
-    case COMPRESSION_LZMA5:
-    case COMPRESSION_LZMA9:
-      compressionInputStream = new LzmaInputStream(&in);
-      break;
-#endif
-
-    default:
-      compressionInputStream = new DeflateInputStream(&in);
-      break;
-  }
+  InputStream* compressionInputStream = ShabackInputStream::createCompressionStream(&in, config.init_compressionAlgorithm);
 
   int bytesRead;
 
