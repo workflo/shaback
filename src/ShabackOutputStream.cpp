@@ -133,11 +133,12 @@ void ShabackOutputStream::close()
 {
   if (compressionOutputStream) {
     compressionOutputStream->close();
-    compressionOutputStream = 0;
   }
-  if (outputStream) {
-    outputStream->close();
-    outputStream = 0;
+  if (encryptionOutputStream) {
+    encryptionOutputStream->close();
+  }
+  if (fileOutputStream) {
+    fileOutputStream->close();
   }
 }
 
