@@ -2,9 +2,11 @@
 
 #cmakedefine LZMA_FOUND
 #cmakedefine OPENSSL_FOUND
+#cmakedefine HAVE_EVP_CIPHER_CTX_new
 #cmakedefine HAVE_STAT64
 #cmakedefine HAVE_FSTAT64
 #cmakedefine HAVE_LSTAT64
+
 
 #define SHABACK_lib_config_H
 
