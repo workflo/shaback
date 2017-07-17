@@ -42,7 +42,12 @@ class BlowfishOutputStream: public OutputStream
   protected:
     OutputStream* out;
     unsigned char outputBuffer[BLOWFISH_CHUNK_SIZE + EVP_MAX_BLOCK_LENGTH];
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+    EVP_CIPHER_CTX *pctx;
+#else
     EVP_CIPHER_CTX ctx;
+    EVP_CIPHER_CTX *pctx;
+#endif
     unsigned char iv[BF_BLOCK];
     unsigned char key[16];
     int outlen;

@@ -39,8 +39,14 @@ BlowfishOutputStream::BlowfishOutputStream(string& password, OutputStream* out) 
   // Use first 16 bytes of digest as key:
   strncpy((char*) key, (const char*) sha.toBytes(), 16);
 
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+  pctx = EVP_CIPHER_CTX_new();
+#else
   EVP_CIPHER_CTX_init(&ctx);
-  EVP_EncryptInit_ex(&ctx, EVP_bf_cbc(), NULL, key, iv);
+  pctx = &ctx;
+#endif
+
+  EVP_EncryptInit_ex(pctx, EVP_bf_cbc(), NULL, key, iv);
 
   outlen = 0;
 }
@@ -48,7 +54,7 @@ BlowfishOutputStream::BlowfishOutputStream(string& password, OutputStream* out) 
 BlowfishOutputStream::~BlowfishOutputStream()
 {
   close();
-  EVP_CIPHER_CTX_cleanup(&ctx);
+  EVP_CIPHER_CTX_free(pctx);
 }
 
 void BlowfishOutputStream::write(int b)
@@ -60,7 +66,7 @@ void BlowfishOutputStream::write(int b)
 void BlowfishOutputStream::write(const char* b, int len)
 {
   while (len > 0) {
-    if (!EVP_EncryptUpdate(&ctx, outputBuffer, &outlen, (const unsigned char*) b, min(len, BLOWFISH_CHUNK_SIZE))) {
+    if (!EVP_EncryptUpdate(pctx, outputBuffer, &outlen, (const unsigned char*) b, min(len, BLOWFISH_CHUNK_SIZE))) {
       throw IOException("EVP_EncryptUpdate failed");
     }
 
@@ -73,7 +79,7 @@ void BlowfishOutputStream::write(const char* b, int len)
 
 void BlowfishOutputStream::finish()
 {
-  if (!EVP_CipherFinal_ex(&ctx, outputBuffer, &outlen)) {
+  if (!EVP_CipherFinal_ex(pctx, outputBuffer, &outlen)) {
     throw IOException("EVP_CipherFinal_ex failed");
   }
   out->write((const char*) outputBuffer, outlen);
