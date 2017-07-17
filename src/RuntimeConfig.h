@@ -65,6 +65,7 @@ class RuntimeConfig
     std::string color_stats;
     std::string color_default;
     std::string color_low;
+    std::string color_debug;
 
     std::string style_bold;
     std::string style_default;

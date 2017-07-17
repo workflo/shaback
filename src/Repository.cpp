@@ -582,11 +582,11 @@ RestoreReport Repository::testRestore()
 
     for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
       File file(*it);
-      if (config.verbose) cerr << "*** " << file.path << " ***" << endl;
+      if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
       RestoreReport r = restoreByRootFile(file, true);
       if (r.hasErrors()) {
         report.numErrors ++;
-        cerr << "ERROR DETECTED: " << file.path << " contains errors!" << endl;
+        cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
       }
     }
 

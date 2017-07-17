@@ -264,7 +264,8 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
     color_filename = "\e[36m";
     color_stats = "\e[34m";
     color_default = "\e[39m";
-    color_low = "\e[37m";
+    color_low = "\e[90m";
+    color_debug = "\e[37m";
 
     style_bold = "\e[1m";
     style_default = "\e[0m";

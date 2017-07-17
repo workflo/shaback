@@ -50,5 +50,8 @@ class FileOutputStream: public OutputStream
     int handle;
 #endif
     void init(std::string& filename);
+
+    long long totalBytesWritten;
+    std::string filename;
 };
 #endif // SHABACK_FileOutputStream_H
