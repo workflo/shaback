@@ -135,7 +135,9 @@ void FileOutputStream::close()
 #else
 
   if (handle != -1) {
-    ::close(handle);
+    if (::close(handle) != 0) {
+      throw Exception::errnoToException();
+    }
     handle = -1;
 
     if (File(filename).getSize() != totalBytesWritten) {
@@ -147,4 +149,3 @@ void FileOutputStream::close()
 
 #endif
 }
-
