@@ -433,8 +433,16 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   int from = 0;
   int until;
 
-  if ((until = content.find('\n', from)) == string::npos)
-    throw InvalidTreeFile("Missing header line");
+  if ((until = content.find('\n', from)) == string::npos) {
+    if (config.verbose) {
+      cerr << config.color_error;
+      cerr << "Missing header line in index file " << hashValueToFile(treeId).path << ":" << endl;
+      cerr << config.color_low;
+      cerr << content.substr(0, 200) << (content.size() > 200 ? "..." : "") << endl;
+      cerr << config.color_default;
+    }
+    throw InvalidTreeFile(string("Missing header line in index ") + treeId);
+  }
   string header = content.substr(from, until - from);
   if (header != TREEFILE_HEADER)
     throw InvalidTreeFile("Unexpected header line in tree file");
