@@ -16,29 +16,29 @@ IF (OPENSSL_INCLUDE_DIR)
 ENDIF (OPENSSL_INCLUDE_DIR)
 
 set(shaback_lib_SRCS
-		    BlowfishOutputStream.cpp
-		    BlowfishInputStream.cpp
-		    BufferedWriter.cpp
-		    BufferedReader.cpp
-            BzInputStream.cpp
-            BzOutputStream.cpp
-		    Date.cpp
-		    DeflateOutputStream.cpp
-		    DeflateInputStream.cpp
-		    Digest.cpp
-		    Exception.cpp
-		    File.cpp
-		    FileOutputStream.cpp
-		    FileInputStream.cpp
-		    InputStream.cpp
-            LzmaInputStream.cpp
-            LzmaOutputStream.cpp
-		    OutputStream.cpp
-		    Properties.cpp
-		    Sha1.cpp
-		    Sha256.cpp
-		    StandardOutputStream.cpp
-		    StandardInputStream.cpp
+    BlowfishOutputStream.cpp
+    BlowfishInputStream.cpp
+    BufferedWriter.cpp
+    BufferedReader.cpp
+    BzInputStream.cpp
+    BzOutputStream.cpp
+    Date.cpp
+    DeflateOutputStream.cpp
+    DeflateInputStream.cpp
+    Digest.cpp
+    Exception.cpp
+    File.cpp
+    FileOutputStream.cpp
+    FileInputStream.cpp
+    InputStream.cpp
+    LzmaInputStream.cpp
+    LzmaOutputStream.cpp
+    OutputStream.cpp
+    Properties.cpp
+    Sha1.cpp
+    Sha256.cpp
+    StandardOutputStream.cpp
+    StandardInputStream.cpp
 )
 
 IF (LZMA_FOUND)
@@ -47,12 +47,14 @@ ENDIF (LZMA_FOUND)
 
 add_library(shabacklib STATIC ${shaback_lib_SRCS})
 
+IF (OPENSSL_FOUND)
+    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
+    CHECK_FUNCTION_EXISTS (EVP_CIPHER_CTX_new           HAVE_EVP_CIPHER_CTX_new)
+ENDIF (OPENSSL_FOUND)
+
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
     "config.h.in"
     "config.h"
 )
-
-set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
-CHECK_FUNCTION_EXISTS (EVP_CIPHER_CTX_new           HAVE_EVP_CIPHER_CTX_new)
