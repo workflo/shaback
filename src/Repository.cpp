@@ -135,7 +135,8 @@ void Repository::lock(bool exclusive)
       if (errno == EEXIST) {
         throw LockingException(
             string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path).append(": ").append(existingLocks));
-        // TODO: EPERM: symlinks not supported!
+      } else if (errno == ENOSYS) {
+        throw LockingException("Destination filesystem does not support symlinks. Use `-L' to lock without symlinks.");
       } else {
         throw Exception::errnoToException(config.exclusiveLockFile.path);
       }

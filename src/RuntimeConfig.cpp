@@ -356,6 +356,16 @@ static int l_setShowTotals(lua_State *L)
   return 0;
 }
 
+static int l_setUseSymlinkLock(lua_State *L)
+{
+  bool b = (bool) lua_toboolean(L, 1);
+
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->useSymlinkLock = b;
+
+  return 0;
+}
+
 static int l_localCache(lua_State *L)
 {
   const char* file = lua_tostring(L, 1);
@@ -471,6 +481,9 @@ void RuntimeConfig::initLua()
   lua_setglobal(this->luaState, "showTotals");
   lua_pushcfunction(this->luaState, l_setShowTotals);
   lua_setglobal(this->luaState, "setShowTotals");
+
+  lua_pushcfunction(this->luaState, l_setUseSymlinkLock);
+  lua_setglobal(this->luaState, "setUseSymlinkLock");
 
   lua_pushcfunction(this->luaState, l_addDir);
   lua_setglobal(this->luaState, "addDir");
