@@ -23,35 +23,35 @@ ADD_SUBDIRECTORY(dialog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
-        BackupRun.cpp
-        BackupsetSelector.cpp
-        Cache.cpp 
-        GarbageCollection.cpp
-        History.cpp
-        main.cpp 
-        Repository.cpp
-        RestoreReport.cpp
-        RestoreRun.cpp
-        RuntimeConfig.cpp 
-        shaback.cpp 
-        ShabackException.cpp
-        ShabackInputStream.cpp
-        ShabackOutputStream.cpp
-        SplitFileIndexReader.cpp
-        TreeFileEntry.cpp
-    )
+    BackupRun.cpp
+    BackupsetSelector.cpp
+    Cache.cpp 
+    GarbageCollection.cpp
+    History.cpp
+    main.cpp 
+    Repository.cpp
+    RestoreReport.cpp
+    RestoreRun.cpp
+    RuntimeConfig.cpp 
+    shaback.cpp 
+    ShabackException.cpp
+    ShabackInputStream.cpp
+    ShabackOutputStream.cpp
+    SplitFileIndexReader.cpp
+    TreeFileEntry.cpp
+)
 
 target_link_libraries(shaback 
-  shabacklib
-  shabackdialog
-  ${ZLIB_LIBRARY}
-  ${OPENSSL_CRYPTO_LIBRARIES}
-  ${LUA_LIBRARIES}
-  ${GDBM_LIBRARY}
-  ${BZIP2_LIBRARIES}
-  ${ZSTD_LIBRARIES}
-  ${LZMA_LIBRARIES}
-  ${NCURSES_LIBRARIES}
+    shabacklib
+    shabackdialog
+    ${ZLIB_LIBRARY}
+    ${OPENSSL_CRYPTO_LIBRARIES}
+    ${LUA_LIBRARIES}
+    ${GDBM_LIBRARY}
+    ${BZIP2_LIBRARIES}
+    ${ZSTD_LIBRARIES}
+    ${LZMA_LIBRARIES}
+    ${NCURSES_LIBRARIES}
 )
 
 #add_executable(visichunk
@@ -67,6 +67,6 @@ install(PROGRAMS shaback DESTINATION bin)
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "${PROJECT_SOURCE_DIR}/ShabackConfig.h.in"
-  "${PROJECT_SOURCE_DIR}/ShabackConfig.h"
-  )
+    "${PROJECT_SOURCE_DIR}/ShabackConfig.h.in"
+    "${PROJECT_SOURCE_DIR}/ShabackConfig.h"
+)

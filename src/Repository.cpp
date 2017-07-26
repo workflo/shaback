@@ -135,7 +135,8 @@ void Repository::lock(bool exclusive)
       if (errno == EEXIST) {
         throw LockingException(
             string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path).append(": ").append(existingLocks));
-        // TODO: EPERM: symlinks not supported!
+      } else if (errno == ENOSYS) {
+        throw LockingException("Destination filesystem does not support symlinks. Use `-L' to lock without symlinks.");
       } else {
         throw Exception::errnoToException(config.exclusiveLockFile.path);
       }
@@ -433,8 +434,16 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   int from = 0;
   int until;
 
-  if ((until = content.find('\n', from)) == string::npos)
-    throw InvalidTreeFile("Missing header line");
+  if ((until = content.find('\n', from)) == string::npos) {
+    if (config.verbose) {
+      cerr << config.color_error;
+      cerr << "Missing header line in index file " << hashValueToFile(treeId).path << ":" << endl;
+      cerr << config.color_low;
+      cerr << content.substr(0, 200) << (content.size() > 200 ? "..." : "") << endl;
+      cerr << config.color_default;
+    }
+    throw InvalidTreeFile(string("Missing header line in index ") + treeId);
+  }
   string header = content.substr(from, until - from);
   if (header != TREEFILE_HEADER)
     throw InvalidTreeFile("Unexpected header line in tree file");
@@ -574,7 +583,7 @@ RestoreReport Repository::testRestore()
 
     for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
       File file(*it);
-      if (config.verbose) cerr << "*** " << file.path << " ***" << endl;
+      if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
       RestoreReport r = restoreByRootFile(file, true);
       if (r.hasErrors()) {
         report.numErrors ++;

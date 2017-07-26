@@ -269,6 +269,21 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
       }
     }
   }
+
+  struct termios terminal;
+  if (tcgetattr(0, &terminal) != -1 && tcgetattr(1, &terminal) != -1) {
+    // Colors (See http://misc.flogisoft.com/bash/tip_colors_and_formatting)
+    color_error = "\e[31m";
+    color_success = "\e[32m";
+    color_filename = "\e[36m";
+    color_stats = "\e[34m";
+    color_default = "\e[39m";
+    color_low = "\e[90m";
+    color_debug = "\e[37m";
+
+    style_bold = "\e[1m";
+    style_default = "\e[0m";
+  }
 }
 
 void RuntimeConfig::load()
@@ -351,6 +366,16 @@ static int l_setShowTotals(lua_State *L)
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
   config->showTotals = b;
+
+  return 0;
+}
+
+static int l_setUseSymlinkLock(lua_State *L)
+{
+  bool b = (bool) lua_toboolean(L, 1);
+
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->useSymlinkLock = b;
 
   return 0;
 }
@@ -470,6 +495,9 @@ void RuntimeConfig::initLua()
   lua_setglobal(this->luaState, "showTotals");
   lua_pushcfunction(this->luaState, l_setShowTotals);
   lua_setglobal(this->luaState, "setShowTotals");
+
+  lua_pushcfunction(this->luaState, l_setUseSymlinkLock);
+  lua_setglobal(this->luaState, "setUseSymlinkLock");
 
   lua_pushcfunction(this->luaState, l_addDir);
   lua_setglobal(this->luaState, "addDir");

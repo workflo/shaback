@@ -39,8 +39,13 @@ BlowfishInputStream::BlowfishInputStream(string& password, InputStream* in) :
   // Use first 16 bytes of digest as key:
   strncpy((char*) key, (const char*) sha.toBytes(), 16);
 
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+  pctx = EVP_CIPHER_CTX_new();
+#else
   EVP_CIPHER_CTX_init(&ctx);
-  EVP_DecryptInit_ex(&ctx, EVP_bf_cbc(), NULL, key, iv);
+  pctx = &ctx;
+#endif
+  EVP_DecryptInit_ex(pctx, EVP_bf_cbc(), NULL, key, iv);
 
   outlen = 0;
 }
@@ -48,7 +53,7 @@ BlowfishInputStream::BlowfishInputStream(string& password, InputStream* in) :
 BlowfishInputStream::~BlowfishInputStream()
 {
   close();
-  EVP_CIPHER_CTX_cleanup(&ctx);
+  EVP_CIPHER_CTX_free(pctx);
 }
 
 int BlowfishInputStream::read()
@@ -66,7 +71,7 @@ int BlowfishInputStream::read(char* b, int len)
     if (finished)
       return -1;
     finished = true;
-    if (!EVP_DecryptFinal(&ctx, (unsigned char*) b, &outlen)) {
+    if (!EVP_DecryptFinal(pctx, (unsigned char*) b, &outlen)) {
       throw IOException("EVP_DecryptFinal failed");
     }
     if (outlen == 0) {
@@ -76,7 +81,7 @@ int BlowfishInputStream::read(char* b, int len)
     }
   }
 
-  if (!EVP_DecryptUpdate(&ctx, (unsigned char*) b, &outlen, (const unsigned char*) inputBuffer, bytesRead)) {
+  if (!EVP_DecryptUpdate(pctx, (unsigned char*) b, &outlen, (const unsigned char*) inputBuffer, bytesRead)) {
     throw IOException("EVP_DecryptUpdate failed");
   }
 
