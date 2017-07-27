@@ -19,6 +19,7 @@
 #include <iostream>
 
 #include "AesOutputStream.h"
+#if defined(OPENSSL_FOUND)
 #include "Exception.h"
 
 using namespace std;
@@ -85,3 +86,4 @@ void AesOutputStream::close()
     out = 0;
   }
 }
+#endif

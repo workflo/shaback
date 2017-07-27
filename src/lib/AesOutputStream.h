@@ -32,7 +32,7 @@
 // IV length:  16
 
 #define SHABACK_AES_IV ((unsigned char*) "SHABACK2_h29skHs")
-#define AES_CHUNK_SIZE (16 * 1024)
+#define AES_CHUNK_SIZE (AES_BLOCK_SIZE * 1024 / 8)
 
 class AesOutputStream: public OutputStream
 {

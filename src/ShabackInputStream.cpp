@@ -108,6 +108,9 @@ void ShabackInputStream::open(File& file)
 
     case ENCRYPTION_NONE:
       break;
+
+    default:
+      throw Exception("Unexpected encryption algorithm");
   }
 #endif
 

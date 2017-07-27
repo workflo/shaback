@@ -33,7 +33,26 @@ AesInputStream::AesInputStream(unsigned char* key, InputStream* in) :
   EVP_CIPHER_CTX_init(&ctx);
   pctx = &ctx;
 #endif
+
   EVP_EncryptInit_ex(pctx, EVP_aes_256_cbc(), NULL, key, SHABACK_AES_IV);
+
+
+  int cipherBlockSize = EVP_CIPHER_CTX_block_size(pctx); 
+  int cipherKeyLength = EVP_CIPHER_CTX_key_length(pctx);
+  int cipherIvLength  = EVP_CIPHER_CTX_iv_length(pctx);
+
+  fprintf(stderr, "INFO(evp_encrypt): Enc Algo:   %s\n", OBJ_nid2ln(EVP_CIPHER_CTX_nid(pctx)));
+  fprintf(stderr, "INFO(evp_encrypt): Key:        ");
+  for(int i=0; i<cipherKeyLength; i++)
+    fprintf(stderr, "%02X", (int)(key[i]));
+  fprintf(stderr, "\n");
+//   fprintf(stderr, "INFO(evp_encrypt): IV:         ");
+//   for(i=0; i<cipherIvLength; i++)
+//     fprintf(stderr, "%02X", (int)(iv[i]));
+//   fprintf(stderr, "\n");
+  fprintf(stderr, "INFO(evp_encrypt): block size: %d\n", cipherBlockSize);
+  fprintf(stderr, "INFO(evp_encrypt): key length: %d\n", cipherKeyLength);
+  fprintf(stderr, "INFO(evp_encrypt): IV length:  %d\n", cipherIvLength);
 
   outlen = 0;
 }
