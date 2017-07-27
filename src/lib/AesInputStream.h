@@ -16,34 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <stdlib.h>
+#include "config.h"
+#if !defined(SHABACK_AesInputStream_H) && defined(OPENSSL_FOUND)
+#define SHABACK_AesInputStream_H
+
 #include <string.h>
-
-#include "Exception.h"
-#include "KeyDerivation.h"
-
-#if defined(OPENSSL_FOUND)
-
 #include <openssl/evp.h>
+#include <openssl/blowfish.h>
+#include "InputStream.h"
+#include "AesOutputStream.h"
 
-unsigned char* KeyDerivation::deriveFromPassword(std::string& password)
+
+class AesInputStream: public InputStream
 {
-    unsigned char* key = (unsigned char*) malloc(EVP_MAX_KEY_LENGTH);
-    int iter;
-    int pwLen = password.size();
+  public:
+    AesInputStream(unsigned char* key, InputStream* in);
+    ~AesInputStream();
 
-    if (pwLen < 8) {
-      throw Exception("Crypto Password must be at least 8 characters.");
-    }
+    int read();
+    int read(char* b, int len);
+    void close();
 
-    iter = 10000000 / pwLen;
-
-    if (!PKCS5_PBKDF2_HMAC_SHA1( (const char*) password.c_str(), pwLen, SHABACK_KEY_SALT, strlen((const char*) SHABACK_KEY_SALT), iter, EVP_MAX_KEY_LENGTH, key)) {
-      throw Exception("PKCS5_PBKDF2_HMAC_SHA1 failed.");
-    }
-
-    return key;
-}
-
+  protected:
+    unsigned char* key;
+    InputStream* in;
+    unsigned char inputBuffer[AES_CHUNK_SIZE + EVP_MAX_BLOCK_LENGTH];
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+    EVP_CIPHER_CTX *pctx;
+#else
+    EVP_CIPHER_CTX ctx;
+    EVP_CIPHER_CTX *pctx;
 #endif
+    int outlen;
+    bool finished;
+};
+#endif// SHABACK_AesInputStream_H

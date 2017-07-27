@@ -20,7 +20,7 @@
 #include <fcntl.h>
 #include "ShabackInputStream.h"
 
-//#include "lib/AesInputStream.h"
+#include "lib/AesInputStream.h"
 #include "lib/BlowfishInputStream.h"
 #include "lib/BzInputStream.h"
 #include "lib/DeflateInputStream.h"
@@ -101,10 +101,10 @@ void ShabackInputStream::open(File& file)
       inputStream = encryptionInputStream;
       break;
 
-      //    case ENCRYPTION_AES:
-      //      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
-      //      outputStream = encryptionOutputStream;
-      //      break;
+    case ENCRYPTION_AES256:
+      encryptionInputStream = new AesInputStream(config.derivedKey(), inputStream);
+      inputStream = encryptionInputStream;
+      break;
 
     case ENCRYPTION_NONE:
       break;
