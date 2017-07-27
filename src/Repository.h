@@ -230,9 +230,7 @@ class Repository
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_BLOWFISH 1
-//#define ENCRYPTION_TWOFISH  2
-//#define ENCRYPTION_AES      3
-//#define ENCRYPTION_DES      4
+#define ENCRYPTION_AES256   2
 
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2

@@ -16,18 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_AesOutputStream_H
+
+#include "config.h"
+#if !defined(SHABACK_AesOutputStream_H) && defined(OPENSSL_FOUND)
 #define SHABACK_AesOutputStream_H
 
 #include <string.h>
+#include <openssl/evp.h>
+#include <openssl/aes.h>
 #include "OutputStream.h"
 
+// AES 256 CBC:
+// block size: 16
+// key length: 32
+// IV length:  16
+
+#define SHABACK_AES_IV ((unsigned char*) "SHABACK2_h29skHs")
 #define AES_CHUNK_SIZE (16 * 1024)
 
 class AesOutputStream: public OutputStream
 {
   public:
-    AesOutputStream(std::string& password, OutputStream* out);
+    AesOutputStream(unsigned char* key, OutputStream* out);
     ~AesOutputStream();
 
     void write(int b);
@@ -36,7 +46,15 @@ class AesOutputStream: public OutputStream
     void close();
 
   protected:
+    unsigned char* key;
     OutputStream* out;
-    unsigned char outputBuffer[AES_CHUNK_SIZE];
+    unsigned char outputBuffer[AES_CHUNK_SIZE + EVP_MAX_BLOCK_LENGTH];
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+    EVP_CIPHER_CTX *pctx;
+#else
+    EVP_CIPHER_CTX ctx;
+    EVP_CIPHER_CTX *pctx;
+#endif
+    int outlen;
 };
 #endif// SHABACK_AesOutputStream_H

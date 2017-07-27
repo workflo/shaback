@@ -17,6 +17,7 @@ IF (OPENSSL_INCLUDE_DIR)
 ENDIF (OPENSSL_INCLUDE_DIR)
 
 set(shaback_lib_SRCS
+    AesOutputStream.cpp
     BlowfishOutputStream.cpp
     BlowfishInputStream.cpp
     BufferedWriter.cpp

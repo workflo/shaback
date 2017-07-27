@@ -25,6 +25,7 @@
 # include <termios.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
 
 extern "C" {
 #include <lua.h>
@@ -66,6 +67,7 @@ RuntimeConfig::RuntimeConfig()
   actionDetails = false;
   backupsToKeep = -1;
   number = 0;
+  cryptoKey = 0;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -610,4 +612,35 @@ void RuntimeConfig::runLeaveDirCallbacks(File &dir)
   lua_getglobal(this->luaState, "_runLeaveDirCallbacks");
   lua_pushstring(this->luaState, dir.path.c_str());
   lua_call(this->luaState, 1, 0);
+}
+
+
+#if defined(OPENSSL_FOUND)
+  #include <openssl/evp.h>
+#endif
+
+unsigned char* RuntimeConfig::derivedKey()
+{
+#if defined(OPENSSL_FOUND)
+  if (cryptoKey == 0) {
+    unsigned char* key = (unsigned char*) malloc(EVP_MAX_KEY_LENGTH);
+    int iter;
+    int pwLen = cryptoPassword.size();
+
+    if (pwLen < 8) {
+      throw Exception("Crypto Password must be at least 8 characters.");
+    }
+
+    iter = 10000000 / pwLen;
+
+    if (!PKCS5_PBKDF2_HMAC_SHA1( (const char*) cryptoPassword.c_str(), -1, SHABACK_KEY_SALT, strlen((const char*) SHABACK_KEY_SALT), iter, EVP_MAX_KEY_LENGTH, key)) {
+      throw Exception("PKCS5_PBKDF2_HMAC_SHA1 failed.");
+    }
+    cryptoKey = key;
+  }
+
+  return cryptoKey;
+#else
+  throw UnsupportedOperation("PKCS5_PBKDF2_HMAC_SHA1");
+#endif
 }

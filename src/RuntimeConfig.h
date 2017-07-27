@@ -24,6 +24,8 @@
 #include <set>
 #include "lib/File.h"
 
+#define SHABACK_KEY_SALT ((unsigned char*) "ThisIsOurShabackRepoSalt")
+
 extern "C" {
 # include <lua.h>
 }
@@ -37,6 +39,7 @@ class RuntimeConfig
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
+    unsigned char* derivedKey();
 
     bool quiet;
     int verbose;
@@ -99,6 +102,9 @@ class RuntimeConfig
 
     /** Clear-text password when using an encryted repository. */
     std::string cryptoPassword;
+
+    /** The crypto key derived from cryptoPassword using PKCS5_PBKDF2_HMAC_SHA1. Always EVP_MAX_KEY_LENGTH (=64) bytes. */
+    unsigned char* cryptoKey;
 
     /** Encryption algorithm to be used when creating a new repository. */
     int init_encryptionAlgorithm;

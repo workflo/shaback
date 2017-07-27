@@ -775,16 +775,12 @@ int Repository::encryptionByName(string name)
 
   if (lcName == "blowfish") {
     return ENCRYPTION_BLOWFISH;
-    //  } else if (lcName == "twofish") {
-    //    return ENCRYPTION_TWOFISH;
-    //  } else if (lcName == "aes") {
-    //    return ENCRYPTION_AES;
-    //  } else if (lcName == "des") {
-    //    return ENCRYPTION_DES;
+  } else if (lcName == "aes" || lcName == "aes256") {
+    return ENCRYPTION_AES256;
   } else if (lcName == "none" || name.empty()) {
     return ENCRYPTION_NONE;
   } else {
-    throw UnsupportedEncryptionAlgorithm(name);
+    throw UnsupportedEncryptionAlgorithm(lcName);
   }
 }
 
@@ -872,6 +868,8 @@ string Repository::encryptionToName(int encryption)
   switch (encryption) {
     case ENCRYPTION_BLOWFISH:
       return "Blowfish";
+    case ENCRYPTION_AES256:
+      return "AES";
     default:
       return "None";
   }

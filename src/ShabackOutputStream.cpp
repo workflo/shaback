@@ -118,6 +118,11 @@ void ShabackOutputStream::open(File& file)
       outputStream = encryptionOutputStream;
       break;
 
+    case ENCRYPTION_AES256:
+      encryptionOutputStream = new AesOutputStream(config.derivedKey(), outputStream);
+      outputStream = encryptionOutputStream;
+      break;
+      
     case ENCRYPTION_NONE:
       break;
   }
