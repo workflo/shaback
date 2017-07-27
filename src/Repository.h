@@ -167,7 +167,7 @@ class Repository
     /**
      * Returns the hash digest for the given password as a hex string.
      */
-    static std::string hashPassword(std::string password);
+    static std::string hashPassword(int encryptionAlgorithm, std::string password);
 #endif
 
     /**

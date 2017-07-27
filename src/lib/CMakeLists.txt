@@ -32,6 +32,7 @@ set(shaback_lib_SRCS
     File.cpp
     FileOutputStream.cpp
     FileInputStream.cpp
+    KeyDerivation.cpp
     InputStream.cpp
     LzmaInputStream.cpp
     LzmaOutputStream.cpp

@@ -99,7 +99,7 @@ void Repository::checkPassword()
 {
   FileInputStream in(config.passwordCheckFile);
   string hashFromFile;
-  string hashFromPassword = hashPassword(config.cryptoPassword);
+  string hashFromPassword = hashPassword(encryptionAlgorithm, config.cryptoPassword);
 
   if (in.readAll(hashFromFile)) {
     if (hashFromFile == hashFromPassword) {
@@ -886,12 +886,26 @@ string Repository::repoFormatToName(int fmt)
 }
 
 #if defined(OPENSSL_FOUND)
-string Repository::hashPassword(string password)
+  #include <openssl/evp.h>
+  #include "lib/KeyDerivation.h"
+
+string Repository::hashPassword(int encryptionAlgorithm, string password)
 {
   Sha256 sha;
   string salt(PASSWORDFILE_SALT);
   sha.update(salt);
-  sha.update(password);
+
+  switch (encryptionAlgorithm) {
+    case ENCRYPTION_BLOWFISH:
+      sha.update(password);
+      break;
+    case ENCRYPTION_NONE:
+      break;
+    default:
+      unsigned char* key = KeyDerivation::deriveFromPassword(password);
+      sha.update(&key[EVP_MAX_KEY_LENGTH - 16], 16);
+      free(key);
+  }
   sha.finalize();
   return sha.toString();
 }

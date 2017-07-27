@@ -24,8 +24,6 @@
 #include <set>
 #include "lib/File.h"
 
-#define SHABACK_KEY_SALT ((unsigned char*) "ThisIsOurShabackRepoSalt")
-
 extern "C" {
 # include <lua.h>
 }
@@ -39,7 +37,9 @@ class RuntimeConfig
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
+#if defined(OPENSSL_FOUND)
     unsigned char* derivedKey();
+#endif
 
     bool quiet;
     int verbose;

@@ -616,31 +616,14 @@ void RuntimeConfig::runLeaveDirCallbacks(File &dir)
 
 
 #if defined(OPENSSL_FOUND)
-  #include <openssl/evp.h>
-#endif
+  #include "lib/KeyDerivation.h"
 
 unsigned char* RuntimeConfig::derivedKey()
 {
-#if defined(OPENSSL_FOUND)
   if (cryptoKey == 0) {
-    unsigned char* key = (unsigned char*) malloc(EVP_MAX_KEY_LENGTH);
-    int iter;
-    int pwLen = cryptoPassword.size();
-
-    if (pwLen < 8) {
-      throw Exception("Crypto Password must be at least 8 characters.");
-    }
-
-    iter = 10000000 / pwLen;
-
-    if (!PKCS5_PBKDF2_HMAC_SHA1( (const char*) cryptoPassword.c_str(), -1, SHABACK_KEY_SALT, strlen((const char*) SHABACK_KEY_SALT), iter, EVP_MAX_KEY_LENGTH, key)) {
-      throw Exception("PKCS5_PBKDF2_HMAC_SHA1 failed.");
-    }
-    cryptoKey = key;
+    cryptoKey = KeyDerivation::deriveFromPassword(cryptoPassword);
   }
 
   return cryptoKey;
-#else
-  throw UnsupportedOperation("PKCS5_PBKDF2_HMAC_SHA1");
-#endif
 }
+#endif

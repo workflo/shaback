@@ -133,7 +133,7 @@ void Shaback::createRepository()
   if (config.init_encryptionAlgorithm != ENCRYPTION_NONE && !config.passwordCheckFile.isFile()) {
 #if defined(OPENSSL_FOUND)
     // Create "password" file:
-    string hash = Repository::hashPassword(config.cryptoPassword);
+    string hash = Repository::hashPassword(config.init_encryptionAlgorithm, config.cryptoPassword);
     FileOutputStream os(config.passwordCheckFile);
     os.write(hash.data(), hash.size());
     os.close();
