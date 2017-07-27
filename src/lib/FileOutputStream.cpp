@@ -142,7 +142,11 @@ void FileOutputStream::close()
 
     if (File(filename).getSize() != totalBytesWritten) {
       char buf[50];
-      sprintf(buf, "%i", totalBytesWritten);
+#ifdef __APPLE__
+      sprintf(buf, "%jd", totalBytesWritten);
+#else
+      sprintf(buf, "%lu", totalBytesWritten);
+#endif
       throw IOException(string("IO ERROR: Written output file has unexpected size: ") + filename + " should be " + buf + " bytes");
     }
   }
