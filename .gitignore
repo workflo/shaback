@@ -4,5 +4,7 @@ src/shaback
 **/.kdev4
 *.a
 .lastbuild
-gui/*
 
+gui/gui.userprefs
+gui/gui/bin
+gui/gui/obj
