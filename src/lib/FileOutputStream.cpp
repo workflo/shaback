@@ -143,7 +143,7 @@ void FileOutputStream::close()
     if (File(filename).getSize() != totalBytesWritten) {
       char buf[50];
 #ifdef __APPLE__
-      sprintf(buf, "%jd", totalBytesWritten);
+      sprintf(buf, "%lld", totalBytesWritten);
 #else
       sprintf(buf, "%lu", totalBytesWritten);
 #endif
