@@ -31,3 +31,15 @@ RestoreReport::RestoreReport(const RestoreReport& orig) :
     numErrors(orig.numErrors), numFilesRestored(orig.numFilesRestored), numBytesRestored(orig.numBytesRestored),
     fileCount(orig.fileCount), bytesToBeRestored(orig.bytesToBeRestored)
 {}
+
+
+void RestoreReport::dump()
+{
+  fprintf(stderr, "Files restored:   %12d                      \n", numFilesRestored);
+  #ifdef __APPLE__
+  fprintf(stderr, "Bytes restored:   %12jd\n", numBytesRestored);
+  #else
+  fprintf(stderr, "Bytes restored:   %12jd\n", numBytesRestored);
+  #endif
+  fprintf(stderr, "Errors:           %12d\n", numErrors);
+}

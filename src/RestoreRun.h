@@ -33,7 +33,6 @@ class RestoreRun
 
     void restore(std::string& treeId, File& destinationDir, int depth = 0);
     void restoreAsCpioStream(std::string& treeId, int depth = 0);
-    void showTotals();
 
     RestoreReport start(std::string& treeId, File& destinationDir);
     RestoreReport report;

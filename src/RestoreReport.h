@@ -30,6 +30,7 @@ class RestoreReport
     RestoreReport& operator=(const RestoreReport& report);
 
     bool inline hasErrors() { return numErrors > 0; }
+    void dump();
 
     intmax_t numBytesRestored;
     intmax_t bytesToBeRestored;
