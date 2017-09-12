@@ -22,8 +22,10 @@
 #else
 # include <getopt.h>
 # include <fnmatch.h>
+# include <termios.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
 
 extern "C" {
 #include <lua.h>
@@ -65,6 +67,7 @@ RuntimeConfig::RuntimeConfig()
   actionDetails = false;
   backupsToKeep = -1;
   number = 0;
+  cryptoKey = 0;
   init_compressionAlgorithm = COMPRESSION_DEFLATE;
   init_encryptionAlgorithm = ENCRYPTION_NONE;
   init_repoFormat = REPOFORMAT_2_2;
@@ -85,6 +88,20 @@ RuntimeConfig::RuntimeConfig()
   readCacheFile = File(File::home(), ".shaback-read-cache.gdbm");
 
   initLua();
+
+  struct termios terminal;
+  if (tcgetattr(0, &terminal) != -1 && tcgetattr(1, &terminal) != -1) {
+    // Colors (See http://misc.flogisoft.com/bash/tip_colors_and_formatting)
+    color_error = "\e[31m";
+    color_success = "\e[32m";
+    color_filename = "\e[36m";
+    color_stats = "\e[34m";
+    color_deleted = "\e[35m";
+    color_default = "\e[39m";
+
+    style_bold = "\e[1m";
+    style_default = "\e[0m";
+  }
 }
 
 RuntimeConfig::~RuntimeConfig()
@@ -139,6 +156,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case 'q':
         quiet = true;
+        gauge = true;
         break;
 
       case 'h':
@@ -253,6 +271,21 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
       }
     }
   }
+
+  struct termios terminal;
+  if (tcgetattr(0, &terminal) != -1 && tcgetattr(1, &terminal) != -1) {
+    // Colors (See http://misc.flogisoft.com/bash/tip_colors_and_formatting)
+    color_error = "\e[31m";
+    color_success = "\e[32m";
+    color_filename = "\e[36m";
+    color_stats = "\e[34m";
+    color_default = "\e[39m";
+    color_low = "\e[90m";
+    color_debug = "\e[37m";
+
+    style_bold = "\e[1m";
+    style_default = "\e[0m";
+  }
 }
 
 void RuntimeConfig::load()
@@ -335,6 +368,16 @@ static int l_setShowTotals(lua_State *L)
 
   RuntimeConfig* config = getRuntimeConfig(L, 2);
   config->showTotals = b;
+
+  return 0;
+}
+
+static int l_setUseSymlinkLock(lua_State *L)
+{
+  bool b = (bool) lua_toboolean(L, 1);
+
+  RuntimeConfig* config = getRuntimeConfig(L, 2);
+  config->useSymlinkLock = b;
 
   return 0;
 }
@@ -455,6 +498,9 @@ void RuntimeConfig::initLua()
   lua_pushcfunction(this->luaState, l_setShowTotals);
   lua_setglobal(this->luaState, "setShowTotals");
 
+  lua_pushcfunction(this->luaState, l_setUseSymlinkLock);
+  lua_setglobal(this->luaState, "setUseSymlinkLock");
+
   lua_pushcfunction(this->luaState, l_addDir);
   lua_setglobal(this->luaState, "addDir");
 
@@ -567,3 +613,17 @@ void RuntimeConfig::runLeaveDirCallbacks(File &dir)
   lua_pushstring(this->luaState, dir.path.c_str());
   lua_call(this->luaState, 1, 0);
 }
+
+
+#if defined(OPENSSL_FOUND)
+  #include "lib/KeyDerivation.h"
+
+unsigned char* RuntimeConfig::derivedKey()
+{
+  if (cryptoKey == 0) {
+    cryptoKey = KeyDerivation::deriveFromPassword(cryptoPassword);
+  }
+
+  return cryptoKey;
+}
+#endif

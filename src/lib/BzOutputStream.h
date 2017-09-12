@@ -23,7 +23,7 @@
 #include <bzlib.h>
 #include "OutputStream.h"
 
-#define BZ_CHUNK_SIZE (1024 * 16)
+#define BZ_CHUNK_SIZE (16 * 1024)
 
 /**
  * An OutputStream that performs BZ data compression.

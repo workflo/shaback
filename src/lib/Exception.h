@@ -111,4 +111,12 @@ class LzmaException : public Exception
     LzmaException(std::string msg, int err);
 };
 
+class ZStdException : public Exception
+{
+  public:
+    ZStdException(std::string msg);
+    ZStdException(std::string msg, int err);
+    ZStdException(std::string msg, std::string details);
+};
+
 #endif // SHABACK_Exception_H

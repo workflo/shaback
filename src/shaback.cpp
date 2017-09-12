@@ -20,11 +20,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "lib/DeflateOutputStream.h"
+#include "lib/StandardInputStream.h"
 #include "lib/StandardOutputStream.h"
 #include "lib/FileOutputStream.h"
+#include "lib/DeflateOutputStream.h"
 #include "lib/DeflateInputStream.h"
-#include "lib/StandardInputStream.h"
+#include "lib/BzInputStream.h"
+#include "lib/BzOutputStream.h"
+#include "lib/LzmaInputStream.h"
+#include "lib/LzmaOutputStream.h"
+#include "lib/ZStdInputStream.h"
+#include "lib/ZStdOutputStream.h"
 
 #include "shaback.h"
 #include "RuntimeConfig.h"
@@ -44,7 +50,7 @@ void Shaback::createRepository()
 {
   if (!config.force) {
     if (config.filesDir.isDir() || config.indexDir.isDir() || config.locksDir.isDir()) {
-      cerr << "Looks like a shaback repository already: " << config.repository << endl;
+      cerr << config.color_error << "Looks like a shaback repository already: " << config.repository << config.color_default << endl;
       exit(3);
     }
     if (!config.repoDir.listFiles("*").empty()) {
@@ -127,17 +133,17 @@ void Shaback::createRepository()
   if (config.init_encryptionAlgorithm != ENCRYPTION_NONE && !config.passwordCheckFile.isFile()) {
 #if defined(OPENSSL_FOUND)
     // Create "password" file:
-    string hash = Repository::hashPassword(config.cryptoPassword);
+    string hash = Repository::hashPassword(config.init_encryptionAlgorithm, config.cryptoPassword);
     FileOutputStream os(config.passwordCheckFile);
     os.write(hash.data(), hash.size());
     os.close();
 #else
-    cerr << "Cannot handle encrypted repositories - missing openssl." << endl;
+    cerr << config.color_error << "Cannot handle encrypted repositories - missing openssl." << config.color_default << endl;
     exit(1);
 #endif
   }
 
-  cout << "Repository created: " << config.repository << endl;
+  cout << config.color_success << "Repository created: " << config.repository << config.color_default << endl;
 }
 
 int Shaback::deflate()
@@ -146,15 +152,20 @@ int Shaback::deflate()
   StandardOutputStream out(stdout);
 
   char buf[DEFLATE_CHUNK_SIZE];
-  DeflateOutputStream def(&out);
+
+  OutputStream* compressionOutputStream = ShabackOutputStream::createCompressionStream(&out, config.init_compressionAlgorithm);
+
   int bytesRead;
 
   while (true) {
     bytesRead = in.read(buf, DEFLATE_CHUNK_SIZE);
     if (bytesRead == -1)
       break;
-    def.write(buf, bytesRead);
+    compressionOutputStream->write(buf, bytesRead);
   }
+
+  compressionOutputStream->close();
+  delete compressionOutputStream;
 
   return 0;
 }
@@ -165,15 +176,20 @@ int Shaback::inflate()
   StandardOutputStream out(stdout);
 
   char buf[DEFLATE_CHUNK_SIZE];
-  DeflateInputStream def(&in);
+
+  InputStream* compressionInputStream = ShabackInputStream::createCompressionStream(&in, config.init_compressionAlgorithm);
+
   int bytesRead;
 
   while (true) {
-    bytesRead = def.read(buf, DEFLATE_CHUNK_SIZE);
+    bytesRead = compressionInputStream->read(buf, DEFLATE_CHUNK_SIZE);
     if (bytesRead == -1)
       break;
     out.write(buf, bytesRead);
   }
+
+  compressionInputStream->close();
+  delete compressionInputStream;
 
   return 0;
 }

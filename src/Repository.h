@@ -167,7 +167,7 @@ class Repository
     /**
      * Returns the hash digest for the given password as a hex string.
      */
-    static std::string hashPassword(std::string password);
+    static std::string hashPassword(int encryptionAlgorithm, std::string password);
 #endif
 
     /**
@@ -224,12 +224,13 @@ class Repository
 #define COMPRESSION_LZMA0   20
 #define COMPRESSION_LZMA5   21
 #define COMPRESSION_LZMA9   22
+#define COMPRESSION_ZSTD1   31
+#define COMPRESSION_ZSTD5   35
+#define COMPRESSION_ZSTD9   39
 
 #define ENCRYPTION_NONE     0
 #define ENCRYPTION_BLOWFISH 1
-//#define ENCRYPTION_TWOFISH  2
-//#define ENCRYPTION_AES      3
-//#define ENCRYPTION_DES      4
+#define ENCRYPTION_AES256   2
 
 #define DIGEST_SHA1         1
 #define DIGEST_SHA256       2

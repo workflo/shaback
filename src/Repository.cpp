@@ -99,7 +99,7 @@ void Repository::checkPassword()
 {
   FileInputStream in(config.passwordCheckFile);
   string hashFromFile;
-  string hashFromPassword = hashPassword(config.cryptoPassword);
+  string hashFromPassword = hashPassword(encryptionAlgorithm, config.cryptoPassword);
 
   if (in.readAll(hashFromFile)) {
     if (hashFromFile == hashFromPassword) {
@@ -135,7 +135,8 @@ void Repository::lock(bool exclusive)
       if (errno == EEXIST) {
         throw LockingException(
             string("Repository is locked exclusively. Check lock files in ").append(config.locksDir.path).append(": ").append(existingLocks));
-        // TODO: EPERM: symlinks not supported!
+      } else if (errno == ENOSYS) {
+        throw LockingException("Destination filesystem does not support symlinks. Use `-L' to lock without symlinks.");
       } else {
         throw Exception::errnoToException(config.exclusiveLockFile.path);
       }
@@ -304,7 +305,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
     File destFile = hashValueToFile(hashValue);
 
     if (config.verbose || config.debug) {
-      cout << "[m] " << srcFile.path << endl;
+      cout << config.color_filename << "[m] " << srcFile.path << config.color_default << endl;
       if (config.debug) {
         cout << "[f] " << destFile.path << endl;
       }
@@ -344,7 +345,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
   int blockCount = 0;
 
   if (config.verbose || config.debug) {
-    cout << "[s] " << srcFile.path << endl;
+    cout << config.color_filename << "[s] " << srcFile.path << config.color_default << endl;
   }
 
   *totalFileSize = 0;
@@ -433,8 +434,16 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   int from = 0;
   int until;
 
-  if ((until = content.find('\n', from)) == string::npos)
-    throw InvalidTreeFile("Missing header line");
+  if ((until = content.find('\n', from)) == string::npos) {
+    if (config.verbose) {
+      cerr << config.color_error;
+      cerr << "Missing header line in index file " << hashValueToFile(treeId).path << ":" << endl;
+      cerr << config.color_low;
+      cerr << content.substr(0, 200) << (content.size() > 200 ? "..." : "") << endl;
+      cerr << config.color_default;
+    }
+    throw InvalidTreeFile(string("Missing header line in index ") + treeId);
+  }
   string header = content.substr(from, until - from);
   if (header != TREEFILE_HEADER)
     throw InvalidTreeFile("Unexpected header line in tree file");
@@ -514,8 +523,10 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 
   os.close();
 
+  cout << config.color_success;
   cout << "ID:         " << rootHashValue << endl;
   cout << "Index file: " << file.path << endl;
+  cout << config.color_default;
 }
 
 RestoreReport Repository::restore()
@@ -572,7 +583,7 @@ RestoreReport Repository::testRestore()
 
     for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
       File file(*it);
-      if (config.verbose) cerr << "*** " << file.path << " ***" << endl;
+      if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
       RestoreReport r = restoreByRootFile(file, true);
       
       report.numErrors += r.numErrors;
@@ -686,12 +697,12 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
             totalBytesRead += bytesRead;
           }
         } catch (Exception &ex) {
-          cerr << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << endl;
+          cerr << config.color_error << "FAILED: " << entry.path << ": Error reading " << hashValue << ": " << ex.getMessage() << config.color_default << endl;
           restoreRun.report.numErrors ++;
         }
       }
     } catch (Exception &ex) {
-      cerr << "FAILED: " << entry.path << ": Error reading block list " << entry.id << ": " << ex.getMessage() << endl;
+      cerr << config.color_error << "FAILED: " << entry.path << ": Error reading block list " << entry.id << ": " << ex.getMessage() << config.color_default << endl;
       restoreRun.report.numErrors ++;
       return;
     }
@@ -712,7 +723,7 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
           totalBytesRead += bytesRead;
         }
       } catch (Exception &ex) {
-        cerr << "FAILED: " << entry.path << ": Error reading " << entry.id << ": " << ex.getMessage() << endl;
+        cerr << config.color_error << "FAILED: " << entry.path << ": Error reading " << entry.id << ": " << ex.getMessage() << config.color_default << endl;
         restoreRun.report.numErrors ++;
         return;
       }
@@ -773,40 +784,50 @@ void Repository::history()
 
 int Repository::encryptionByName(string name)
 {
-  if (name == "Blowfish") {
+  string lcName(name);
+  std::transform(lcName.begin(), lcName.end(), lcName.begin(), ::tolower);
+
+  if (lcName == "blowfish") {
     return ENCRYPTION_BLOWFISH;
-    //  } else if (name == "Twofish") {
-    //    return ENCRYPTION_TWOFISH;
-    //  } else if (name == "AES") {
-    //    return ENCRYPTION_AES;
-    //  } else if (name == "DES") {
-    //    return ENCRYPTION_DES;
-  } else if (name == "None" || name.empty()) {
+  } else if (lcName == "aes" || lcName == "aes256") {
+    return ENCRYPTION_AES256;
+  } else if (lcName == "none" || name.empty()) {
     return ENCRYPTION_NONE;
   } else {
-    throw UnsupportedEncryptionAlgorithm(name);
+    throw UnsupportedEncryptionAlgorithm(lcName);
   }
 }
 
 int Repository::compressionByName(string name)
 {
-  if (name == "Deflate") {
+  string lcName(name);
+  std::transform(lcName.begin(), lcName.end(), lcName.begin(), ::tolower);
+
+  if (lcName == "deflate") {
     return COMPRESSION_DEFLATE;
-  } else if (name == "BZ" || name == "Bz" || name == "BZip" || name == "BZip-5") {
+  } else if (lcName == "bz" || lcName == "bzip" || lcName == "bzip-5") {
     return COMPRESSION_BZip5;
-  } else if (name == "BZ1" || name == "Bz1" || name == "BZip-1" || name == "BZip1") {
+  } else if (lcName == "bz1" || lcName == "bzip-1" || lcName == "bzip1") {
     return COMPRESSION_BZip1;
-  } else if (name == "BZ9" || name == "Bz9" || name == "BZip-9" || name == "BZip9") {
+  } else if (lcName == "bz9" || lcName == "bz9" || lcName == "bzip-9" || lcName == "bzip9") {
     return COMPRESSION_BZip9;
+#if defined(ZSTD_FOUND)
+  } else if (lcName == "zstd1" || lcName == "zstd-1" || lcName == "zstd") {
+    return COMPRESSION_ZSTD1;
+  } else if (lcName == "zstd5" || lcName == "zstd-5") {
+    return COMPRESSION_ZSTD5;
+  } else if (lcName == "zstd9" || lcName == "zstd-9") {
+    return COMPRESSION_ZSTD9;
+#endif
 #if defined(LZMA_FOUND)
-  } else if (name == "LZMA0" || name == "LZMA-0" || name == "Lzma0" || name == "Lzma-0") {
+  } else if (lcName == "lzma0" || lcName == "lzma-0") {
     return COMPRESSION_LZMA0;
-  } else if (name == "LZMA" || name == "LZMA-5" || name == "Lzma" || name == "Lzma-5") {
+  } else if (lcName == "lzma5" || lcName == "lzma-5" || lcName == "lzma") {
     return COMPRESSION_LZMA5;
-  } else if (name == "LZMA9" || name == "LZMA-9" || name == "Lzma9" || name == "Lzma-9") {
+  } else if (lcName == "lzma9" || lcName == "lzma-9") {
     return COMPRESSION_LZMA9;
 #endif
-  } else if (name == "None" || name.empty()) {
+  } else if (lcName == "none" || lcName.empty()) {
     return COMPRESSION_NONE;
   } else {
     throw UnsupportedCompressionAlgorithm(name);
@@ -835,6 +856,14 @@ string Repository::compressionToName(int compression)
       return "BZip-1";
     case COMPRESSION_BZip9:
       return "BZip-9";
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD5:
+      return "ZStd";
+    case COMPRESSION_ZSTD1:
+      return "ZStd-1";
+    case COMPRESSION_ZSTD9:
+      return "ZStd-9";
+#endif
 #if defined(LZMA_FOUND)
     case COMPRESSION_LZMA0:
       return "Lzma-0";
@@ -853,6 +882,8 @@ string Repository::encryptionToName(int encryption)
   switch (encryption) {
     case ENCRYPTION_BLOWFISH:
       return "Blowfish";
+    case ENCRYPTION_AES256:
+      return "AES";
     default:
       return "None";
   }
@@ -869,12 +900,26 @@ string Repository::repoFormatToName(int fmt)
 }
 
 #if defined(OPENSSL_FOUND)
-string Repository::hashPassword(string password)
+  #include <openssl/evp.h>
+  #include "lib/KeyDerivation.h"
+
+string Repository::hashPassword(int encryptionAlgorithm, string password)
 {
   Sha256 sha;
   string salt(PASSWORDFILE_SALT);
   sha.update(salt);
-  sha.update(password);
+
+  switch (encryptionAlgorithm) {
+    case ENCRYPTION_BLOWFISH:
+      sha.update(password);
+      break;
+    case ENCRYPTION_NONE:
+      break;
+    default:
+      unsigned char* key = KeyDerivation::deriveFromPassword(password);
+      sha.update(&key[EVP_MAX_KEY_LENGTH - 16], 16);
+      free(key);
+  }
   sha.finalize();
   return sha.toString();
 }

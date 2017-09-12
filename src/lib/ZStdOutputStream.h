@@ -16,42 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_FileOutputStream_H
-#define SHABACK_FileOutputStream_H
+#include "config.h"
+#if !defined(SHABACK_ZStdOutputStream_H) && defined(ZSTD_FOUND)
+#define SHABACK_ZStdOutputStream_H
 
 #include <string.h>
-#ifdef WIN32
-# include <windows.h>
-#endif
-#include "File.h"
+#include <zstd.h>
 #include "OutputStream.h"
 
 /**
- * This classes allows a stream of data to be written to a disk file.
+ * An OutputStream that performs ZStandard data compression.
  *
- * @class FileOutputStream
+ * @class ZStdOutputStream
  */
-class FileOutputStream: public OutputStream
+class ZStdOutputStream: public OutputStream
 {
   public:
-    FileOutputStream(File& file);
-    FileOutputStream(const char* filename);
-    FileOutputStream(std::string& filename);
-    ~FileOutputStream();
+    ZStdOutputStream(OutputStream* out, int compressionLevel = 5);
+    ~ZStdOutputStream();
 
     void write(int b);
     void write(const char* b, int len);
+    void finish();
     void close();
 
   protected:
-#ifdef WIN32
-    HANDLE handle;
-#else
-    int handle;
-#endif
-    void init(std::string& filename);
+    OutputStream* out;
+    ZSTD_CStream* zipStream;
 
-    long long totalBytesWritten;
-    std::string filename;
+    ZSTD_outBuffer outBuffer;
 };
-#endif // SHABACK_FileOutputStream_H
+#endif // SHABACK_ZStdOutputStream_H

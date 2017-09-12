@@ -40,13 +40,13 @@ class ShabackOutputStream
     void write(const char* s);
     void write(const char* data, int numBytes);
 
+    static OutputStream* createCompressionStream(OutputStream* outputStream, int compressionAlgorithm);
+
   private:
     int compressionAlgorithm;
     int encryptionAlgorithm;
     File file;
     File tmpFile;
-//    gzFile gz;
-//    int fd;
     bool opened;
     OutputStream* compressionOutputStream;
     OutputStream* outputStream;

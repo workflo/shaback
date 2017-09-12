@@ -38,6 +38,8 @@ class ShabackInputStream : public InputStream
     int read(char* b, int len);
     int read();
 
+    static InputStream* createCompressionStream(InputStream* inputStream, int compressionAlgorithm);
+
   private:
     int compressionAlgorithm;
     int encryptionAlgorithm;

@@ -37,6 +37,9 @@ class RuntimeConfig
     virtual void load();
     virtual void parseCommandlineArgs(int argc, char** argv);
     virtual void loadConfigFile(std::string filename);
+#if defined(OPENSSL_FOUND)
+    unsigned char* derivedKey();
+#endif
 
     bool quiet;
     int verbose;
@@ -58,6 +61,18 @@ class RuntimeConfig
     bool actionDetails;
     int backupsToKeep;
     int number;
+
+    std::string color_error;
+    std::string color_success;
+    std::string color_filename;
+    std::string color_stats;
+    std::string color_deleted;
+    std::string color_default;
+    std::string color_low;
+    std::string color_debug;
+
+    std::string style_bold;
+    std::string style_default;
 
     std::string operation;
     std::string repository;
@@ -87,6 +102,9 @@ class RuntimeConfig
 
     /** Clear-text password when using an encryted repository. */
     std::string cryptoPassword;
+
+    /** The crypto key derived from cryptoPassword using PKCS5_PBKDF2_HMAC_SHA1. Always EVP_MAX_KEY_LENGTH (=64) bytes. */
+    unsigned char* cryptoKey;
 
     /** Encryption algorithm to be used when creating a new repository. */
     int init_encryptionAlgorithm;

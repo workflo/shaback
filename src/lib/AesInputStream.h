@@ -1,6 +1,6 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2012 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2017 Florian Wolff (florian@donuz.de)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,42 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_FileOutputStream_H
-#define SHABACK_FileOutputStream_H
+#include "config.h"
+#if !defined(SHABACK_AesInputStream_H) && defined(OPENSSL_FOUND)
+#define SHABACK_AesInputStream_H
 
 #include <string.h>
-#ifdef WIN32
-# include <windows.h>
-#endif
-#include "File.h"
-#include "OutputStream.h"
+#include <openssl/evp.h>
+#include <openssl/blowfish.h>
+#include "InputStream.h"
+#include "AesOutputStream.h"
 
-/**
- * This classes allows a stream of data to be written to a disk file.
- *
- * @class FileOutputStream
- */
-class FileOutputStream: public OutputStream
+
+class AesInputStream: public InputStream
 {
   public:
-    FileOutputStream(File& file);
-    FileOutputStream(const char* filename);
-    FileOutputStream(std::string& filename);
-    ~FileOutputStream();
+    AesInputStream(unsigned char* key, InputStream* in);
+    ~AesInputStream();
 
-    void write(int b);
-    void write(const char* b, int len);
+    int read();
+    int read(char* b, int len);
     void close();
 
   protected:
-#ifdef WIN32
-    HANDLE handle;
+    unsigned char* key;
+    InputStream* in;
+    unsigned char inputBuffer[AES_CHUNK_SIZE + EVP_MAX_BLOCK_LENGTH];
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+    EVP_CIPHER_CTX *pctx;
 #else
-    int handle;
+    EVP_CIPHER_CTX ctx;
+    EVP_CIPHER_CTX *pctx;
 #endif
-    void init(std::string& filename);
-
-    long long totalBytesWritten;
-    std::string filename;
+    int outlen;
+    bool finished;
 };
-#endif // SHABACK_FileOutputStream_H
+#endif// SHABACK_AesInputStream_H

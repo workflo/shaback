@@ -22,6 +22,7 @@
 #include "RuntimeConfig.h"
 #include "Repository.h"
 
+
 class Shaback
 {
 public:
@@ -29,8 +30,8 @@ public:
     virtual ~Shaback();
 
     virtual void createRepository();
-    static int deflate();
-    static int inflate();
+    int deflate();
+    int inflate();
 
     Repository repository;
     

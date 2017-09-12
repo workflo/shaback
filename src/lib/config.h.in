@@ -1,6 +1,7 @@
 #if !defined(SHABACK_lib_config_H)
 
 #cmakedefine LZMA_FOUND
+#cmakedefine ZSTD_FOUND
 #cmakedefine OPENSSL_FOUND
 #cmakedefine HAVE_EVP_CIPHER_CTX_new
 #cmakedefine HAVE_STAT64

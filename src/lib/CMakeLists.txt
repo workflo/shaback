@@ -4,6 +4,7 @@ set (CMAKE_MODULE_PATH CMakeModules)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 find_package(ZLIB REQUIRED)
 find_package(BZip2 REQUIRED)
+find_package(ZStd QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lzma QUIET)
 
@@ -16,6 +17,8 @@ IF (OPENSSL_INCLUDE_DIR)
 ENDIF (OPENSSL_INCLUDE_DIR)
 
 set(shaback_lib_SRCS
+    AesInputStream.cpp
+    AesOutputStream.cpp
     BlowfishOutputStream.cpp
     BlowfishInputStream.cpp
     BufferedWriter.cpp
@@ -30,6 +33,7 @@ set(shaback_lib_SRCS
     File.cpp
     FileOutputStream.cpp
     FileInputStream.cpp
+    KeyDerivation.cpp
     InputStream.cpp
     LzmaInputStream.cpp
     LzmaOutputStream.cpp
@@ -39,6 +43,8 @@ set(shaback_lib_SRCS
     Sha256.cpp
     StandardOutputStream.cpp
     StandardInputStream.cpp
+    ZStdOutputStream.cpp
+    ZStdInputStream.cpp
 )
 
 IF (LZMA_FOUND)

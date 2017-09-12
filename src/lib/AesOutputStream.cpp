@@ -19,19 +19,31 @@
 #include <iostream>
 
 #include "AesOutputStream.h"
+#if defined(OPENSSL_FOUND)
 #include "Exception.h"
 
 using namespace std;
 
 
-AesOutputStream::AesOutputStream(string& password, OutputStream* out)
-  : out(out)
+AesOutputStream::AesOutputStream(unsigned char* key, OutputStream* out)
+  : out(out), key(key)
 {
+#if defined(HAVE_EVP_CIPHER_CTX_new)
+  pctx = EVP_CIPHER_CTX_new();
+#else
+  EVP_CIPHER_CTX_init(&ctx);
+  pctx = &ctx;
+#endif
+
+  EVP_EncryptInit_ex(pctx, EVP_aes_256_cbc(), NULL, key, SHABACK_AES_IV);
+
+  outlen = 0;
 }
 
 AesOutputStream::~AesOutputStream()
 {
   close();
+  EVP_CIPHER_CTX_free(pctx);
 }
 
 
@@ -44,13 +56,25 @@ void AesOutputStream::write(int b)
 
 void AesOutputStream::write(const char* b, int len)
 {
-  if (len <= 0) return;
-  out->write(b, len);
+  while (len > 0) {
+    if (!EVP_EncryptUpdate(pctx, outputBuffer, &outlen, (const unsigned char*) b, min(len, AES_CHUNK_SIZE))) {
+      throw IOException("EVP_EncryptUpdate failed");
+    }
+
+    out->write((const char*) outputBuffer, outlen);
+
+    b += AES_CHUNK_SIZE;
+    len -= AES_CHUNK_SIZE;
+  }
 }
 
 
 void AesOutputStream::finish()
 {
+  if (!EVP_CipherFinal_ex(pctx, outputBuffer, &outlen)) {
+    throw IOException("EVP_CipherFinal_ex failed");
+  }
+  out->write((const char*) outputBuffer, outlen);
 }
 
 
@@ -62,4 +86,4 @@ void AesOutputStream::close()
     out = 0;
   }
 }
-
+#endif

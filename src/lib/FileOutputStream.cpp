@@ -50,8 +50,12 @@ FileOutputStream::~FileOutputStream()
 /*****************************************************************************\
  * init                                                                       |
  *****************************************************************************/
-void FileOutputStream::init(string& filename)
+void FileOutputStream::init(string& _filename)
 {
+  totalBytesWritten = 0;
+  filename = _filename;
+
+  
 #if defined(WIN32)
 
   handle = CreateFileA(filename.c_str(), GENERIC_WRITE,
@@ -112,6 +116,8 @@ void FileOutputStream::write(const char* b, int len)
   }
 
 #endif
+
+  totalBytesWritten += len;
 }
 
 /*****************************************************************************\
@@ -129,10 +135,21 @@ void FileOutputStream::close()
 #else
 
   if (handle != -1) {
-    ::close(handle);
+    if (::close(handle) != 0) {
+      throw Exception::errnoToException();
+    }
     handle = -1;
+
+    if (File(filename).getSize() != totalBytesWritten) {
+      char buf[50];
+#ifdef __APPLE__
+      sprintf(buf, "%lld", totalBytesWritten);
+#else
+      sprintf(buf, "%lu", totalBytesWritten);
+#endif
+      throw IOException(string("IO ERROR: Written output file has unexpected size: ") + filename + " should be " + buf + " bytes");
+    }
   }
 
 #endif
 }
-

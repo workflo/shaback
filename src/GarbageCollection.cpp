@@ -125,14 +125,16 @@ void GarbageCollection::keepSplitFileBlocks(TreeFileEntry& entry)
 void GarbageCollection::reportError(Exception& ex)
 {
   numErrors++;
-  cerr << "[E] " << ex.getMessage() << endl;
+  cerr << config.color_error << "[E] " << ex.getMessage() << config.color_default << endl;
 }
 
 void GarbageCollection::showTotals()
 {
+  cerr << (numErrors == 0 ? config.color_stats : config.color_error);
   printf("Files deleted:     %12d\n", filesDeleted);
   printf("Tmp files deleted: %12d\n", tmpFilesDeleted);
   printf("Errors:            %12d\n", numErrors);
+  cout << config.color_default;
 }
 
 void GarbageCollection::removeUnusedFiles()

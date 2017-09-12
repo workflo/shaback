@@ -20,13 +20,14 @@
 #include <fcntl.h>
 #include "ShabackInputStream.h"
 
-//#include "lib/AesInputStream.h"
+#include "lib/AesInputStream.h"
 #include "lib/BlowfishInputStream.h"
 #include "lib/BzInputStream.h"
 #include "lib/DeflateInputStream.h"
 #include "lib/Exception.h"
 #include "lib/FileInputStream.h"
 #include "lib/LzmaInputStream.h"
+#include "lib/ZStdInputStream.h"
 #include "Repository.h"
 
 using namespace std;
@@ -52,6 +53,41 @@ ShabackInputStream::~ShabackInputStream()
     delete fileInputStream;
 }
 
+
+InputStream* ShabackInputStream::createCompressionStream(InputStream* inputStream, int compressionAlgorithm)
+{
+  switch (compressionAlgorithm) {
+    case COMPRESSION_DEFLATE:
+      return new DeflateInputStream(inputStream);
+
+    case COMPRESSION_BZip5:
+    case COMPRESSION_BZip1:
+    case COMPRESSION_BZip9:
+      return new BzInputStream(inputStream);
+
+#if defined(ZSTD_FOUND)
+    case COMPRESSION_ZSTD1:
+    case COMPRESSION_ZSTD5:
+    case COMPRESSION_ZSTD9:
+      return new ZStdInputStream(inputStream);
+#endif
+
+#if defined(LZMA_FOUND)
+    case COMPRESSION_LZMA0:
+    case COMPRESSION_LZMA5:
+    case COMPRESSION_LZMA9:
+      return new LzmaInputStream(inputStream);
+#endif
+
+    case COMPRESSION_NONE:
+      return 0;
+
+    default:
+      throw Exception("Unexpected compression algorithm");
+  }
+}
+
+
 void ShabackInputStream::open(File& file)
 {
   this->file = file;
@@ -65,40 +101,23 @@ void ShabackInputStream::open(File& file)
       inputStream = encryptionInputStream;
       break;
 
-      //    case ENCRYPTION_AES:
-      //      encryptionOutputStream = new AesOutputStream(config.cryptoPassword, outputStream);
-      //      outputStream = encryptionOutputStream;
-      //      break;
+    case ENCRYPTION_AES256:
+      encryptionInputStream = new AesInputStream(config.derivedKey(), inputStream);
+      inputStream = encryptionInputStream;
+      break;
 
     case ENCRYPTION_NONE:
       break;
+
+    default:
+      throw Exception("Unexpected encryption algorithm");
   }
 #endif
 
-  switch (compressionAlgorithm) {
-    case COMPRESSION_DEFLATE:
-      compressionInputStream = new DeflateInputStream(inputStream);
-      inputStream = compressionInputStream;
-      break;
+  compressionInputStream = createCompressionStream(inputStream, compressionAlgorithm);
 
-    case COMPRESSION_BZip5:
-    case COMPRESSION_BZip1:
-    case COMPRESSION_BZip9:
-      compressionInputStream = new BzInputStream(inputStream);
-      inputStream = compressionInputStream;
-      break;
-
-#if defined(LZMA_FOUND)
-    case COMPRESSION_LZMA0:
-    case COMPRESSION_LZMA5:
-    case COMPRESSION_LZMA9:
-      compressionInputStream = new LzmaInputStream(inputStream);
-      inputStream = compressionInputStream;
-      break;
-#endif
-
-    case COMPRESSION_NONE:
-      break;
+  if (compressionInputStream) {
+    inputStream = compressionInputStream;
   }
 }
 

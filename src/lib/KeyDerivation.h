@@ -1,6 +1,6 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2012 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2017 Florian Wolff (florian@donuz.de)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,14 @@
  */
 
 #include "config.h"
-#if !defined(SHABACK_LzmaOutputStream_H) && defined(LZMA_FOUND)
-#define SHABACK_LzmaOutputStream_H
+#if !defined(SHABACK_KeyDerivation_H) && defined(OPENSSL_FOUND)
+#define SHABACK_KeyDerivation_H
 
-#include <string.h>
-#include <lzma.h>
-#include "OutputStream.h"
+#define SHABACK_KEY_SALT ((unsigned char*) "ThisIsOurShabackRepoSalt")
 
-#define LZMA_CHUNK_SIZE (16 * 1024)
-
-/**
- * An OutputStream that performs LZMA data compression.
- *
- * @class LzmaOutputStream
- */
-class LzmaOutputStream: public OutputStream
-{
+class KeyDerivation {
   public:
-    LzmaOutputStream(OutputStream* out, int compressionLevel = 5);
-    ~LzmaOutputStream();
-
-    void write(int b);
-    void write(const char* b, int len);
-    void finish();
-    void close();
-
-  protected:
-    OutputStream* out;
-    lzma_stream zipStream;
-    char* outputBuffer;
-    lzma_ret ret;
+    static unsigned char* deriveFromPassword(std::string &password);
 };
-#endif // SHABACK_LzmaOutputStream_H
+
+#endif // SHABACK_KeyDerivation_H

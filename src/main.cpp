@@ -142,20 +142,25 @@ void showUsage(string& op)
       "Options:\n"
       "\t-f, --force\n"
       "\t    Force creation even if the destination directory is not empty.\n\n"
+#if defined(OPENSSL_FOUND)
       "\t-E <enc>, --encryption=<enc>\n"
       "\t    Enable encryption for this repository. You cannot alter this setting\n"
       "\t    after the repository has been created!\n"
       "\t    Be sure to specify a password via the --password option (see below).\n"
-      "\t    <enc> must be one of: `None' or `Blowfish'. Defaults to `None'.\n\n"
+      "\t    <enc> must be one of: `None', `AES' or `Blowfish'. Defaults to `None'.\n\n"
+#endif
       "\t-C <comp>, --compression=<comp>\n"
       "\t    Enable data compression for this repository. You cannot alter this setting\n"
       "\t    after the repository has been created!\n"
-      "\t    <comp> must be one of: `None', `BZip', `BZip-1', `BZip-9'"
-#if defined(LZMA_FOUND)
-           ", `LZMA',\n"
-      "\t    `LZMA-0', `LZMA-5', `LZMA-9'"
+      "\t    <comp> must be one of: `None',\n"
+      "\t    `BZip', `BZip-1', `BZip-9'"
+#if defined(ZSTD_FOUND)
+           ",\n\t    `ZStd', `ZStd-1', `ZStd-5', `ZStd-9'"
 #endif
-           " or `Deflate'.\n"
+#if defined(LZMA_FOUND)
+           ",\n\t    `LZMA', `LZMA-0', `LZMA-5', `LZMA-9'"
+#endif
+           "\n\t    or `Deflate'.\n"
       "\t    Defaults to `Deflate'.\n\n"
       "\t-F <fmt>, --repo-format=<fmt>\n"
       "\t    Select an alternative repository format.\n"
@@ -215,53 +220,59 @@ int main(int argc, char** argv)
 {
   try {
     RuntimeConfig config;
-    config.load();
-    config.parseCommandlineArgs(argc, argv);
-    config.finalize();
 
-    if (config.operation.empty()) {
-      showUsage(config.operation);
-      return 1;
-    }
+    try {
+      config.load();
+      config.parseCommandlineArgs(argc, argv);
+      config.finalize();
 
-    if (config.help) {
-      showUsage(config.operation);
-    } else {
-      Shaback shaback(config);
-      globalRepo = &shaback.repository;
-
-      signal(SIGINT, interruptHandler);
-      signal(SIGTERM, interruptHandler);
-      signal(SIGHUP, interruptHandler);
-      signal(SIGPIPE, interruptHandler);
-
-      if (config.operation == "init") {
-        shaback.createRepository();
-      } else if (config.operation == "backup") {
-        return shaback.repository.backup();
-      } else if (config.operation == "restore") {
-        RestoreReport report = shaback.repository.restore();
-        return report.hasErrors() ? 1 : 0;
-      } else if (config.operation == "test-restore") {
-        RestoreReport report(shaback.repository.testRestore());
-        return report.hasErrors() ? 1 : 0;
-      } else if (config.operation == "show") {
-        shaback.repository.show();
-      } else if (config.operation == "gc") {
-        shaback.repository.gc();
-      } else if (config.operation == "history") {
-        shaback.repository.history();
-      } else if (config.operation == "deflate") {
-        return shaback.deflate();
-      } else if (config.operation == "inflate") {
-        return shaback.inflate();
-      } else if (config.operation == "version") {
-        printf("Shaback version %u.%u\n", SHABACK_VERSION_MAJOR, SHABACK_VERSION_MINOR);
-      } else {
-        cerr << "Invalid operation `" << config.operation << "'." << endl;
+      if (config.operation.empty()) {
+        showUsage(config.operation);
         return 1;
       }
-      return 0;
+
+      if (config.help) {
+        showUsage(config.operation);
+      } else {
+        Shaback shaback(config);
+        globalRepo = &shaback.repository;
+
+        signal(SIGINT, interruptHandler);
+        signal(SIGTERM, interruptHandler);
+        signal(SIGHUP, interruptHandler);
+        signal(SIGPIPE, interruptHandler);
+
+        if (config.operation == "init") {
+          shaback.createRepository();
+        } else if (config.operation == "backup") {
+          return shaback.repository.backup();
+        } else if (config.operation == "restore") {
+          RestoreReport report = shaback.repository.restore();
+          return report.hasErrors() ? 1 : 0;
+        } else if (config.operation == "test-restore") {
+          RestoreReport report(shaback.repository.testRestore());
+          return report.hasErrors() ? 1 : 0;
+        } else if (config.operation == "show") {
+          shaback.repository.show();
+        } else if (config.operation == "gc") {
+          shaback.repository.gc();
+        } else if (config.operation == "history") {
+          shaback.repository.history();
+        } else if (config.operation == "deflate") {
+          return shaback.deflate();
+        } else if (config.operation == "inflate") {
+          return shaback.inflate();
+        } else if (config.operation == "version") {
+          printf("Shaback version %u.%u\n", SHABACK_VERSION_MAJOR, SHABACK_VERSION_MINOR);
+        } else {
+          cerr << "Invalid operation `" << config.operation << "'." << endl;
+          return 1;
+        }
+        return 0;
+      }
+    } catch (Exception& ex) {
+      cerr << config.color_error << ex.getMessage() << config.color_default << endl;
+      return 10;
     }
   } catch (Exception& ex) {
     cerr << ex.getMessage() << endl;
