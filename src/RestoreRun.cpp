@@ -60,7 +60,7 @@ RestoreReport RestoreRun::start(std::string& treeId, File& destinationDir)
   }
 
   if (config.showTotals) {
-    showTotals();
+    report.dump();
   }
 
   return report;
@@ -283,17 +283,6 @@ void RestoreRun::reportError(string msg)
 {
   report.numErrors++;
   cerr << "[E] " << msg << endl;
-}
-
-void RestoreRun::showTotals()
-{
-  fprintf(stderr, "Files restored:   %12d                      \n", report.numFilesRestored);
-  #ifdef __APPLE__
-  fprintf(stderr, "Bytes restored:   %12jd\n", report.numBytesRestored);
-  #else
-  fprintf(stderr, "Bytes restored:   %12jd\n", report.numBytesRestored);
-  #endif
-  fprintf(stderr, "Errors:           %12d\n", report.numErrors);
 }
 
 void RestoreRun::progress(std::string &path)

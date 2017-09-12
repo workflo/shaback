@@ -574,10 +574,16 @@ RestoreReport Repository::testRestore()
       File file(*it);
       if (config.verbose) cerr << "*** " << file.path << " ***" << endl;
       RestoreReport r = restoreByRootFile(file, true);
+      
+      report.numErrors += r.numErrors;
+
       if (r.hasErrors()) {
-        report.numErrors ++;
-        cerr << "ERROR DETECTED: " << file.path << " contains errors!" << endl;
+        cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
       }
+    }
+
+    if (config.showTotals) {
+      fprintf(stderr, "\nTotal Errors:     %12d\n", report.numErrors);
     }
 
     return report;
@@ -713,21 +719,29 @@ void Repository::testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry)
     }
   }
 
-  sha1.finalize();
-  string hashValue = sha1.toString();
-
-  // Check actual file size and hash digest:
-  if (!config.quick && totalBytesRead != entry.size) {
-    cerr << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << endl;
-    restoreRun.report.numErrors ++;
-  } else if (!config.quick && hashValue != entry.id.substr(0, 40)) {
-    cerr << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << endl;
-    restoreRun.report.numErrors ++;
+  if (config.quick) {
+    // Nothing more to check for 'quick' mode.
   } else {
-    if (config.verbose >= 2) cerr << "OK: " << entry.path << endl;
-    restoreRun.report.numFilesRestored ++;
-    restoreRun.report.numBytesRestored += totalBytesRead;
+    // Check actual file size and hash digest:
+    if (totalBytesRead != entry.size) {
+      cerr << config.color_error << "FAILED: " << entry.path << ": size mismatch (" << totalBytesRead << " <> " << entry.size << ")" << config.color_default << endl;
+      restoreRun.report.numErrors ++;
+      return;
+    } else {
+      sha1.finalize();
+      string hashValue = sha1.toString();
+
+      if (hashValue != entry.id.substr(0, 40)) {
+        cerr << config.color_error << "FAILED: " << entry.path << ": hash mismatch (" << hashValue << " <> " << entry.id << ")" << config.color_default << endl;
+        restoreRun.report.numErrors ++;
+        return;
+      }
+    }
   }
+
+  if (config.verbose >= 2) cerr << config.color_debug << "OK: " << entry.path << config.color_default << endl;
+  restoreRun.report.numFilesRestored ++;
+  restoreRun.report.numBytesRestored += totalBytesRead;
 }
 
 
