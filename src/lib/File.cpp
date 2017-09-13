@@ -87,9 +87,14 @@ File File::home()
   if (SHGetSpecialFolderPathA(NULL, tmpbuf, CSIDL_PERSONAL, false))
   path = tmpbuf;
 #else
-  struct passwd *pw = getpwuid(getuid());
-  if (pw) {
-    path = pw->pw_dir;
+  char* home = getenv("HOME");
+  if (home == 0) {
+    struct passwd *pw = getpwuid(getuid());
+    if (pw) {
+      path = pw->pw_dir;
+    }
+  } else {
+    path = home;
   }
 #endif
 
