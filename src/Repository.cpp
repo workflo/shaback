@@ -53,7 +53,7 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile)
+    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile, config.useReadCache)
 {
   readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
