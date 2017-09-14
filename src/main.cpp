@@ -149,7 +149,7 @@ void showUsage(string& op)
       "\t    Enable encryption for this repository. You cannot alter this setting\n"
       "\t    after the repository has been created!\n"
       "\t    Be sure to specify a password via the --password option (see below).\n"
-      "\t    <enc> must be one of: `None', `AES' or `Blowfish'. Defaults to `None'.\n\n"
+      "\t    <enc> must be one of: `None' or `Blowfish'. Defaults to `None'.\n\n"
 #endif
       "\t-C <comp>, --compression=<comp>\n"
       "\t    Enable data compression for this repository. You cannot alter this setting\n"
