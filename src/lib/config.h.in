@@ -7,7 +7,7 @@
 #cmakedefine HAVE_STAT64
 #cmakedefine HAVE_FSTAT64
 #cmakedefine HAVE_LSTAT64
-
+#cmakedefine COMPILER_SUPPORTS_CXX11
 
 #define SHABACK_lib_config_H
 

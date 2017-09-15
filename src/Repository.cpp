@@ -476,7 +476,11 @@ void Repository::exportCacheFile()
   FileOutputStream os(file);
   BufferedWriter writer(&os);
 
+#if defined(COMPILER_SUPPORTS_CXX11)
   unordered_set<string>::iterator it;
+#else
+  set<string>::iterator it;
+#endif
 
   for (it = writeCache.begin(); it != writeCache.end(); it++) {
     string s(*it);

@@ -21,7 +21,9 @@
 
 #include <string>
 #include <vector>
+#if defined(COMPILER_SUPPORTS_CXX11)
 #include <unordered_set>
+#endif
 #include <stdint.h>
 #include "ShabackConfig.h"
 #include "RuntimeConfig.h"
@@ -187,7 +189,11 @@ class Repository
     static std::string repoFormatToName(int fmt);
 
     /** The temporary write cache. Used to speed up backup. */
+  #if defined(COMPILER_SUPPORTS_CXX11)
     std::unordered_set<std::string> writeCache;
+  #else
+    std::set<std::string> writeCache;
+  #endif
 
     /** The (persistent) read cache. Used to speed up traversing tree files. */
     Cache readCache;
