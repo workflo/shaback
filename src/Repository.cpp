@@ -476,7 +476,7 @@ void Repository::exportCacheFile()
   FileOutputStream os(file);
   BufferedWriter writer(&os);
 
-  set<string>::iterator it;
+  unordered_set<string>::iterator it;
 
   for (it = writeCache.begin(); it != writeCache.end(); it++) {
     string s(*it);

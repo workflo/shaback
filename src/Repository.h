@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <stdint.h>
 #include "ShabackConfig.h"
 #include "RuntimeConfig.h"
@@ -186,7 +187,7 @@ class Repository
     static std::string repoFormatToName(int fmt);
 
     /** The temporary write cache. Used to speed up backup. */
-    std::set<std::string> writeCache;
+    std::unordered_set<std::string> writeCache;
 
     /** The (persistent) read cache. Used to speed up traversing tree files. */
     Cache readCache;
