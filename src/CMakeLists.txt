@@ -18,6 +18,8 @@ include(CheckTypeSize)
 check_type_size("long" SIZEOF_LONG)
 check_type_size("long long" SIZEOF_LONG_LONG)
 
+check_include_file_cxx ("unordered_set" HAVE_UNORDERED_SET)
+
 ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(dialog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})

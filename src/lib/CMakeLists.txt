@@ -8,9 +8,6 @@ find_package(ZStd QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lzma QUIET)
 
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-
 CHECK_FUNCTION_EXISTS (fstat64           HAVE_FSTAT64)
 CHECK_FUNCTION_EXISTS (stat64            HAVE_STAT64)
 CHECK_FUNCTION_EXISTS (lstat64           HAVE_LSTAT64)
