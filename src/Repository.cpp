@@ -53,7 +53,7 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile)
+    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile, config.useReadCache)
 {
   readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
@@ -476,7 +476,11 @@ void Repository::exportCacheFile()
   FileOutputStream os(file);
   BufferedWriter writer(&os);
 
+#if defined(COMPILER_SUPPORTS_CXX11)
+  unordered_set<string>::iterator it;
+#else
   set<string>::iterator it;
+#endif
 
   for (it = writeCache.begin(); it != writeCache.end(); it++) {
     string s(*it);

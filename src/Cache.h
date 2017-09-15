@@ -31,7 +31,7 @@ extern "C" {
 class Cache
 {
   public:
-    Cache(File file);
+    Cache(File file, bool use);
     ~Cache();
 
     void open(int openMode = GDBM_WRCREAT);
@@ -55,6 +55,7 @@ class Cache
     File file;
     GDBM_FILE gdbmFile;
     bool opened;
+    bool use;
 };
 
 #endif // SHABACK_Cache_H

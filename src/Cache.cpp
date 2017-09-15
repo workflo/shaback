@@ -23,8 +23,8 @@
 
 using namespace std;
 
-Cache::Cache(File file) :
-    file(file), opened(false)
+Cache::Cache(File file, bool use) :
+    file(file), opened(false), use(use)
 {
 }
 
@@ -35,7 +35,7 @@ Cache::~Cache()
 
 void Cache::open(int openMode)
 {
-  if (!opened) {
+  if (use && !opened) {
     gdbmFile = gdbm_open((char*) file.path.c_str(), 4096, openMode, 0777, 0);
     if (gdbmFile == 0) {
       if (errno > 0) {
