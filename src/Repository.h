@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-#if defined(COMPILER_SUPPORTS_CXX11)
+#if defined(HAVE_UNORDERED_SET)
 #include <unordered_set>
 #endif
 #include <stdint.h>
@@ -189,7 +189,7 @@ class Repository
     static std::string repoFormatToName(int fmt);
 
     /** The temporary write cache. Used to speed up backup. */
-  #if defined(COMPILER_SUPPORTS_CXX11)
+  #if defined(HAVE_UNORDERED_SET)
     std::unordered_set<std::string> writeCache;
   #else
     std::set<std::string> writeCache;
