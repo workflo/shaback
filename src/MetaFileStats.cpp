@@ -25,25 +25,27 @@
  
 MetaFileStats::MetaFileStats()
 {
-    reset();
+  reset();
 }
 
 
 void MetaFileStats::dump()
 {
-   #ifdef __APPLE__
-   fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
-   #else
-   fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
-   #endif
-   fprintf(stderr, "Meta data files read: %12d\n", treeFilesRead);
-   fprintf(stderr, "   cache hits:        %12d\n", treeFileCacheHits);
+  if (treeFilesRead > 0) {
+    #ifdef __APPLE__
+    fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
+    #else
+    fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
+    #endif
+    fprintf(stderr, "Meta data files read: %12d\n", treeFilesRead);
+    fprintf(stderr, "   cache hits:        %12d\n", treeFileCacheHits);
+  }
 }
 
 
 void MetaFileStats::reset()
 {
-    treeFilesRead = 0;
-    treeFileCacheHits = 0;
-    treeFileBytesRead = 0;
+  treeFilesRead = 0;
+  treeFileCacheHits = 0;
+  treeFileBytesRead = 0;
 }
