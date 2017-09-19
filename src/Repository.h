@@ -202,6 +202,8 @@ class Repository
     int repoFormat;
 
     MetaFileStats metaFileStats;
+    
+    Date startDate;
 
   protected:
     RuntimeConfig config;
@@ -210,7 +212,6 @@ class Repository
     int compressionAlgorithm;
     int splitBlockSize;
     int splitMinBlocks;
-    Date startDate;
 
 #if defined(OPENSSL_FOUND)
     void checkPassword();

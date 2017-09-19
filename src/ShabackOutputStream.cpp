@@ -100,7 +100,7 @@ OutputStream* ShabackOutputStream::createCompressionStream(OutputStream* outputS
 }
 
 
-void ShabackOutputStream::open(File& file)
+void ShabackOutputStream::open(File file)
 {
   this->file = file;
 

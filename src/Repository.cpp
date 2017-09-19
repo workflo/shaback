@@ -241,6 +241,7 @@ bool Repository::contains(string& hashValue)
 
 string Repository::storeTreeFile(BackupRun* run, string& treeFile)
 {
+  throw(UnsupportedOperation("Repository::storeTreeFile"));
   Sha1 sha1;
   sha1.update(treeFile);
   sha1.finalize();
@@ -528,6 +529,7 @@ void Repository::importCacheFile()
 
 void Repository::storeRootTreeFile(string& rootHashValue)
 {
+  throw(UnsupportedOperation("Repository::storeRootTreeFile"));
   string filename = config.backupName;
   filename.append("_").append(startDate.toFilename()).append(".sroot");
 

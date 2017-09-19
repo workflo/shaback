@@ -54,8 +54,11 @@ class BackupRun
      */
     void deleteOldIndexFiles();
 
+    void openDirectoryFile();
+    
     Repository& repository;
     RuntimeConfig& config;
+    ShabackOutputStream directoryFileStream;
 };
 
 #endif // SHABACK_BackupRun_H

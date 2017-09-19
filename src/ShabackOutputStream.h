@@ -32,7 +32,7 @@ class ShabackOutputStream
     ShabackOutputStream(RuntimeConfig& config, int compressionAlgorithm, int encryptionAlgorithm);
     ~ShabackOutputStream();
 
-    void open(File& file);
+    void open(File file);
     void close();
     void finish();
 

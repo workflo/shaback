@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.attributes": "java-properties",
+        "*.tcc": "cpp"
+    }
+}
