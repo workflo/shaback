@@ -43,9 +43,9 @@ class BackupRun
     int numErrors;
 
   protected:
-    std::string handleDirectory(File& dir, bool absolutePaths, intmax_t* totalDirSize, bool skipChildren = false);
-    std::string handleFile(File& dir, bool absolutePaths, intmax_t* totalDirSize);
-    std::string handleSymlink(File& dir, bool absolutePaths);
+    void handleDirectory(File& dir, bool absolutePaths, intmax_t* totalDirSize, bool skipChildren = false);
+    void handleFile(File& dir, bool absolutePaths, intmax_t* totalDirSize);
+    void handleSymlink(File& dir, bool absolutePaths);
     void handleSymlink(File& dir);
 
     /**

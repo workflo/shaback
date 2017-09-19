@@ -82,6 +82,15 @@ void Repository::open()
   encryptionAlgorithm = encryptionByName(props.getProperty("encryption"));
   repoFormat = repoFormatByName(props.getProperty("repoFormat"));
 
+  // Check Repo Version
+  string version(props.getProperty("version"));
+  if (version == "2") {
+    throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\":" \
+      "\n    shaback migrate-repository");
+  } else if (version != "3") {
+
+  }
+
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();

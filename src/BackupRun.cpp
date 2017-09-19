@@ -109,7 +109,7 @@ void BackupRun::openDirectoryFile()
 }
 
 
-string BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalParentDirSize, bool skipChildren)
+void BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalParentDirSize, bool skipChildren)
 {
   intmax_t totalDirSize = 0;
 
@@ -151,11 +151,9 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* total
   config.runLeaveDirCallbacks(dir);
 
   *totalParentDirSize += totalDirSize;
-
-  return "";
 }
 
-string BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirSize)
+void BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirSize)
 {
   intmax_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
@@ -174,11 +172,9 @@ string BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirS
   *totalDirSize += totalFileSize;
 
   directoryFileStream.write(treeFileLine);
-
-  return treeFileLine;
 }
 
-string BackupRun::handleSymlink(File& file, bool absolutePaths)
+void BackupRun::handleSymlink(File& file, bool absolutePaths)
 {
   string treeFileLine("S\t*\t");
   treeFileLine.append(file.path);
@@ -191,8 +187,6 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
   treeFileLine.append("\n");
 
   directoryFileStream.write(treeFileLine);
-  
-  return treeFileLine;
 }
 
 void BackupRun::showTotals()
