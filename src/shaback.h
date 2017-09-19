@@ -22,6 +22,7 @@
 #include "RuntimeConfig.h"
 #include "Repository.h"
 
+#define SHABACK_REPO_VERSION "3"
 
 class Shaback
 {

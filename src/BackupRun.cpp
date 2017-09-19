@@ -84,11 +84,7 @@ int BackupRun::run()
     }
   }
 
-  directoryFileStream.close();
-
-  // string rootFileHashValue = repository.storeTreeFile(this, rootFile);
-
-  // repository.storeRootTreeFile(rootFileHashValue);
+  directoryFileStream.finish();
 
   deleteOldIndexFiles();
 
@@ -98,9 +94,8 @@ int BackupRun::run()
 
 void BackupRun::openDirectoryFile()
 {
-  // FIXME: Race condition! Add random part to filename.
   string filename = config.backupName;
-  filename.append("_").append(repository.startDate.toFilename()).append(".shaback-backup");
+  filename.append("_").append(repository.startDate.toFilename()).append(".shaback");
 
   directoryFileStream.open(File(config.indexDir, filename));
 

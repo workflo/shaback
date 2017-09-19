@@ -187,6 +187,7 @@ void showUsage(string& op)
     printf("   show          Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate       Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate       Decompress data from stdin to stdout using `Deflate' compression.\n");
+    printf("   migrate       Upgrade repository to version " SHABACK_REPO_VERSION ".\n");
     printf("   version       Print version information.\n");
     printf("\n");
     printf("General options are:\n");

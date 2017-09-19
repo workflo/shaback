@@ -35,6 +35,7 @@
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
+#include "shaback.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
 #include "History.h"
@@ -86,9 +87,9 @@ void Repository::open()
   string version(props.getProperty("version"));
   if (version == "2") {
     throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\":" \
-      "\n    shaback migrate-repository");
-  } else if (version != "3") {
-
+      "\n\tshaback migrate");
+  } else if (version != SHABACK_REPO_VERSION) {
+    throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
   }
 
   if (encryptionAlgorithm != ENCRYPTION_NONE) {

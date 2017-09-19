@@ -120,7 +120,7 @@ void Shaback::createRepository()
   if (!config.repoPropertiesFile.isFile()) {
     string repoProperties =
         "# Don't modify this file!\n# Loss of data is inevitable!\n\n"
-          "version = 3\n"
+          "version = " SHABACK_REPO_VERSION "\n"
           "compression = ";
     repoProperties.append(Repository::compressionToName(config.init_compressionAlgorithm)).append("\nencryption = ") .append(
         Repository::encryptionToName(config.init_encryptionAlgorithm)).append("\n"
