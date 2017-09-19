@@ -171,13 +171,19 @@ void Repository::lock(bool exclusive)
 void Repository::unlock(bool force)
 {
   if (config.lockCount > 1 && !force) {
-    config.lockCount--;
+    config.lockCount--; 
     return;
   }
 
+  config.lockCount = 0;
   config.lockFile.remove();
   if (config.haveExclusiveLock) {
     config.exclusiveLockFile.remove();
+  }
+
+  if (config.showTotals && config.verbose > 0) {
+    metaFileStats.dump();
+    metaFileStats.reset();
   }
 }
 
@@ -418,9 +424,12 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   string content;
   bool fromCache;
 
+  metaFileStats.treeFilesRead ++;
+
   if (readCache.contains(treeId)) {
     content = readCache.get(treeId);
     fromCache = true;
+    metaFileStats.treeFileCacheHits ++;
   } else {
     File file = hashValueToFile(treeId);
     ShabackInputStream in = createInputStream();
@@ -429,6 +438,8 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
     in.readAll(content);
     fromCache = false;
   }
+
+  metaFileStats.treeFileBytesRead += content.size();
 
   vector<TreeFileEntry> list;
   int from = 0;
@@ -598,7 +609,7 @@ RestoreReport Repository::testRestore()
     }
 
     if (config.showTotals) {
-      fprintf(stderr, "\nTotal Errors:     %12d\n", report.numErrors);
+      fprintf(stderr, "\nTotal Errors:         %12d\n", report.numErrors);
     }
 
     return report;

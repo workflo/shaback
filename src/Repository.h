@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include "ShabackConfig.h"
 #include "RuntimeConfig.h"
+#include "MetaFileStats.h"
 #include "Cache.h"
 #include "lib/Date.h"
 #include "ShabackOutputStream.h"
@@ -199,6 +200,8 @@ class Repository
     Cache readCache;
 
     int repoFormat;
+
+    MetaFileStats metaFileStats;
 
   protected:
     RuntimeConfig config;
