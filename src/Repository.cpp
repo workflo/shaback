@@ -82,6 +82,12 @@ void Repository::open()
   encryptionAlgorithm = encryptionByName(props.getProperty("encryption"));
   repoFormat = repoFormatByName(props.getProperty("repoFormat"));
 
+  // Check Repo Version
+  string version(props.getProperty("version"));
+  if (version != "2") {
+    throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
+  }
+
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
