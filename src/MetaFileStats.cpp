@@ -38,7 +38,6 @@ void MetaFileStats::dump()
     fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
     #endif
     fprintf(stderr, "Meta data files read: %12d\n", treeFilesRead);
-    fprintf(stderr, "   cache hits:        %12d\n", treeFileCacheHits);
   }
 }
 
@@ -46,6 +45,5 @@ void MetaFileStats::dump()
 void MetaFileStats::reset()
 {
   treeFilesRead = 0;
-  treeFileCacheHits = 0;
   treeFileBytesRead = 0;
 }

@@ -54,14 +54,13 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile, config.useReadCache)
+    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5)
 {
   readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
 {
-  readCache.close();
   free(readBuffer);
 }
 
@@ -194,15 +193,6 @@ void Repository::unlock(bool force)
   if (config.showTotals && config.verbose > 0) {
     metaFileStats.dump();
     metaFileStats.reset();
-  }
-}
-
-void Repository::openReadCache()
-{
-  try {
-    readCache.open(GDBM_WRCREAT);
-  } catch (Exception &ex) {
-    cerr << "Warning: Unable to open read cache file: " << ex.getMessage() << endl;
   }
 }
 
@@ -433,22 +423,14 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
   string content;
-  bool fromCache;
 
   metaFileStats.treeFilesRead ++;
 
-  if (readCache.contains(treeId)) {
-    content = readCache.get(treeId);
-    fromCache = true;
-    metaFileStats.treeFileCacheHits ++;
-  } else {
-    File file = hashValueToFile(treeId);
-    ShabackInputStream in = createInputStream();
-    in.open(file);
+  File file = hashValueToFile(treeId);
+  ShabackInputStream in = createInputStream();
+  in.open(file);
 
-    in.readAll(content);
-    fromCache = false;
-  }
+  in.readAll(content);
 
   metaFileStats.treeFileBytesRead += content.size();
 
@@ -480,10 +462,6 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
     string line = content.substr(from, until - from);
     list.push_back(TreeFileEntry(line, parentDir));
     from = until + 1;
-  }
-
-  if (!fromCache) {
-    readCache.put(treeId, content);
   }
 
   return list;

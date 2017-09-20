@@ -46,8 +46,6 @@ void GarbageCollection::run()
   repository.lock(true);
   repository.open();
 
-  repository.openReadCache();
-
   vector<File> rootFiles = config.indexDir.listFiles("*.sroot");
 
   for (vector<File>::iterator it = rootFiles.begin(); it < rootFiles.end(); it++) {
@@ -171,7 +169,6 @@ void GarbageCollection::removeUnusedFiles()
               if (config.debug)
                 cout << "[d] " << f.path << endl;
               filesDeleted++;
-              repository.readCache.remove(id);
             }
           }
         }
@@ -211,7 +208,6 @@ void GarbageCollection::removeUnusedFiles()
                 if (config.debug)
                   cout << "[d] " << f.path << endl;
                 filesDeleted++;
-                repository.readCache.remove(id);
               }
             }
           }

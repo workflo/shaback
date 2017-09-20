@@ -28,7 +28,6 @@
 #include "ShabackConfig.h"
 #include "RuntimeConfig.h"
 #include "MetaFileStats.h"
-#include "Cache.h"
 #include "lib/Date.h"
 #include "ShabackOutputStream.h"
 #include "ShabackInputStream.h"
@@ -119,11 +118,6 @@ class Repository
     void testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry);
 
     /**
-     * Lazily opens the read cache.
-     */
-    void openReadCache();
-
-    /**
      * Removes all files from the repository's cache/ directory.
      */
     void removeAllCacheFiles();
@@ -195,9 +189,6 @@ class Repository
   #else
     std::set<std::string> writeCache;
   #endif
-
-    /** The (persistent) read cache. Used to speed up traversing tree files. */
-    Cache readCache;
 
     int repoFormat;
 

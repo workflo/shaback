@@ -24,19 +24,13 @@
  
 class MetaFileStats
 {
-   public:
-      MetaFileStats();
+  public:
+    MetaFileStats();
  
-      void dump();
-      void reset();
+    void dump();
+    void reset();
 
-    //   intmax_t numBytesRestored;
-    //  intmax_t bytesToBeRestored;
-    //  int numFilesRestored;
-    //  int numErrors;
-    //  unsigned int fileCount;
     int treeFilesRead;
-    int treeFileCacheHits;
     intmax_t treeFileBytesRead;
 };
  
