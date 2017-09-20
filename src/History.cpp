@@ -196,7 +196,7 @@ vector<string> History::listBackupNames()
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
     string name(file.getName());
-    name = name.substr(0, name.size() - 24);
+    name = name.substr(0, name.size() - 28);
     backupNames.insert(name);
   }
 
