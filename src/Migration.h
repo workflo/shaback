@@ -34,7 +34,7 @@ class Migration
  
   protected:
     void migrate2to3();
-    void migrate2to3int(ShabackOutputStream& out, std::string& treeId, File parentDir);
+    void migrate2to3int(ShabackOutputStream& out, std::string& treeId);
     std::vector<File> listRootFiles();
 
     Repository& repository;

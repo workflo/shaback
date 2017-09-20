@@ -78,9 +78,9 @@ void Migration::migrate2to3()
 
       out.write(DIRECTORY_FILE_HEADER "\n");
 
-      migrate2to3int(out, treeId, File("/"));
+      migrate2to3int(out, treeId);
 
-      // out.finalize();
+      out.finish();
       // rootFile.remove();
     }
   }
@@ -90,11 +90,11 @@ void Migration::migrate2to3()
 
   repository.unlock();
 
-  cout << "Run garbage collection to get rid of the now obsolete tree files." << endl;
+  cout << endl << "Run garbage collection to get rid of the now obsolete tree files." << endl;
 }
 
 
-void Migration::migrate2to3int(ShabackOutputStream& out, string& treeId, File parentDir)
+void Migration::migrate2to3int(ShabackOutputStream& out, string& treeId)
 {
   vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
   
@@ -106,8 +106,11 @@ void Migration::migrate2to3int(ShabackOutputStream& out, string& treeId, File pa
     string line(entry.toString());
     out.write(line);
 
-  //   switch (entry.type) {
-  //     case TREEFILEENTRY_DIRECTORY: {
+    switch (entry.type) {
+      case TREEFILEENTRY_DIRECTORY:
+        migrate2to3int(out, entry.id);
+        break;
+    }
   //       // File dir(destinationDir, entry.path);
 
   //       // bool skip = (config.skipExisting && dir.isDir());
