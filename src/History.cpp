@@ -28,7 +28,7 @@
 
 #include "History.h"
 #include "ShabackException.h"
-#include "SplitFileIndexReader.h"
+#include "DirectoryFileReader.h"
 
 using namespace std;
 
@@ -153,26 +153,22 @@ void History::details(string& backupName)
   int n = 0;
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
-    File rootFile(*it); n++;
-    string fname = rootFile.getName();
-    string bname = fname.substr(0, fname.size() - 6);
+    File shabackupFile(*it); n++;
+
+    string fname = shabackupFile.getName();
+    string bname = fname.substr(0, fname.size() - 10);
     string name = bname.substr(0, bname.size() - 18);
     Date date(bname.substr(bname.size() - 17));
-
-    // Read treeId from root file:
-    FileInputStream in(rootFile);
-    string treeId;
-    in.readLine(treeId);
-
-    // Read root files / directories:
-    vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
-
-    // Sum up total number of bytes:
     intmax_t totalBytes = 0;
-    for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
-      TreeFileEntry entry(*it);
+
+    DirectoryFileReader dirFileReader(repository, shabackupFile);
+    dirFileReader.open();
+    
+    do {
+      TreeFileEntry entry(dirFileReader.next());
+      if (entry.isEof()) break;
       totalBytes += entry.size;
-    }
+    } while(true);
 
     readable_fs(totalBytes, sizeBuf);
     printf("|%-80s|%s|%12s|\n", name.c_str(), date.toString().c_str(), sizeBuf);
