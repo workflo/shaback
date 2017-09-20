@@ -125,3 +125,33 @@ bool TreeFileEntry::isEof()
 {
   return (type == TREEFILEENTRY_EOF);
 }
+
+string TreeFileEntry::toString()
+{
+  string s;
+  char buf[100];
+  
+  switch (type) {
+    case TREEFILEENTRY_DIRECTORY: {
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", fileMode, uid, gid, mtime, ctime, 0);
+
+      s.append("D\t\t").append(path).append(buf);
+      break;
+    }
+
+    case TREEFILEENTRY_FILE: {
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", fileMode, uid, gid, mtime, ctime, size);
+
+      s.append("F\t").append(id).append("\t").append(path).append(buf);
+      break;
+    }
+    
+    case TREEFILEENTRY_SYMLINK: {
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", fileMode, uid, gid, mtime, ctime);
+
+      s.append("S\t*\t").append(path).append(buf).append(symLinkDest).append("\n");
+      break;
+    }
+  }
+  return s;
+}

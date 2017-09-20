@@ -23,7 +23,6 @@
 #include <string.h>
 
 #include "lib/Exception.h"
-#include "lib/FileInputStream.h"
 #include "lib/FileOutputStream.h"
 
 #include "History.h"
@@ -91,7 +90,7 @@ void History::list()
 
 void History::list(string& backupName)
 {
-  vector<File> indexFiles = listIndexFiled(backupName);
+  vector<File> indexFiles = listIndexFiles(backupName);
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
@@ -115,7 +114,7 @@ void History::keep(int backupsToKeep)
 
 void History::keep(string& backupName, int backupsToKeep)
 {
-  vector<File> indexFiles = listIndexFiled(backupName);
+  vector<File> indexFiles = listIndexFiles(backupName);
 
   int idx = 0;
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
@@ -148,7 +147,7 @@ void History::details()
 
 void History::details(string& backupName)
 {
-  vector<File> indexFiles = listIndexFiled(backupName);
+  vector<File> indexFiles = listIndexFiles(backupName);
   char sizeBuf[30];
   int n = 0;
 
@@ -177,7 +176,7 @@ void History::details(string& backupName)
   }
 }
 
-vector<File> History::listIndexFiled(string& backupName)
+vector<File> History::listIndexFiles(string& backupName)
 {
   string pattern(backupName);
   pattern.append("_????" "-??" "-??_??????.shabackup");

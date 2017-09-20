@@ -58,6 +58,7 @@ class TreeFileEntry
     bool isSplitFile;
     bool isDirectory();
     bool isEof();
+    std::string toString();
 };
 
 #endif // SHABACK_TreeFileEntry_H

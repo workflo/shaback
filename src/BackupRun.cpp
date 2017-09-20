@@ -73,7 +73,7 @@ int BackupRun::run()
       } else if (file.isDir()) {
         handleDirectory(file, true, &totalSubDirSize);
       } else if (file.isFile()) {
-        handleFile(file, true, &totalSubDirSize);
+        handleFile(file, true);
       } else if (!file.exists()) {
         throw FileNotFoundException(file.path);
       } else {
@@ -104,15 +104,13 @@ void BackupRun::openDirectoryFile()
 }
 
 
-void BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalParentDirSize, bool skipChildren)
+void BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren)
 {
-  intmax_t totalDirSize = 0;
-
   config.runEnterDirCallbacks(dir);
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
-      dir.getPosixMtime(), dir.getPosixCtime(), totalDirSize);
+      dir.getPosixMtime(), dir.getPosixCtime(), 0);
 
   directoryFileStream.write("D\t\t");
   directoryFileStream.write(dir.path);
@@ -131,9 +129,9 @@ void BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalPa
         if (child.isSymlink()) {
           handleSymlink(child, false);
         } else if (child.isDir()) {
-          handleDirectory(child, false, &totalDirSize, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev()));
+          handleDirectory(child, false, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev()));
         } else if (child.isFile()) {
-          handleFile(child, false, &totalDirSize);
+          handleFile(child, false);
         } else {
           // Ignore other types of files.
         }
@@ -144,11 +142,9 @@ void BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalPa
   }
 
   config.runLeaveDirCallbacks(dir);
-
-  *totalParentDirSize += totalDirSize;
 }
 
-void BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirSize)
+void BackupRun::handleFile(File& file, bool absolutePaths)
 {
   intmax_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
@@ -163,8 +159,6 @@ void BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirSiz
       file.getPosixMtime(), file.getPosixCtime(), totalFileSize);
   treeFileLine.append(buf);
   treeFileLine.append("\n");
-
-  *totalDirSize += totalFileSize;
 
   directoryFileStream.write(treeFileLine);
 }

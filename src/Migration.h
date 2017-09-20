@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include "lib/File.h"
 #include "Repository.h"
   
 class Migration
@@ -32,6 +33,10 @@ class Migration
     void run();  
  
   protected:
+    void migrate2to3();
+    void migrate2to3int(ShabackOutputStream& out, std::string& treeId, File parentDir);
+    std::vector<File> listRootFiles();
+
     Repository& repository;
     RuntimeConfig& config;
 };
