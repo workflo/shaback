@@ -110,6 +110,14 @@ void BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalPa
 
   config.runEnterDirCallbacks(dir);
 
+  char buf[100];
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
+      dir.getPosixMtime(), dir.getPosixCtime(), totalDirSize);
+
+  directoryFileStream.write("D\t\t");
+  directoryFileStream.write(dir.path);
+  directoryFileStream.write(buf);
+  
   if (!skipChildren) {
     vector<File> files = dir.listFiles("*");
 
@@ -135,14 +143,6 @@ void BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalPa
     }
   }
 
-  char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
-      dir.getPosixMtime(), dir.getPosixCtime(), totalDirSize);
-
-  directoryFileStream.write("D\t\t");
-  directoryFileStream.write(dir.path);
-  directoryFileStream.write(buf);
-  
   config.runLeaveDirCallbacks(dir);
 
   *totalParentDirSize += totalDirSize;
