@@ -63,12 +63,10 @@ RestoreReport RestoreRun::start(list<string> _files, File& destinationDir)
     for (vector<string>::iterator it = files.begin(); it < files.end(); it++) {
       string file(*it);
       if (file == entry.path) {
-        cout << entry.path << endl;
-
         report.bytesToBeRestored += entry.size;
       
         if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
-          // restoreAsCpioStream(treeId);
+          restoreAsCpioStream(entry);
         } else {
           restore(entry, destinationDir);
         }
@@ -76,20 +74,13 @@ RestoreReport RestoreRun::start(list<string> _files, File& destinationDir)
       }
     }
   } while(true);
-  // // Open index file to read directory sizes:
-  // vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
 
-  // for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
-  //   TreeFileEntry entry(*it);
-  //   report.bytesToBeRestored += entry.size;
-  // }
-
-  // if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
-  //   restoreAsCpioStream(treeId);
-  // } else {
-  //   restore(treeId, destinationDir);
-  // }
-
+  if (config.restoreAsShabackStream) {
+    fprintf(stdout, "ShAbAcKsTrEaM1_000000000000000000000000000000000001000000000000000130000000000000000TRAILER!!!%c", 0x0);
+  } else if (config.restoreAsCpioStream) {
+    fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
+  }
+  
   if (config.showTotals) {
     report.dump();
   }
@@ -163,7 +154,7 @@ void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
       file.getParent().mkdirs();
       
       if (config.skipExisting && file.isSymlink()) break;
-      
+
       file.getParent().mkdirs();
 
       if (config.verbose && !config.gauge)
@@ -182,9 +173,6 @@ void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
 
 void RestoreRun::restoreAsCpioStream(TreeFileEntry& entry)
 {
-  // TODO: RestoreRun::restoreAsCpioStream
-  StandardOutputStream out(stdout);
-
   string path(entry.path);
   if (path == "/") {
     path = ".";
@@ -205,7 +193,6 @@ void RestoreRun::restoreAsCpioStream(TreeFileEntry& entry)
             entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
             path.c_str(), 0x0);
       }
-      restoreAsCpioStream(entry);
       break;
     }
 
@@ -226,7 +213,8 @@ void RestoreRun::restoreAsCpioStream(TreeFileEntry& entry)
             (unsigned int) entry.size, path.c_str(), 0x0);
       }
       try {
-        repository.exportFile(entry, out);
+        StandardOutputStream stdoutStream(stdout);
+        repository.exportFile(entry, stdoutStream);
         report.numFilesRestored ++;
         report.numBytesRestored += entry.size;
       } catch (Exception &ex) {
@@ -250,13 +238,6 @@ void RestoreRun::restoreAsCpioStream(TreeFileEntry& entry)
 
     default:
       throw IllegalStateException("Unexpected tree file entry type");
-  }
-
-  // FIXME: Only once!
-  if (config.restoreAsShabackStream) {
-    fprintf(stdout, "ShAbAcKsTrEaM1_000000000000000000000000000000000001000000000000000130000000000000000TRAILER!!!%c", 0x0);
-  } else {
-    fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
   }
 }
 
