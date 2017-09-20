@@ -1,6 +1,6 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2012 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2017 Florian Wolff (florian@donuz.de)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_MetaFileStats_H
-#define SHABACK_MetaFileStats_H
- 
-#include <stdint.h>
- 
- 
-class MetaFileStats
+#ifndef SHABACK_Migration_H
+#define SHABACK_Migration_H
+  
+#include <string>
+#include <vector>
+#include <set>
+#include "Repository.h"
+  
+class Migration
 {
   public:
-    MetaFileStats();
- 
-    void dump();
-    void reset();
+    Migration(RuntimeConfig& config, Repository& Repository);
 
-    int treeFilesRead;
-    intmax_t treeFileBytesRead;
+    void run();  
+ 
+  protected:
+    Repository& repository;
+    RuntimeConfig& config;
 };
- 
-#endif // SHABACK_MetaFileStats_H
- 
+  
+#endif // SHABACK_Migration_H

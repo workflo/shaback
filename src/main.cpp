@@ -255,6 +255,8 @@ int main(int argc, char** argv)
           shaback.repository.gc();
         } else if (config.operation == "history") {
           shaback.repository.history();
+        } else if (config.operation == "migrate") {
+          shaback.repository.migrate();
         } else if (config.operation == "deflate") {
           return shaback.deflate();
         } else if (config.operation == "inflate") {

@@ -39,6 +39,7 @@
 #include "BackupRun.h"
 #include "GarbageCollection.h"
 #include "History.h"
+#include "Migration.h"
 #include "Repository.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
@@ -83,14 +84,16 @@ void Repository::open()
   repoFormat = repoFormatByName(props.getProperty("repoFormat"));
 
   // Check Repo Version
-  string version(props.getProperty("version"));
-  if (version == "2") {
-    throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\":" \
-      "\n\tshaback migrate");
-  } else if (version != SHABACK_REPO_VERSION) {
-    throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
+  version = props.getProperty("version");
+  if (config.operation != "migrate") {
+    if (version == "2") {
+      throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\":" \
+        "\n\tshaback migrate");
+    } else if (version != SHABACK_REPO_VERSION) {
+      throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
+    }
   }
-
+  
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
@@ -188,11 +191,6 @@ void Repository::unlock(bool force)
   config.lockFile.remove();
   if (config.haveExclusiveLock) {
     config.exclusiveLockFile.remove();
-  }
-
-  if (config.showTotals && config.verbose > 0) {
-    metaFileStats.dump();
-    metaFileStats.reset();
   }
 }
 
@@ -429,8 +427,6 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
   in.open(file);
 
   in.readAll(content);
-
-  metaFileStats.treeFileBytesRead += content.size();
 
   vector<TreeFileEntry> list;
   int from = 0;
@@ -923,4 +919,11 @@ ShabackInputStream Repository::createInputStream()
 ShabackOutputStream Repository::createOutputStream()
 {
   return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
+}
+
+
+void Repository::migrate()
+{
+  Migration migration(config, *this);
+  migration.run();
 }

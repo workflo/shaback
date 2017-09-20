@@ -1,6 +1,6 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2012 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2017 Florian Wolff (florian@donuz.de)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,34 @@
  */
 
 #include <iostream>
+#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
- 
- 
-#include "MetaFileStats.h"
- 
-MetaFileStats::MetaFileStats()
+#include <string.h>
+   
+#include "shaback.h"
+#include "Migration.h"
+#include "lib/Exception.h"
+
+using namespace std;
+
+
+Migration::Migration(RuntimeConfig& config, Repository& repository) :
+    repository(repository), config(config)
 {
-  reset();
 }
-
-
-void MetaFileStats::dump()
+ 
+void Migration::run()
 {
-  if (treeFilesRead > 0) {
-    #ifdef __APPLE__
-    fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
-    #else
-    fprintf(stderr, "Meta data bytes read: %12jd\n", treeFileBytesRead);
-    #endif
-    fprintf(stderr, "Meta data files read: %12d\n", treeFilesRead);
+  repository.open();
+
+  if (repository.version == SHABACK_REPO_VERSION) {
+    cerr << "No need to migrate repository." << endl;
+  } else if (repository.version == "2") {
+    repository.lock();
+    cout << "Migrating repository from version \"" << repository.version << "\" to \"3\"..." << endl;
+    repository.unlock();
+  } else {
+    throw Exception(string("Unsupported repository version \"").append(repository.version).append("\"."));
   }
-}
-
-
-void MetaFileStats::reset()
-{
-  treeFilesRead = 0;
-  treeFileBytesRead = 0;
 }

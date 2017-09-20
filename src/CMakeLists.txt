@@ -33,7 +33,7 @@ add_executable(shaback
     GarbageCollection.cpp
     History.cpp
     main.cpp
-    MetaFileStats.cpp
+    Migration.cpp
     Repository.cpp
     RestoreReport.cpp
     RestoreRun.cpp

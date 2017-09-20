@@ -22,13 +22,13 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <unordered_set>
 #if defined(HAVE_UNORDERED_SET)
 #include <unordered_set>
 #endif
 #include <stdint.h>
 #include "ShabackConfig.h"
 #include "RuntimeConfig.h"
-#include "MetaFileStats.h"
 #include "lib/Date.h"
 #include "ShabackOutputStream.h"
 #include "ShabackInputStream.h"
@@ -56,6 +56,8 @@ class Repository
      * hashes and dumps file listings.
      */
     RestoreReport testRestore();
+
+    void migrate();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -190,10 +192,10 @@ class Repository
   #endif
 
     int repoFormat;
-
-    MetaFileStats metaFileStats;
     
     Date startDate;
+
+    std::string version;
 
   protected:
     RuntimeConfig config;
