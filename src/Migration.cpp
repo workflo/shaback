@@ -27,6 +27,7 @@
 #include "TreeFile.h"
 #include "lib/Exception.h"
 #include "lib/FileInputStream.h"
+#include "lib/FileOutputStream.h"
 
 using namespace std;
 
@@ -81,14 +82,13 @@ void Migration::migrate2to3()
       migrate2to3int(out, treeId);
 
       out.finish();
-      // rootFile.remove();
+      rootFile.remove();
     }
   }
 
-  // TODO: Lock exclusively and
-  // TODO: Update repo.properties
-
   repository.unlock();
+  
+  updateRepoVersion("3");
 
   cout << endl << "Run garbage collection to get rid of the now obsolete tree files." << endl;
 }
@@ -101,7 +101,7 @@ void Migration::migrate2to3int(ShabackOutputStream& out, string& treeId)
   for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
     TreeFileEntry entry(*it);
 
-    cout << "    " << entry.path << endl;
+    if (config.verbose > 1) cout << "    " << entry.path << endl;
 
     string line(entry.toString());
     out.write(line);
@@ -111,61 +111,6 @@ void Migration::migrate2to3int(ShabackOutputStream& out, string& treeId)
         migrate2to3int(out, entry.id);
         break;
     }
-  //       // File dir(destinationDir, entry.path);
-
-  //       // bool skip = (config.skipExisting && dir.isDir());
-
-  //       // if (!skip) {
-  //       //   if (config.verbose && !config.gauge)
-  //       //     cerr << "[d] " << dir.path << endl;
-
-  //       //   dir.mkdirs();
-  //       // }
-  //       migrate2to3int(out, entry.id, File(entry.path));
-  //       break;
-  //     }
-
-  //     case TREEFILEENTRY_FILE: {
-  //       // File file(destinationDir, entry.path);
-
-  //       // if (config.skipExisting && file.isFile())
-  //       //   break;
-
-  //       // if (config.verbose && !config.gauge) 
-  //       //   cerr << "[f] " << file.path << endl;
-
-  //       // // Create base directory:
-  //       // if (depth == 0) {
-  //       //   file.getParent().mkdirs();
-  //       //   if (!file.getParent().isDir()) {
-  //       //     reportError(string("Cannot create destination directory: ").append(file.getParent().path));
-  //       //   }
-  //       // }
-
-  //       break;
-  //     }
-
-  //     case TREEFILEENTRY_SYMLINK: {
-  //       // File file(destinationDir, entry.path);
-
-  //       // if (config.skipExisting && file.isSymlink())
-  //       //   break;
-
-  //       // if (config.verbose && !config.gauge)
-  //       //   cout << "[s] " << file.path << endl;
-
-  //       // if (depth == 0)
-  //       //   file.getParent().mkdirs();
-
-  //       // repository.exportSymlink(entry, file);
-  //       // restoreMetaData(file, entry);
-  //       // report.numFilesRestored++;
-  //       break;
-  //     }
-
-  //     default:
-  //       throw IllegalStateException("Unexpected tree file entry type");
-  //   }
   }
 }
 
@@ -176,4 +121,22 @@ vector<File> Migration::listRootFiles()
   vector<File> rootFiles = config.indexDir.listFiles(pattern);
 
   return rootFiles;
+}
+
+
+void Migration::updateRepoVersion(string newVersion)
+{
+  repository.lock(true);
+
+  string repoProperties =
+      "# Don't modify this file!\n# Loss of data is inevitable!\n\nversion = ";
+  repoProperties.append(newVersion);
+  repoProperties.append("\ncompression = ");
+  repoProperties.append(Repository::compressionToName(repository.compressionAlgorithm)).append("\nencryption = ") .append(
+      Repository::encryptionToName(repository.encryptionAlgorithm)).append("\ndigest = SHA1\n");
+  repoProperties.append("repoFormat = ").append(Repository::repoFormatToName(repository.repoFormat)).append("\n");
+  FileOutputStream os(config.repoPropertiesFile);
+  os.write(repoProperties.data(), repoProperties.size());
+
+  repository.unlock();
 }

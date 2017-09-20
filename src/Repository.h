@@ -192,6 +192,8 @@ class Repository
   #endif
 
     int repoFormat;
+    int encryptionAlgorithm;
+    int compressionAlgorithm;
     
     Date startDate;
 
@@ -200,8 +202,6 @@ class Repository
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
-    int encryptionAlgorithm;
-    int compressionAlgorithm;
     int splitBlockSize;
     int splitMinBlocks;
 

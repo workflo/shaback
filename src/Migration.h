@@ -36,6 +36,7 @@ class Migration
     void migrate2to3();
     void migrate2to3int(ShabackOutputStream& out, std::string& treeId);
     std::vector<File> listRootFiles();
+    void updateRepoVersion(std::string newVersion);
 
     Repository& repository;
     RuntimeConfig& config;
