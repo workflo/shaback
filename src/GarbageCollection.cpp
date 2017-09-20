@@ -28,6 +28,7 @@
 #include "GarbageCollection.h"
 #include "ShabackException.h"
 #include "SplitFileIndexReader.h"
+#include "DirectoryFileReader.h"
 
 using namespace std;
 
@@ -46,13 +47,13 @@ void GarbageCollection::run()
   repository.lock(true);
   repository.open();
 
-  vector<File> rootFiles = config.indexDir.listFiles("*.sroot");
+  vector<File> directoryFiles = config.indexDir.listFiles("*.shabackup");
 
-  for (vector<File>::iterator it = rootFiles.begin(); it < rootFiles.end(); it++) {
-    File rootFile(*it);
+  for (vector<File>::iterator it = directoryFiles.begin(); it < directoryFiles.end(); it++) {
+    File shabackupFile(*it);
     if (config.verbose)
-      cout << "Reading root file: " << rootFile.path << endl;
-    processRootFile(rootFile);
+      cout << "Reading directory file: " << shabackupFile.path << endl;
+    processShabackupFile(shabackupFile);
   }
 
   if (config.verbose)
@@ -69,30 +70,17 @@ void GarbageCollection::run()
   showTotals();
 }
 
-void GarbageCollection::processRootFile(File& rootFile)
+void GarbageCollection::processShabackupFile(File& shabackupFile)
 {
-  FileInputStream in(rootFile);
-  string hashValue;
-  if (in.readLine(hashValue)) {
-    repository.writeCache.insert(hashValue);
-    processTreeFile(hashValue);
-  } else {
-    throw GarbageCollectionException(string("Root index file is empty: ").append(rootFile.path));
-  }
-}
-
-void GarbageCollection::processTreeFile(std::string id)
-{
+  DirectoryFileReader dirFileReader(repository, shabackupFile);
+  dirFileReader.open();
+  
   try {
-    vector<TreeFileEntry> entries = repository.loadTreeFile(id);
-    for (vector<TreeFileEntry>::iterator it = entries.begin(); it < entries.end(); it++) {
-      TreeFileEntry entry(*it);
-      switch (entry.type) {
-        case TREEFILEENTRY_DIRECTORY:
-          repository.writeCache.insert(entry.id);
-          processTreeFile(entry.id);
-          break;
+    do {
+      TreeFileEntry entry(dirFileReader.next());
+      if (entry.isEof()) break;
 
+      switch (entry.type) {
         case TREEFILEENTRY_FILE:
           repository.writeCache.insert(entry.id);
           if (entry.isSplitFile) {
@@ -100,11 +88,11 @@ void GarbageCollection::processTreeFile(std::string id)
           }
           break;
 
-        case TREEFILEENTRY_SYMLINK:
+        default:
           // Do nothing.
           break;
       }
-    }
+    } while(true);
   } catch (Exception& ex) {
     reportError(ex);
   }

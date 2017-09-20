@@ -104,9 +104,7 @@ void showUsage(string& op)
       "\t    Just check existence of all files, don't recalculate hashes.\n\n");
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
-    printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n"
-      "\t-R, --no-read-cache\n"
-      "\t    For systems without large file support: Don't populate .shaback-read-cache.gdbm.\n\n");
+    printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
   } else if (op == "history") {
     printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-l | --list] [-k <num> | --keep=<num>]\n"

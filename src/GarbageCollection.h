@@ -35,8 +35,7 @@ class GarbageCollection
     void showTotals();
 
   protected:
-    void processRootFile(File& rootFile);
-    void processTreeFile(std::string id);
+    void processShabackupFile(File& rootFile);
     void reportError(Exception& ex);
     void removeUnusedFiles();
 
