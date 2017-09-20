@@ -81,14 +81,14 @@ std::string BackupsetSelector::start()
 
 bool BackupsetSelector::selectSet()
 {	
-  string pattern("*_????" "-??" "-??_??????.sroot");
+  string pattern("*_????" "-??" "-??_??????.shabackup");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
   set<string> setNames; 
 
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
-    string setName = file.fname.substr(0, file.fname.length() - 24);
+    string setName = file.fname.substr(0, file.fname.length() - 28);
     setNames.insert(setName);
   }
 
@@ -133,7 +133,7 @@ bool BackupsetSelector::selectSet()
 bool BackupsetSelector::selectVersion()
 { 
   string pattern(setName);
-  pattern += "_????" "-??" "-??_??????.sroot";
+  pattern += "_????" "-??" "-??_??????.shabackup";
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
 
