@@ -67,10 +67,10 @@ void showUsage(string& op)
 #if defined(HAVE_DIALOG)
     printf("                      [-g | --gui]\n");
 #endif
-    printf("                      <rootfile> | <dir-id>\n\n");
+    printf("                      <shabackup-file> <directory-or-file>\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
-      "\t<rootfile> is a filename from the repository's index/ directory.\n"
-      "\t<dir-id> is the ID of the directory file to be restored.\n\n"
+      "\t<shabackup-file> is a filename from the repository's index/ directory.\n"
+      "\t<directory-or-file> is the absolute path of a directory or file to be restored.\n\n"
       "\t-S, --skip-existing\n"
       "\t    Skip files already existing in destination directory.\n\n"
       "\t-t, --totals\n"
@@ -89,15 +89,14 @@ void showUsage(string& op)
       "\t    Start dialog UI to select what to recover.\n\n");
 #endif
     printf("\tFiles will always be restored into the CWD.\n");
-
   } else if (op == "test-restore") {
     printf("usage: shaback test-restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-Q | --quick]\n");
-    printf("                      <rootfile> | <dir-id> | [-a | --all]\n\n");
+    printf("                      <shabackup-file> <directory-or-file> | [-a | --all]\n\n");
     printf("\tPretends to restore files from the repository.\n"
       "\tChecks sizes and hash digests to ensure the backup set's integrity.\n\n"
-      "\t<rootfile> is a filename from the repository's index/ directory.\n"
-      "\t<dir-id> is the ID of the directory file to be restored.\n\n"
+      "\t<shabackup-file> is a filename from the repository's index/ directory.\n"
+      "\t<directory> is the absolute path of a directory to be checked.\n\n"
       "\t-a, --all\n"
       "\t    Check all backup sets from the repo's index/ directory.\n\n"
       "\t-t, --totals\n"
@@ -183,7 +182,6 @@ void showUsage(string& op)
     printf("   init          Create a new repository.\n");
     printf("   restore       Restore files from repository.\n");
     printf("   test-restore  Pretend to restore files, check hash digests and dump file listing.\n");
-    //    printf("   cleanup     Delete old index files\n");
     printf("   show          Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate       Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate       Decompress data from stdin to stdout using `Deflate' compression.\n");
@@ -205,7 +203,6 @@ void showUsage(string& op)
     printf("\t-h, --help\n"
       "\t     Show usage information.\n\n");
     printf("See `shaback <command> --help' for more information on a specific command.\n");
-    //  printf("Version: " + VERSION);
   }
 }
 
