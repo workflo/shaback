@@ -43,9 +43,8 @@ class BackupRun
     int numErrors;
 
   protected:
-    void handleDirectory(File& dir, bool absolutePaths, bool skipChildren = false);
-    void handleFile(File& dir, bool absolutePaths);
-    void handleSymlink(File& dir, bool absolutePaths);
+    void handleDirectory(File& dir, bool skipChildren = false);
+    void handleFile(File& dir);
     void handleSymlink(File& dir);
 
     /**

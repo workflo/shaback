@@ -66,14 +66,13 @@ int BackupRun::run()
   for (list<string>::iterator it = config.dirs.begin(); it != config.dirs.end(); it++) {
     File file(*it);
     intmax_t totalSubDirSize = 0;
-
     try {
       if (file.isSymlink()) {
-        handleSymlink(file, true);
+        handleSymlink(file);
       } else if (file.isDir()) {
-        handleDirectory(file, true, &totalSubDirSize);
+        handleDirectory(file, false);
       } else if (file.isFile()) {
-        handleFile(file, true);
+        handleFile(file);
       } else if (!file.exists()) {
         throw FileNotFoundException(file.path);
       } else {
@@ -104,7 +103,7 @@ void BackupRun::openDirectoryFile()
 }
 
 
-void BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren)
+void BackupRun::handleDirectory(File& dir, bool skipChildren)
 {
   config.runEnterDirCallbacks(dir);
 
@@ -127,11 +126,11 @@ void BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren
 
       try {
         if (child.isSymlink()) {
-          handleSymlink(child, false);
+          handleSymlink(child);
         } else if (child.isDir()) {
-          handleDirectory(child, false, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev()));
+          handleDirectory(child, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev()));
         } else if (child.isFile()) {
-          handleFile(child, false);
+          handleFile(child);
         } else {
           // Ignore other types of files.
         }
@@ -144,7 +143,7 @@ void BackupRun::handleDirectory(File& dir, bool absolutePaths, bool skipChildren
   config.runLeaveDirCallbacks(dir);
 }
 
-void BackupRun::handleFile(File& file, bool absolutePaths)
+void BackupRun::handleFile(File& file)
 {
   intmax_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
@@ -163,7 +162,7 @@ void BackupRun::handleFile(File& file, bool absolutePaths)
   directoryFileStream.write(treeFileLine);
 }
 
-void BackupRun::handleSymlink(File& file, bool absolutePaths)
+void BackupRun::handleSymlink(File& file)
 {
   string treeFileLine("S\t*\t");
   treeFileLine.append(file.path);
