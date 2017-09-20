@@ -63,7 +63,7 @@ int BackupRun::run()
 
   openDirectoryFile();
 
-  for (vector<string>::iterator it = config.dirs.begin(); it < config.dirs.end(); it++) {
+  for (list<string>::iterator it = config.dirs.begin(); it != config.dirs.end(); it++) {
     File file(*it);
     intmax_t totalSubDirSize = 0;
 

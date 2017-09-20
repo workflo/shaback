@@ -424,8 +424,6 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
   string content;
 
-  metaFileStats.treeFilesRead ++;
-
   File file = hashValueToFile(treeId);
   ShabackInputStream in = createInputStream();
   in.open(file);
@@ -537,18 +535,19 @@ void Repository::storeRootTreeFile(string& rootHashValue)
 RestoreReport Repository::restore()
 {
 #if defined(HAVE_DIALOG)
-  string treeSpec;
+  string shabackupFilename;
 
   if (config.gui) {
     open();
 
     BackupsetSelector sel(*this, config);
-    treeSpec = sel.start();
-    if (treeSpec == "") return RestoreReport();
+    shabackupFilename = sel.start();
+    if (shabackupFilename == "") return RestoreReport();
   } else if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   } else {
-    treeSpec = config.cliArgs.at(0);
+    shabackupFilename = config.cliArgs.front();
+    config.cliArgs.pop_front();
     open();
   }
 #else
@@ -556,86 +555,79 @@ RestoreReport Repository::restore()
     throw RestoreException("Don't know what to restore.");
   }
 
-  string treeSpec = config.cliArgs.at(0);
+  string shabackupFilename = config.cliArgs.front();
+  config.cliArgs.pop_front();
 
   open();
 #endif
 
-  if (Digest::looksLikeDigest(treeSpec)) {
-    return restoreByTreeId(treeSpec, false);
-  } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-    string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-    File rootFile(config.indexDir, fname);
+  File shabackupFile(selectShabackupFile(shabackupFilename));
 
-    return restoreByRootFile(rootFile, false);
+  return restore(shabackupFile, config.cliArgs, false);
+}
+
+
+File Repository::selectShabackupFile(string filename)
+{
+  if (filename.rfind(".shabackup") == filename.size() - 10) {
+    string fname = filename.substr(filename.rfind(File::separator) + 1);
+    return File(config.indexDir, fname);
   } else {
-    throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
+    throw RestoreException(string("Don't know how to restore `").append(filename).append("'."));
   }
 }
+
 
 RestoreReport Repository::testRestore()
 {
-  if (!config.all && config.cliArgs.empty()) {
-    throw RestoreException("Don't know what to restore.");
-  }
+  // if (!config.all && config.cliArgs.empty()) {
+  //   throw RestoreException("Don't know what to restore.");
+  // }
 
-  open();
+  // open();
 
-  if (config.all) {
-    RestoreReport report;
+  // if (config.all) {
+  //   RestoreReport report;
    
-    vector<File> indexFiles = config.indexDir.listFiles("*.sroot");
+  //   vector<File> indexFiles = config.indexDir.listFiles("*.sroot");
 
-    for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
-      File file(*it);
-      if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
-      RestoreReport r = restoreByRootFile(file, true);
+  //   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+  //     File file(*it);
+  //     if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
+  //     RestoreReport r = restoreByRootFile(file, true);
       
-      report.numErrors += r.numErrors;
+  //     report.numErrors += r.numErrors;
 
-      if (r.hasErrors()) {
-        cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
-      }
-    }
+  //     if (r.hasErrors()) {
+  //       cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
+  //     }
+  //   }
 
-    if (config.showTotals) {
-      fprintf(stderr, "\nTotal Errors:         %12d\n", report.numErrors);
-    }
+  //   if (config.showTotals) {
+  //     fprintf(stderr, "\nTotal Errors:         %12d\n", report.numErrors);
+  //   }
 
-    return report;
-  } else {
-    string treeSpec = config.cliArgs.at(0);
+  //   return report;
+  // } else {
+  //   string treeSpec = config.cliArgs.at(0);
 
-    if (Digest::looksLikeDigest(treeSpec)) {
-      return restoreByTreeId(treeSpec, true);
-    } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-      string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-      File rootFile(config.indexDir, fname);
+  //   if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
+  //     string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
+  //     File rootFile(config.indexDir, fname);
 
-      return restoreByRootFile(rootFile, true);
-    } else {
-      throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
-    }
-  }
+  //     return restore(rootFile, true);
+  //   } else {
+  //     throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
+  //   }
+  // }
 }
 
-RestoreReport Repository::restoreByRootFile(File& rootFile, bool testRestore)
+RestoreReport Repository::restore(File shabackupFile, list<string> files, bool testRestore)
 {
-  FileInputStream in(rootFile);
-  string hashValue;
-  if (in.readLine(hashValue)) {
-    return restoreByTreeId(hashValue, testRestore);
-  } else {
-    throw RestoreException(string("Root index file is empty: ").append(rootFile.path));
-  }
-}
-
-RestoreReport Repository::restoreByTreeId(string& treeId, bool testRestore)
-{
-  RestoreRun run(config, *this, testRestore);
+  RestoreRun run(config, *this, shabackupFile, testRestore);
   File destinationDir(".");
 
-  return run.start(treeId, destinationDir);
+  return run.start(files, destinationDir);
 }
 
 void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
@@ -769,7 +761,7 @@ void Repository::show()
 
   open();
 
-  string id = config.cliArgs.at(0);
+  string id = config.cliArgs.front();
   StandardOutputStream out(stdout);
   exportFile(id, out);
 }

@@ -29,6 +29,7 @@ add_executable(shaback
     BackupRun.cpp
     BackupsetSelector.cpp
     Cache.cpp 
+    DirectoryFileReader.cpp
     GarbageCollection.cpp
     History.cpp
     main.cpp

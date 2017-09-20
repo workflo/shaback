@@ -27,11 +27,12 @@
 
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
+#include "DirectoryFileReader.h"
 
 using namespace std;
 
-RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, bool testRestore) :
-    repository(repository), config(config), testRestore(testRestore)
+RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, File shabackupFile, bool testRestore) :
+    repository(repository), config(config), testRestore(testRestore), shabackupFile(shabackupFile)
 {
   repository.lock();
 }
@@ -41,23 +42,26 @@ RestoreRun::~RestoreRun()
   repository.unlock();
 }
 
-RestoreReport RestoreRun::start(std::string& treeId, File& destinationDir)
+RestoreReport RestoreRun::start(list<string> files, File& destinationDir)
 {
   time(&lastProgressTime);
 
-  // Open index file to read directory sizes:
-  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+  DirectoryFileReader dirFileReader(repository, shabackupFile);
+  dirFileReader.open();
 
-  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
-    TreeFileEntry entry(*it);
-    report.bytesToBeRestored += entry.size;
-  }
+  // // Open index file to read directory sizes:
+  // vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
 
-  if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
-    restoreAsCpioStream(treeId);
-  } else {
-    restore(treeId, destinationDir);
-  }
+  // for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
+  //   TreeFileEntry entry(*it);
+  //   report.bytesToBeRestored += entry.size;
+  // }
+
+  // if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
+  //   restoreAsCpioStream(treeId);
+  // } else {
+  //   restore(treeId, destinationDir);
+  // }
 
   if (config.showTotals) {
     report.dump();

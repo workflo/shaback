@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <set>
 #include "lib/File.h"
 
@@ -98,8 +99,8 @@ class RuntimeConfig
     int splitFileBlockSize;
 
     /** List of directories to be backed up. */
-    std::vector<std::string> dirs;
-    std::vector<std::string> cliArgs;
+    std::list<std::string> dirs;
+    std::list<std::string> cliArgs;
 
     /** Clear-text password when using an encryted repository. */
     std::string cryptoPassword;

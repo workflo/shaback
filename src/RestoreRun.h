@@ -28,13 +28,13 @@
 class RestoreRun
 {
   public:
-    RestoreRun(RuntimeConfig& config, Repository& Repository, bool testRestore);
+    RestoreRun(RuntimeConfig& config, Repository& Repository, File shabackupFile, bool testRestore);
     ~RestoreRun();
 
     void restore(std::string& treeId, File& destinationDir, int depth = 0);
     void restoreAsCpioStream(std::string& treeId, int depth = 0);
 
-    RestoreReport start(std::string& treeId, File& destinationDir);
+    RestoreReport start(std::list<std::string> files, File& destinationDir);
     RestoreReport report;
 
   protected:
@@ -47,6 +47,7 @@ class RestoreRun
     void progress(std::string &path);
     time_t lastProgressTime;
     bool testRestore;
+    File shabackupFile;
 };
 
 #endif // SHABACK_RestoreRun_H

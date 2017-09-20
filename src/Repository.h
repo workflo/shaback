@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #if defined(HAVE_UNORDERED_SET)
 #include <unordered_set>
 #endif
@@ -134,8 +135,7 @@ class Repository
      */
     ShabackOutputStream createOutputStream();
 
-    RestoreReport restoreByRootFile(File& rootFile, bool testRestore);
-    RestoreReport restoreByTreeId(std::string& treeId, bool testRestore);
+    RestoreReport restore(File shabackupFile, std::list<std::string> files, bool testRestore);
 
     /**
      * Maps the given name of an encryption algorithm to its respective
@@ -214,6 +214,7 @@ class Repository
      * individually.
      */
     std::string storeSplitFile(BackupRun* run, File &srcFile, InputStream &in, intmax_t* totalFileSize);
+    File selectShabackupFile(std::string filename);
 
     char* readBuffer;
 };

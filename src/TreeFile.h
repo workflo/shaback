@@ -19,8 +19,6 @@
 #ifndef SHABACK_TreeFile_H
 #define SHABACK_TreeFile_H
 
-#include <string>
-
 #define TREEFILE_HEADER ".oO[ShabackTreeFile]Oo."
 #define DIRECTORY_FILE_HEADER ".oO[ShabackDirectoryFile]Oo."
 

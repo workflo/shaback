@@ -33,7 +33,7 @@ class Digest
     virtual const unsigned char* toBytes() = 0;
     virtual void finalize() = 0;
 
-    static bool looksLikeDigest(std::string& str);
+    // static bool looksLikeDigest(std::string& str);
 
   protected:
     std::string hexStr;
