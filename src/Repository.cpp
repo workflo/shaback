@@ -513,24 +513,24 @@ void Repository::importCacheFile()
   }
 }
 
-void Repository::storeRootTreeFile(string& rootHashValue)
-{
-  throw(UnsupportedOperation("Repository::storeRootTreeFile"));
-  string filename = config.backupName;
-  filename.append("_").append(startDate.toFilename()).append(".sroot");
+// void Repository::storeRootTreeFile(string& rootHashValue)
+// {
+//   throw(UnsupportedOperation("Repository::storeRootTreeFile"));
+//   string filename = config.backupName;
+//   filename.append("_").append(startDate.toFilename()).append(".sroot");
 
-  File file(config.indexDir, filename);
-  FileOutputStream os(file);
+//   File file(config.indexDir, filename);
+//   FileOutputStream os(file);
 
-  os.write(rootHashValue.data(), rootHashValue.size());
+//   os.write(rootHashValue.data(), rootHashValue.size());
 
-  os.close();
+//   os.close();
 
-  cout << config.color_success;
-  cout << "ID:         " << rootHashValue << endl;
-  cout << "Index file: " << file.path << endl;
-  cout << config.color_default;
-}
+//   cout << config.color_success;
+//   cout << "ID:         " << rootHashValue << endl;
+//   cout << "Index file: " << file.path << endl;
+//   cout << config.color_default;
+// }
 
 RestoreReport Repository::restore()
 {

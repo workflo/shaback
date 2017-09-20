@@ -31,8 +31,8 @@ class RestoreRun
     RestoreRun(RuntimeConfig& config, Repository& Repository, File shabackupFile, bool testRestore);
     ~RestoreRun();
 
-    void restore(std::string& treeId, File& destinationDir, int depth = 0);
-    void restoreAsCpioStream(std::string& treeId, int depth = 0);
+    void restore(TreeFileEntry& entry, File& destinationDir);
+    void restoreAsCpioStream(TreeFileEntry& entry);
 
     RestoreReport start(std::list<std::string> files, File& destinationDir);
     RestoreReport report;

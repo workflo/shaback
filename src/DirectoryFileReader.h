@@ -19,11 +19,9 @@
  #ifndef SHABACK_DirectoryFileReader_H
  #define SHABACK_DirectoryFileReader_H
  
-//  #include <string>
-//  #include <set>
  #include "Repository.h"
  #include "lib/File.h"
-//  #include "lib/Exception.h"
+ #include "lib/BufferedReader.h"
  
  class DirectoryFileReader
  {
@@ -31,11 +29,15 @@
      DirectoryFileReader(Repository& repository, File file);
      ~DirectoryFileReader();
 
+     TreeFileEntry next();
+
      void open(); 
  
    protected:
     File file;
     Repository& repository;
+    ShabackInputStream in;
+    BufferedReader* reader;
  };
  
  #endif // SHABACK_DirectoryFileReader_H

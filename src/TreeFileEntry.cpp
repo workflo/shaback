@@ -110,7 +110,18 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
 }
 
 
+TreeFileEntry::TreeFileEntry()
+    : type(0)
+{}
+
+
 bool TreeFileEntry::isDirectory()
 {
   return (type == TREEFILEENTRY_DIRECTORY);
+}
+
+
+bool TreeFileEntry::isEof()
+{
+  return (type == TREEFILEENTRY_EOF);
 }

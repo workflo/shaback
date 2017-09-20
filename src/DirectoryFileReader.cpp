@@ -31,54 +31,42 @@
 using namespace std;
  
 DirectoryFileReader::DirectoryFileReader(Repository& repository, File file) :
-     repository(repository), file(file)
+     repository(repository), file(file), in(repository.createInputStream()), reader(0)
 {}
  
 DirectoryFileReader::~DirectoryFileReader()
-{}
+{
+  if (reader != 0) {
+    reader->close();
+    delete reader;
+    reader = 0;
+  }
+}
 
 
 void DirectoryFileReader::open()
 {
-  ShabackInputStream in = repository.createInputStream();
   in.open(file);
-  BufferedReader reader(&in);
+  reader = new BufferedReader(&in);
   
   string header;
-  reader.readLine(header);
+  reader->readLine(header);
 
   if (header != DIRECTORY_FILE_HEADER) {
     throw Exception(string("This does not look like a .shabackup file: ").append(file.path));
   }
-  //   vector<TreeFileEntry> list;
-  //   int from = 0;
-  //   int until;
-  
-  //   if ((until = content.find('\n', from)) == string::npos) {
-  //     if (config.verbose) {
-  //       cerr << config.color_error;
-  //       cerr << "Missing header line in index file " << hashValueToFile(treeId).path << ":" << endl;
-  //       cerr << config.color_low;
-  //       cerr << content.substr(0, 200) << (content.size() > 200 ? "..." : "") << endl;
-  //       cerr << config.color_default;
-  //     }
-  //     throw InvalidTreeFile(string("Missing header line in index ") + treeId);
-  //   }
-  //   string header = content.substr(from, until - from);
-  //   if (header != TREEFILE_HEADER)
-  //     throw InvalidTreeFile("Unexpected header line in tree file");
-  //   from = until + 1;
-  
-  //   if ((until = content.find('\n', from)) == string::npos)
-  //     throw InvalidTreeFile("Missing parent directory line");
-  //   string parentDir = content.substr(from, until - from);
-  //   from = until + 1;
-  
-  //   while ((until = content.find('\n', from)) != string::npos) {
-  //     string line = content.substr(from, until - from);
-  //     list.push_back(TreeFileEntry(line, parentDir));
-  //     from = until + 1;
-  //   }
-  
-  //   return list;
+}
+
+
+TreeFileEntry DirectoryFileReader::next()
+{
+  string line;
+  string emptyString;
+  reader->readLine(line);
+
+  if (line.size() >= 10) {
+    return TreeFileEntry(line, emptyString);
+  } else {
+    return TreeFileEntry();
+  }
 }
