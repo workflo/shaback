@@ -82,7 +82,6 @@ void Migration::migrate2to3()
       migrate2to3int(out, treeId);
 
       out.finish();
-      // rootFile.remove();
     }
   }
 
