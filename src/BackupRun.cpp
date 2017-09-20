@@ -95,7 +95,7 @@ int BackupRun::run()
 void BackupRun::openDirectoryFile()
 {
   string filename = config.backupName;
-  filename.append("_").append(repository.startDate.toFilename()).append(".shaback");
+  filename.append("_").append(repository.startDate.toFilename()).append(".shabackup");
 
   directoryFileStream.open(File(config.indexDir, filename));
 
