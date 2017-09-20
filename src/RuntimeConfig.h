@@ -51,7 +51,6 @@ class RuntimeConfig
     bool showTotals;
     bool help;
     bool useWriteCache;
-    bool useReadCache;
     bool useSymlinkLock;
     bool skipExisting;
     bool restoreAsCpioStream;

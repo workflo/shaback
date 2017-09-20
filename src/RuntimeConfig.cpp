@@ -55,7 +55,6 @@ RuntimeConfig::RuntimeConfig()
   force = false;
   haveExclusiveLock = false;
   useWriteCache = true;
-  useReadCache = true;
   useSymlinkLock = true;
   skipExisting = false;
   restoreAsCpioStream = false;
@@ -123,7 +122,6 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"cpio", no_argument, 0, 'o'},
         {"shaback", no_argument, 0, 'O'},
         {"no-write-cache", no_argument, 0, 'W'},
-        {"no-read-cache", no_argument, 0, 'R'},
         {"no-symlink-lock", no_argument, 0, 'L'},
         {"skip-existing", no_argument, 0, 'S'},
         {"quiet", no_argument, 0, 'q'},
@@ -139,7 +137,7 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 #endif
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WRLSoOqGgaQlk:D1", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D1", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -231,10 +229,6 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         useWriteCache = false;
         break;
         
-      case 'R':
-        useReadCache = false;
-        break;
-
       case 'L':
         useSymlinkLock = false;
         break;
