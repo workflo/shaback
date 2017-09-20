@@ -54,6 +54,13 @@ RestoreReport RestoreRun::start(list<string> _files, File& destinationDir)
     string file(*it);
     while (file.size() > 1 && file.at(file.size() -1) == File::separatorChar) file.pop_back();
     files.push_back(file);
+
+    // Add filename + "/" to the list:
+    if (file.size() > 1) {
+      string file2(file);
+      file2.append(File::separator);
+      files.push_back(file2);
+    }
   }
 
   do {
@@ -62,7 +69,7 @@ RestoreReport RestoreRun::start(list<string> _files, File& destinationDir)
 
     for (vector<string>::iterator it = files.begin(); it < files.end(); it++) {
       string file(*it);
-      if (file == entry.path) {
+      if (entry.path == file || entry.path.substr(0, file.size()) == file) {
         report.bytesToBeRestored += entry.size;
       
         if (config.restoreAsCpioStream || config.restoreAsShabackStream) {

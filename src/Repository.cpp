@@ -513,24 +513,6 @@ void Repository::importCacheFile()
   }
 }
 
-// void Repository::storeRootTreeFile(string& rootHashValue)
-// {
-//   throw(UnsupportedOperation("Repository::storeRootTreeFile"));
-//   string filename = config.backupName;
-//   filename.append("_").append(startDate.toFilename()).append(".sroot");
-
-//   File file(config.indexDir, filename);
-//   FileOutputStream os(file);
-
-//   os.write(rootHashValue.data(), rootHashValue.size());
-
-//   os.close();
-
-//   cout << config.color_success;
-//   cout << "ID:         " << rootHashValue << endl;
-//   cout << "Index file: " << file.path << endl;
-//   cout << config.color_default;
-// }
 
 RestoreReport Repository::restore()
 {
@@ -580,52 +562,53 @@ File Repository::selectShabackupFile(string filename)
 
 RestoreReport Repository::testRestore()
 {
-  // if (!config.all && config.cliArgs.empty()) {
-  //   throw RestoreException("Don't know what to restore.");
-  // }
+  if (!config.all && config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to restore.");
+  }
 
-  // open();
+  open();
 
-  // if (config.all) {
-  //   RestoreReport report;
+  if (config.all) {
+    RestoreReport report;
    
-  //   vector<File> indexFiles = config.indexDir.listFiles("*.sroot");
+    vector<File> directoryFiles = config.indexDir.listFiles("*.shabackup");
 
-  //   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
-  //     File file(*it);
-  //     if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
-  //     RestoreReport r = restoreByRootFile(file, true);
+    for (vector<File>::iterator it = directoryFiles.begin(); it < directoryFiles.end(); it++) {
+      File file(*it);
+      if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
+
+      File shabackupFile(selectShabackupFile(file.path));
+  
+      RestoreReport r = restore(shabackupFile, list<string>(), true);
       
-  //     report.numErrors += r.numErrors;
+      report.numErrors += r.numErrors;
 
-  //     if (r.hasErrors()) {
-  //       cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
-  //     }
-  //   }
+      if (r.hasErrors()) {
+        cerr << config.color_error << "ERROR DETECTED: " << file.path << " contains errors!" << config.color_default << endl;
+      }
+    }
 
-  //   if (config.showTotals) {
-  //     fprintf(stderr, "\nTotal Errors:         %12d\n", report.numErrors);
-  //   }
+    if (config.showTotals) {
+      fprintf(stderr, "\nTotal Errors:         %12d\n", report.numErrors);
+    }
 
-  //   return report;
-  // } else {
-  //   string treeSpec = config.cliArgs.at(0);
+    return report;
+  } else {
+    string shabackupFilename = config.cliArgs.front();
+    config.cliArgs.pop_front();
 
-  //   if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-  //     string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-  //     File rootFile(config.indexDir, fname);
-
-  //     return restore(rootFile, true);
-  //   } else {
-  //     throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
-  //   }
-  // }
+    File shabackupFile(selectShabackupFile(shabackupFilename));
+    
+    return restore(shabackupFile, list<string>(), true);
+  }
 }
 
 RestoreReport Repository::restore(File shabackupFile, list<string> files, bool testRestore)
 {
   RestoreRun run(config, *this, shabackupFile, testRestore);
   File destinationDir(".");
+
+  if (files.empty()) files.push_back(""); // Restore everything!
 
   return run.start(files, destinationDir);
 }

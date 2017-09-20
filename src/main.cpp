@@ -92,11 +92,10 @@ void showUsage(string& op)
   } else if (op == "test-restore") {
     printf("usage: shaback test-restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-Q | --quick]\n");
-    printf("                      <shabackup-file> <directory-or-file> | [-a | --all]\n\n");
+    printf("                      <shabackup-file>  [-a | --all]\n\n");
     printf("\tPretends to restore files from the repository.\n"
       "\tChecks sizes and hash digests to ensure the backup set's integrity.\n\n"
-      "\t<shabackup-file> is a filename from the repository's index/ directory.\n"
-      "\t<directory> is the absolute path of a directory to be checked.\n\n"
+      "\t<shabackup-file> is a filename from the repository's index/ directory.\n\n"
       "\t-a, --all\n"
       "\t    Check all backup sets from the repo's index/ directory.\n\n"
       "\t-t, --totals\n"

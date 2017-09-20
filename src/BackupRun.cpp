@@ -215,7 +215,7 @@ void BackupRun::deleteOldIndexFiles()
 {
   // TODO: Move to new class History!
   string pattern(config.backupName);
-  pattern.append("_????" "-??" "-??_??????.sroot");
+  pattern.append("_????" "-??" "-??_??????.shabackup");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
 
@@ -314,7 +314,7 @@ void BackupRun::deleteOldIndexFiles()
   for (vector<Date>::iterator it = toDelete.begin(); it < toDelete.end(); it++) {
     Date d(*it);
     string fname(config.backupName);
-    fname.append("_").append(d.toFilename()).append(".sroot");
+    fname.append("_").append(d.toFilename()).append(".shabackup");
     File file(config.indexDir, fname);
     if (config.verbose) {
       cout << config.color_deleted << "Deleting old index file " << file.path.c_str() << config.color_default << endl;

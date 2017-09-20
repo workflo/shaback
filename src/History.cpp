@@ -184,7 +184,7 @@ void History::details(string& backupName)
 vector<File> History::listIndexFiled(string& backupName)
 {
   string pattern(backupName);
-  pattern.append("_????" "-??" "-??_??????.sroot");
+  pattern.append("_????" "-??" "-??_??????.shabackup");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
   sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
@@ -197,7 +197,7 @@ vector<string> History::listBackupNames()
 {
   set<string> backupNames;
 
-  vector<File> indexFiles = config.indexDir.listFiles("*_????" "-??" "-??_??????.sroot");
+  vector<File> indexFiles = config.indexDir.listFiles("*_????" "-??" "-??_??????.shabackup");
   for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
     File file(*it);
     string name(file.getName());
