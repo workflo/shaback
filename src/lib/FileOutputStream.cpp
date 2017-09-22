@@ -52,7 +52,6 @@ FileOutputStream::~FileOutputStream()
  *****************************************************************************/
 void FileOutputStream::init(string& _filename)
 {
-  totalBytesWritten = 0;
   filename = _filename;
 
   
@@ -116,8 +115,6 @@ void FileOutputStream::write(const char* b, int len)
   }
 
 #endif
-
-  totalBytesWritten += len;
 }
 
 /*****************************************************************************\
@@ -139,16 +136,6 @@ void FileOutputStream::close()
       throw Exception::errnoToException();
     }
     handle = -1;
-
-    if (File(filename).getSize() != totalBytesWritten) {
-      char buf[50];
-#ifdef __APPLE__
-      sprintf(buf, "%lld", totalBytesWritten);
-#else
-      sprintf(buf, "%lu", totalBytesWritten);
-#endif
-      throw IOException(string("IO ERROR: Written output file has unexpected size: ") + filename + " should be " + buf + " bytes");
-    }
   }
 
 #endif
