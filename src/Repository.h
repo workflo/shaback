@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <unordered_set>
+#include <set>
 #if defined(HAVE_UNORDERED_SET)
 #include <unordered_set>
 #endif
