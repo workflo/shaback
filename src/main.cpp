@@ -64,13 +64,10 @@ void showUsage(string& op)
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-S | --skip-existing]\n"
       "                      [-o | --cpio] [-q | --quiet] [-G | --gauge]\n");
-#if defined(HAVE_DIALOG)
-    printf("                      [-g | --gui]\n");
-#endif
-    printf("                      <shabackup-file> <directory-or-file>\n\n");
+    printf("                      <shabackup-file> [directories | files]\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
       "\t<shabackup-file> is a filename from the repository's index/ directory.\n"
-      "\t<directory-or-file> is the absolute path of a directory or file to be restored.\n\n"
+      "\t[directories | files] are the absolute paths of directories or files to be restored.\n\n"
       "\t-S, --skip-existing\n"
       "\t    Skip files already existing in destination directory.\n\n"
       "\t-t, --totals\n"
@@ -84,11 +81,7 @@ void showUsage(string& op)
       "\t    Suppress progress output.\n\n"
       "\t-G, --gauge\n"
       "\t    Produce output on stdout suitable for dialog --gauge.\n\n", CPIO_ODC_MAX_FILE_SIZE);
-#if defined(HAVE_DIALOG)
-    printf("\t-g, --gui\n"
-      "\t    Start dialog UI to select what to recover.\n\n");
-#endif
-    printf("\tFiles will always be restored into the CWD.\n");
+    printf("\tFiles will always be restored into the current working directory.\n");
   } else if (op == "test-restore") {
     printf("usage: shaback test-restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-Q | --quick]\n");

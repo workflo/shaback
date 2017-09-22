@@ -12,7 +12,6 @@ find_package(ZStd QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
 find_package(GDBM REQUIRED)
-find_package(NCurses QUIET)
 
 include(CheckTypeSize)
 check_type_size("long" SIZEOF_LONG)
@@ -22,12 +21,10 @@ include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX ("unordered_set" HAVE_UNORDERED_SET)
 
 ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(dialog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
     BackupRun.cpp
-    BackupsetSelector.cpp
     Cache.cpp 
     DirectoryFileReader.cpp
     GarbageCollection.cpp
@@ -48,7 +45,6 @@ add_executable(shaback
 
 target_link_libraries(shaback 
     shabacklib
-    shabackdialog
     ${ZLIB_LIBRARY}
     ${OPENSSL_CRYPTO_LIBRARIES}
     ${LUA_LIBRARIES}
@@ -56,7 +52,6 @@ target_link_libraries(shaback
     ${BZIP2_LIBRARIES}
     ${ZSTD_LIBRARIES}
     ${LZMA_LIBRARIES}
-    ${NCURSES_LIBRARIES}
 )
 
 #add_executable(visichunk

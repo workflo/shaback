@@ -47,7 +47,6 @@
 #include "ShabackException.h"
 #include "SplitFileIndexReader.h"
 #include "TreeFile.h"
-#include "BackupsetSelector.h"
 
 
 #define READ_BUFFER_SIZE (1024 * 4)
@@ -512,23 +511,6 @@ void Repository::importCacheFile()
 
 RestoreReport Repository::restore()
 {
-#if defined(HAVE_DIALOG)
-  string shabackupFilename;
-
-  if (config.gui) {
-    open();
-
-    BackupsetSelector sel(*this, config);
-    shabackupFilename = sel.start();
-    if (shabackupFilename == "") return RestoreReport();
-  } else if (config.cliArgs.empty()) {
-    throw RestoreException("Don't know what to restore.");
-  } else {
-    shabackupFilename = config.cliArgs.front();
-    config.cliArgs.pop_front();
-    open();
-  }
-#else
   if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   }
@@ -537,7 +519,6 @@ RestoreReport Repository::restore()
   config.cliArgs.pop_front();
 
   open();
-#endif
 
   File shabackupFile(selectShabackupFile(shabackupFilename));
 

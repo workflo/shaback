@@ -55,7 +55,6 @@ class RuntimeConfig
     bool skipExisting;
     bool restoreAsCpioStream;
     bool restoreAsShabackStream;
-    bool gui;
     bool all;
     bool quick;
     bool actionList;
