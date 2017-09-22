@@ -87,7 +87,7 @@ void Repository::open()
   version = props.getProperty("version");
   if (config.operation != "migrate") {
     if (version == "2") {
-      throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\":" \
+      throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\" by running" \
         "\n\tshaback migrate");
     } else if (version != SHABACK_REPO_VERSION) {
       throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
