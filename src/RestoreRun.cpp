@@ -52,7 +52,7 @@ RestoreReport RestoreRun::start(list<string> _files, File& destinationDir)
   vector<string> files;
   for (list<string>::iterator it = _files.begin(); it != _files.end(); it++) {
     string file(*it);
-    while (file.size() > 1 && file.at(file.size() -1) == File::separatorChar) file.pop_back();
+    while (file.size() > 1 && file.at(file.size() -1) == File::separatorChar) file.erase(file.size() -1);
     files.push_back(file);
 
     // Add filename + "/" to the list:
