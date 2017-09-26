@@ -304,14 +304,18 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
     }
 
     sha1.finalize();
-
     string newHashValue = sha1.toString();
-    if (hashValue != newHashValue) {
-      os.remove();
-      throw Exception(string(srcFile.path).append(" changed while backing up"));
-    }
 
     os.finish();
+    
+    if (hashValue != newHashValue) {
+      File newDestFile = hashValueToFile(newHashValue);
+      if (config.verbose) {
+        cerr << "[C] " << srcFile.path << " changed while backing up: renaming " << destFile.path << " to " << newDestFile.path << endl;
+      }
+      hashValue = newHashValue;
+      destFile.move(newDestFile);
+    }
 
     run->numFilesStored++;
   } else {
