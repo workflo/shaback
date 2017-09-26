@@ -97,7 +97,6 @@ class Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     std::string storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize);
     void importCacheFile();
 

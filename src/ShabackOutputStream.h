@@ -34,7 +34,16 @@ class ShabackOutputStream
 
     void open(File file);
     void close();
+
+    /**
+     * Closes the output file and renames it thus removing the ".tmp" suffix.
+     */
     void finish();
+
+    /**
+     * Closes and removes the temporary file.
+     */
+    void remove();
 
     void write(std::string& s);
     void write(const char* s);

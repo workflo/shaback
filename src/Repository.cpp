@@ -236,33 +236,6 @@ bool Repository::contains(string& hashValue)
   return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
-string Repository::storeTreeFile(BackupRun* run, string& treeFile)
-{
-  throw(UnsupportedOperation("Repository::storeTreeFile"));
-  Sha1 sha1;
-  sha1.update(treeFile);
-  sha1.finalize();
-  string hashValue = sha1.toString();
-
-  if (!contains(hashValue)) {
-    File file = hashValueToFile(hashValue);
-
-    if (config.debug) {
-      cout << "[t] " << file.path << endl;
-    }
-
-    ShabackOutputStream os = createOutputStream();
-    os.open(file);
-    os.write(treeFile);
-    os.finish();
-
-    run->numBytesStored += treeFile.size();
-  }
-
-  writeCache.insert(hashValue);
-
-  return hashValue;
-}
 
 string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize)
 {
@@ -281,6 +254,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
     }
   }
 
+  int mtime = srcFile.getPosixMtime();
   FileInputStream in(srcFile);
 
   // Allow large files with certain name patterns to be split into blocks/chunks:
@@ -300,7 +274,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
   hashValue = sha1.toString();
 
   srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
-  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  srcFile.setXAttr("user.shaback.mtime", mtime);
 
   if (!contains(hashValue)) {
     in.reset();
@@ -317,14 +291,24 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
 
     ShabackOutputStream os = createOutputStream();
     os.open(destFile);
+    sha1.reset();
 
     while (true) {
       int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
       if (bytesRead == -1)
         break;
       os.write(readBuffer, bytesRead);
+      sha1.update((unsigned char*) readBuffer, bytesRead);
       run->numBytesStored += bytesRead;
       *totalFileSize += bytesRead;
+    }
+
+    sha1.finalize();
+
+    string newHashValue = sha1.toString();
+    if (hashValue != newHashValue) {
+      os.remove();
+      throw Exception(string(srcFile.path).append(" changed while backing up"));
     }
 
     os.finish();
@@ -344,6 +328,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
 string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in,
     intmax_t* totalFileSize)
 {
+  int mtime = srcFile.getPosixMtime();
   string blockList;
   Sha1 totalSha1;
   int blockCount = 0;
@@ -412,7 +397,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
   }
 
   srcFile.setXAttr("user.shaback.sha1", totalHashValue); // TODO: Use dynamic digest name
-  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  srcFile.setXAttr("user.shaback.mtime", mtime);
 
   return totalHashValue;
 }

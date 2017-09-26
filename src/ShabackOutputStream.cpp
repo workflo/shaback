@@ -153,6 +153,13 @@ void ShabackOutputStream::finish()
   tmpFile.move(file);
 }
 
+void ShabackOutputStream::remove()
+{
+  close();
+  cerr << "Removing " << tmpFile.path << endl;
+  tmpFile.remove();
+}
+
 void ShabackOutputStream::write(string& s)
 {
   write(s.data(), s.size());
