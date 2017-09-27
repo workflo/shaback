@@ -30,7 +30,7 @@ using namespace std;
 TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
 {
   if (line.size() < 10)
-    throw InvalidTreeFile("Tree file contains empty/short line");
+    throw InvalidTreeFile("Invalid directory file: Empty/short line");
 
   int from = 2;
   int until;
@@ -38,12 +38,12 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   // Entry Type
   type = line.at(0);
   if (type != TREEFILEENTRY_FILE && type != TREEFILEENTRY_DIRECTORY && type != TREEFILEENTRY_SYMLINK)
-    throw InvalidTreeFile(string("Tree file contains invalid entry type `").append(&type, 1).append("'"));
+    throw InvalidTreeFile(string("Invalid directory file: Invalid entry type `").append(&type, 1).append("'"));
   if (line.at(1) != '\t')
-    throw InvalidTreeFile("Entry type should be followed by <TAB>");
+    throw InvalidTreeFile("Invalid directory file: Entry type should be followed by <TAB>");
 
   // ID
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file ID");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file ID");
   id = line.substr(from, until - from);
   from = until +1;
 
@@ -51,7 +51,7 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   isSplitFile = (id.find_first_of(SPLITFILE_ID_INDICATOR) != string::npos);
 
   // Filename
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing filename");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing filename");
   filename = line.substr(from, until - from);
   from = until +1;
 
@@ -62,37 +62,37 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   path.append(filename);
 
   // File mode (POSIX)
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file mode octets");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file mode octets");
   string n = line.substr(from, until - from);
   from = until +1;
   fileMode = strtol(n.c_str(), 0, 8);
 
   // UID (POSIX)
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file owner uid");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file owner uid");
   n = line.substr(from, until - from);
   from = until +1;
   uid = strtol(n.c_str(), 0, 10);
 
   // GID (POSIX)
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file owner gid");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file owner gid");
   n = line.substr(from, until - from);
   from = until +1;
   gid = strtol(n.c_str(), 0, 10);
 
   // MTime (POSIX)
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file mtime");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file mtime");
   n = line.substr(from, until - from);
   from = until +1;
   mtime = strtol(n.c_str(), 0, 10);
 
   // CTime (POSIX)
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file ctime");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file ctime");
   n = line.substr(from, until - from);
   from = until +1;
   ctime = strtol(n.c_str(), 0, 10);
 
   // Size
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Missing file size");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing file size");
   n = line.substr(from, until - from);
   from = until +1;
   size = strtoimax(n.c_str(), 0, 10);
@@ -104,13 +104,54 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
     } else {
       symLinkDest = line.substr(from, until - from);
     }
-    if (symLinkDest.empty()) throw InvalidTreeFile("Missing symlink destination");
+    if (symLinkDest.empty()) throw InvalidTreeFile("Invalid directory file: Missing symlink destination");
     from = until +1;
   }
 }
 
 
+TreeFileEntry::TreeFileEntry()
+    : type(0)
+{}
+
+
 bool TreeFileEntry::isDirectory()
 {
   return (type == TREEFILEENTRY_DIRECTORY);
+}
+
+
+bool TreeFileEntry::isEof()
+{
+  return (type == TREEFILEENTRY_EOF);
+}
+
+string TreeFileEntry::toString()
+{
+  string s;
+  char buf[100];
+  
+  switch (type) {
+    case TREEFILEENTRY_DIRECTORY: {
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", fileMode, uid, gid, mtime, ctime, 0);
+
+      s.append("D\t\t").append(path).append(buf);
+      break;
+    }
+
+    case TREEFILEENTRY_FILE: {
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", fileMode, uid, gid, mtime, ctime, size);
+
+      s.append("F\t").append(id).append("\t").append(path).append(buf);
+      break;
+    }
+    
+    case TREEFILEENTRY_SYMLINK: {
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", fileMode, uid, gid, mtime, ctime);
+
+      s.append("S\t*\t").append(path).append(buf).append(symLinkDest).append("\n");
+      break;
+    }
+  }
+  return s;
 }

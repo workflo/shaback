@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.attributes": "java-properties",
+        "*.tcc": "cpp",
+        "ostream": "cpp",
+        "*.ipp": "cpp"
+    }
+}

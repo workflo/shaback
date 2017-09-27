@@ -100,7 +100,7 @@ OutputStream* ShabackOutputStream::createCompressionStream(OutputStream* outputS
 }
 
 
-void ShabackOutputStream::open(File& file)
+void ShabackOutputStream::open(File file)
 {
   this->file = file;
 
@@ -151,6 +151,13 @@ void ShabackOutputStream::finish()
 {
   close();
   tmpFile.move(file);
+}
+
+void ShabackOutputStream::remove()
+{
+  close();
+  cerr << "Removing " << tmpFile.path << endl;
+  tmpFile.remove();
 }
 
 void ShabackOutputStream::write(string& s)

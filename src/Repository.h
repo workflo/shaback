@@ -21,13 +21,14 @@
 
 #include <string>
 #include <vector>
+#include <list>
+#include <set>
 #if defined(HAVE_UNORDERED_SET)
 #include <unordered_set>
 #endif
 #include <stdint.h>
 #include "ShabackConfig.h"
 #include "RuntimeConfig.h"
-#include "Cache.h"
 #include "lib/Date.h"
 #include "ShabackOutputStream.h"
 #include "ShabackInputStream.h"
@@ -55,6 +56,8 @@ class Repository
      * hashes and dumps file listings.
      */
     RestoreReport testRestore();
+
+    void migrate();
 
     /**
      * Checks whether all required directories and files can be found.
@@ -94,9 +97,7 @@ class Repository
 
     File hashValueToFile(std::string hashValue);
     bool contains(std::string& hashValue);
-    std::string storeTreeFile(BackupRun* run, std::string& treeFile);
     std::string storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize);
-    void storeRootTreeFile(std::string& rootHashValue);
     void importCacheFile();
 
     /**
@@ -118,11 +119,6 @@ class Repository
     void testExportFile(RestoreRun& restoreRun, TreeFileEntry& entry);
 
     /**
-     * Lazily opens the read cache.
-     */
-    void openReadCache();
-
-    /**
      * Removes all files from the repository's cache/ directory.
      */
     void removeAllCacheFiles();
@@ -139,8 +135,7 @@ class Repository
      */
     ShabackOutputStream createOutputStream();
 
-    RestoreReport restoreByRootFile(File& rootFile, bool testRestore);
-    RestoreReport restoreByTreeId(std::string& treeId, bool testRestore);
+    RestoreReport restore(File shabackupFile, std::list<std::string> files, bool testRestore);
 
     /**
      * Maps the given name of an encryption algorithm to its respective
@@ -195,19 +190,19 @@ class Repository
     std::set<std::string> writeCache;
   #endif
 
-    /** The (persistent) read cache. Used to speed up traversing tree files. */
-    Cache readCache;
-
     int repoFormat;
+    int encryptionAlgorithm;
+    int compressionAlgorithm;
+    
+    Date startDate;
+
+    std::string version;
 
   protected:
     RuntimeConfig config;
     int hashAlgorithm;
-    int encryptionAlgorithm;
-    int compressionAlgorithm;
     int splitBlockSize;
     int splitMinBlocks;
-    Date startDate;
 
 #if defined(OPENSSL_FOUND)
     void checkPassword();
@@ -219,6 +214,7 @@ class Repository
      * individually.
      */
     std::string storeSplitFile(BackupRun* run, File &srcFile, InputStream &in, intmax_t* totalFileSize);
+    File selectShabackupFile(std::string filename);
 
     char* readBuffer;
 };

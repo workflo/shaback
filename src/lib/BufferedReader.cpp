@@ -75,7 +75,7 @@ int BufferedReader::read()
       return -1;
   }
 
-  return buffer[nextChar++];
+  return (unsigned char) buffer[nextChar++];
 }
 
 int BufferedReader::read(char* b, int len)

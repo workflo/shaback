@@ -1,6 +1,6 @@
 /*
  * shaback - A hash digest based backup tool.
- * Copyright (C) 2015 Florian Wolff (florian@donuz.de)
+ * Copyright (C) 2017 Florian Wolff (florian@donuz.de)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,46 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SHABACK_BackupsetSelector_H
-#define SHABACK_BackupsetSelector_H
-
+#ifndef SHABACK_Migration_H
+#define SHABACK_Migration_H
+  
 #include <string>
 #include <vector>
-#include "ShabackConfig.h"
-
-#if defined(HAVE_DIALOG)
-
-#include <ncurses.h>
-
+#include <set>
 #include "lib/File.h"
-#include "lib/Exception.h"
-
-
-class Repository;
-class RuntimeConfig;
-
-class BackupsetSelector
+#include "Repository.h"
+  
+class Migration
 {
   public:
-    BackupsetSelector(Repository& repository, RuntimeConfig& config);
-    ~BackupsetSelector();
+    Migration(RuntimeConfig& config, Repository& Repository);
 
-    std::string start();
+    void run();  
+ 
+  protected:
+    void migrate2to3();
+    void migrate2to3int(ShabackOutputStream& out, std::string& treeId);
+    std::vector<File> listRootFiles();
+    void updateRepoVersion(std::string newVersion);
 
-  private:
     Repository& repository;
     RuntimeConfig& config;
-    std::string setName;
-    File rootFile;
-    std::string directoryId;
-
-    char recoverLabel[100];
-    char backTitle[100];
-    
-    bool selectSet();
-    bool selectVersion();
-    bool selectDirectory();
 };
-
-#endif // HAVE_DIALOG
-#endif // SHABACK_BackupsetSelector_H
+  
+#endif // SHABACK_Migration_H

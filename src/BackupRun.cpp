@@ -31,7 +31,8 @@
 using namespace std;
 
 BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
-  repository(repository), config(config)
+  repository(repository), config(config),
+  directoryFileStream(repository.createOutputStream())
 {
   numFilesRead = 0;
   numFilesStored = 0;
@@ -42,6 +43,7 @@ BackupRun::BackupRun(RuntimeConfig& config, Repository& repository) :
 
 BackupRun::~BackupRun()
 {
+  directoryFileStream.close();
   repository.unlock();
 }
 
@@ -59,20 +61,18 @@ int BackupRun::run()
 
   config.runPreBackupCallbacks();
 
-  string rootFile(TREEFILE_HEADER);
-  rootFile.append("\n\n");
+  openDirectoryFile();
 
-  for (vector<string>::iterator it = config.dirs.begin(); it < config.dirs.end(); it++) {
+  for (list<string>::iterator it = config.dirs.begin(); it != config.dirs.end(); it++) {
     File file(*it);
     intmax_t totalSubDirSize = 0;
-
     try {
       if (file.isSymlink()) {
-        rootFile.append(handleSymlink(file, true));
+        handleSymlink(file);
       } else if (file.isDir()) {
-        rootFile.append(handleDirectory(file, true, &totalSubDirSize));
+        handleDirectory(file, false);
       } else if (file.isFile()) {
-        rootFile.append(handleFile(file, true, &totalSubDirSize));
+        handleFile(file);
       } else if (!file.exists()) {
         throw FileNotFoundException(file.path);
       } else {
@@ -83,23 +83,38 @@ int BackupRun::run()
     }
   }
 
-  string rootFileHashValue = repository.storeTreeFile(this, rootFile);
-
-  repository.storeRootTreeFile(rootFileHashValue);
+  directoryFileStream.finish();
 
   deleteOldIndexFiles();
 
   return (numErrors == 0 ? 0 : 1);
 }
 
-string BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* totalParentDirSize, bool skipChildren)
-{
-  string treeFile(TREEFILE_HEADER);
-  treeFile.append("\n").append(dir.path).append("\n");
-  intmax_t totalDirSize = 0;
 
+void BackupRun::openDirectoryFile()
+{
+  string filename = config.backupName;
+  filename.append("_").append(repository.startDate.toFilename()).append(".shabackup");
+
+  directoryFileStream.open(File(config.indexDir, filename));
+
+  directoryFileStream.write(DIRECTORY_FILE_HEADER);
+  directoryFileStream.write("\n");
+}
+
+
+void BackupRun::handleDirectory(File& dir, bool skipChildren)
+{
   config.runEnterDirCallbacks(dir);
 
+  char buf[100];
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
+      dir.getPosixMtime(), dir.getPosixCtime(), 0);
+
+  directoryFileStream.write("D\t\t");
+  directoryFileStream.write(dir.path);
+  directoryFileStream.write(buf);
+  
   if (!skipChildren) {
     vector<File> files = dir.listFiles("*");
 
@@ -111,12 +126,11 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* total
 
       try {
         if (child.isSymlink()) {
-          treeFile.append(handleSymlink(child, false));
+          handleSymlink(child);
         } else if (child.isDir()) {
-          treeFile.append(
-              handleDirectory(child, false, &totalDirSize, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev())));
+          handleDirectory(child, (config.oneFileSystem && dir.getPosixDev() != child.getPosixDev()));
         } else if (child.isFile()) {
-          treeFile.append(handleFile(child, false, &totalDirSize));
+          handleFile(child);
         } else {
           // Ignore other types of files.
         }
@@ -126,31 +140,10 @@ string BackupRun::handleDirectory(File& dir, bool absolutePaths, intmax_t* total
     }
   }
 
-  string treeFileHashValue = repository.storeTreeFile(this, treeFile);
-
-  string treeFileLine("D\t");
-  treeFileLine.append(treeFileHashValue);
-  treeFileLine.append("\t");
-  if (absolutePaths) {
-    treeFileLine.append(dir.path);
-  } else {
-    treeFileLine.append(dir.fname);
-  }
-
-  char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
-      dir.getPosixMtime(), dir.getPosixCtime(), totalDirSize);
-  treeFileLine.append(buf);
-  treeFileLine.append("\n");
-
   config.runLeaveDirCallbacks(dir);
-
-  *totalParentDirSize += totalDirSize;
-
-  return treeFileLine;
 }
 
-string BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirSize)
+void BackupRun::handleFile(File& file)
 {
   intmax_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
@@ -158,11 +151,7 @@ string BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirS
   string treeFileLine("F\t");
   treeFileLine.append(hashValue);
   treeFileLine.append("\t");
-  if (absolutePaths) {
-    treeFileLine.append(file.path);
-  } else {
-    treeFileLine.append(file.fname);
-  }
+  treeFileLine.append(file.path);
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
@@ -170,19 +159,13 @@ string BackupRun::handleFile(File& file, bool absolutePaths, intmax_t* totalDirS
   treeFileLine.append(buf);
   treeFileLine.append("\n");
 
-  *totalDirSize += totalFileSize;
-
-  return treeFileLine;
+  directoryFileStream.write(treeFileLine);
 }
 
-string BackupRun::handleSymlink(File& file, bool absolutePaths)
+void BackupRun::handleSymlink(File& file)
 {
   string treeFileLine("S\t*\t");
-  if (absolutePaths) {
-    treeFileLine.append(file.path);
-  } else {
-    treeFileLine.append(file.fname);
-  }
+  treeFileLine.append(file.path);
 
   char buf[100];
   sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t\t", file.getPosixMode(), file.getPosixUid(), file.getPosixGid(),
@@ -191,7 +174,7 @@ string BackupRun::handleSymlink(File& file, bool absolutePaths)
   treeFileLine.append(file.readlink());
   treeFileLine.append("\n");
 
-  return treeFileLine;
+  directoryFileStream.write(treeFileLine);
 }
 
 void BackupRun::showTotals()
@@ -225,7 +208,7 @@ void BackupRun::deleteOldIndexFiles()
 {
   // TODO: Move to new class History!
   string pattern(config.backupName);
-  pattern.append("_????" "-??" "-??_??????.sroot");
+  pattern.append("_????" "-??" "-??_??????.shabackup");
 
   vector<File> indexFiles = config.indexDir.listFiles(pattern);
 
@@ -324,7 +307,7 @@ void BackupRun::deleteOldIndexFiles()
   for (vector<Date>::iterator it = toDelete.begin(); it < toDelete.end(); it++) {
     Date d(*it);
     string fname(config.backupName);
-    fname.append("_").append(d.toFilename()).append(".sroot");
+    fname.append("_").append(d.toFilename()).append(".shabackup");
     File file(config.indexDir, fname);
     if (config.verbose) {
       cout << config.color_deleted << "Deleting old index file " << file.path.c_str() << config.color_default << endl;

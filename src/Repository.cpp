@@ -35,9 +35,11 @@
 #include "lib/Sha1.h"
 #include "lib/Sha256.h"
 
+#include "shaback.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
 #include "History.h"
+#include "Migration.h"
 #include "Repository.h"
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
@@ -45,7 +47,6 @@
 #include "ShabackException.h"
 #include "SplitFileIndexReader.h"
 #include "TreeFile.h"
-#include "BackupsetSelector.h"
 
 
 #define READ_BUFFER_SIZE (1024 * 4)
@@ -53,14 +54,13 @@
 using namespace std;
 
 Repository::Repository(RuntimeConfig& config) :
-    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5), readCache(config.readCacheFile, config.useReadCache)
+    config(config), splitBlockSize(1024 * 1024 * 5), splitMinBlocks(5)
 {
   readBuffer = (char*) malloc(max(READ_BUFFER_SIZE, splitBlockSize));
 }
 
 Repository::~Repository()
 {
-  readCache.close();
   free(readBuffer);
 }
 
@@ -83,11 +83,16 @@ void Repository::open()
   repoFormat = repoFormatByName(props.getProperty("repoFormat"));
 
   // Check Repo Version
-  string version(props.getProperty("version"));
-  if (version != "2") {
-    throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
+  version = props.getProperty("version");
+  if (config.operation != "migrate") {
+    if (version == "2") {
+      throw Exception("Unsupported repository version \"2\". Migrate your repository to version \"3\" by running" \
+        "\n\tshaback migrate");
+    } else if (version != SHABACK_REPO_VERSION) {
+      throw Exception(string("Unsupported repository version \"").append(version).append("\"."));
+    }
   }
-
+  
   if (encryptionAlgorithm != ENCRYPTION_NONE) {
     if (config.cryptoPassword.empty())
       throw MissingCryptoPassword();
@@ -177,22 +182,14 @@ void Repository::lock(bool exclusive)
 void Repository::unlock(bool force)
 {
   if (config.lockCount > 1 && !force) {
-    config.lockCount--;
+    config.lockCount--; 
     return;
   }
 
+  config.lockCount = 0;
   config.lockFile.remove();
   if (config.haveExclusiveLock) {
     config.exclusiveLockFile.remove();
-  }
-}
-
-void Repository::openReadCache()
-{
-  try {
-    readCache.open(GDBM_WRCREAT);
-  } catch (Exception &ex) {
-    cerr << "Warning: Unable to open read cache file: " << ex.getMessage() << endl;
   }
 }
 
@@ -239,32 +236,6 @@ bool Repository::contains(string& hashValue)
   return writeCache.count(hashValue) || hashValueToFile(hashValue).isFile();
 }
 
-string Repository::storeTreeFile(BackupRun* run, string& treeFile)
-{
-  Sha1 sha1;
-  sha1.update(treeFile);
-  sha1.finalize();
-  string hashValue = sha1.toString();
-
-  if (!contains(hashValue)) {
-    File file = hashValueToFile(hashValue);
-
-    if (config.debug) {
-      cout << "[t] " << file.path << endl;
-    }
-
-    ShabackOutputStream os = createOutputStream();
-    os.open(file);
-    os.write(treeFile);
-    os.finish();
-
-    run->numBytesStored += treeFile.size();
-  }
-
-  writeCache.insert(hashValue);
-
-  return hashValue;
-}
 
 string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize)
 {
@@ -283,6 +254,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
     }
   }
 
+  int mtime = srcFile.getPosixMtime();
   FileInputStream in(srcFile);
 
   // Allow large files with certain name patterns to be split into blocks/chunks:
@@ -302,7 +274,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
   hashValue = sha1.toString();
 
   srcFile.setXAttr("user.shaback.sha1", hashValue); // TODO: Use dynamic digest name
-  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  srcFile.setXAttr("user.shaback.mtime", mtime);
 
   if (!contains(hashValue)) {
     in.reset();
@@ -319,17 +291,31 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
 
     ShabackOutputStream os = createOutputStream();
     os.open(destFile);
+    sha1.reset();
 
     while (true) {
       int bytesRead = in.read(readBuffer, READ_BUFFER_SIZE);
       if (bytesRead == -1)
         break;
       os.write(readBuffer, bytesRead);
+      sha1.update((unsigned char*) readBuffer, bytesRead);
       run->numBytesStored += bytesRead;
       *totalFileSize += bytesRead;
     }
 
+    sha1.finalize();
+    string newHashValue = sha1.toString();
+
     os.finish();
+    
+    if (hashValue != newHashValue) {
+      File newDestFile = hashValueToFile(newHashValue);
+      if (config.verbose) {
+        cerr << "[C] " << srcFile.path << " changed while backing up: renaming " << destFile.path << " to " << newDestFile.path << endl;
+      }
+      hashValue = newHashValue;
+      destFile.move(newDestFile);
+    }
 
     run->numFilesStored++;
   } else {
@@ -346,6 +332,7 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
 string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in,
     intmax_t* totalFileSize)
 {
+  int mtime = srcFile.getPosixMtime();
   string blockList;
   Sha1 totalSha1;
   int blockCount = 0;
@@ -414,7 +401,7 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
   }
 
   srcFile.setXAttr("user.shaback.sha1", totalHashValue); // TODO: Use dynamic digest name
-  srcFile.setXAttr("user.shaback.mtime", srcFile.getPosixMtime());
+  srcFile.setXAttr("user.shaback.mtime", mtime);
 
   return totalHashValue;
 }
@@ -422,19 +409,12 @@ string Repository::storeSplitFile(BackupRun* run, File &srcFile, InputStream &in
 vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
 {
   string content;
-  bool fromCache;
 
-  if (readCache.contains(treeId)) {
-    content = readCache.get(treeId);
-    fromCache = true;
-  } else {
-    File file = hashValueToFile(treeId);
-    ShabackInputStream in = createInputStream();
-    in.open(file);
+  File file = hashValueToFile(treeId);
+  ShabackInputStream in = createInputStream();
+  in.open(file);
 
-    in.readAll(content);
-    fromCache = false;
-  }
+  in.readAll(content);
 
   vector<TreeFileEntry> list;
   int from = 0;
@@ -464,10 +444,6 @@ vector<TreeFileEntry> Repository::loadTreeFile(string& treeId)
     string line = content.substr(from, until - from);
     list.push_back(TreeFileEntry(line, parentDir));
     from = until + 1;
-  }
-
-  if (!fromCache) {
-    readCache.put(treeId, content);
   }
 
   return list;
@@ -521,62 +497,34 @@ void Repository::importCacheFile()
   }
 }
 
-void Repository::storeRootTreeFile(string& rootHashValue)
-{
-  string filename = config.backupName;
-  filename.append("_").append(startDate.toFilename()).append(".sroot");
-
-  File file(config.indexDir, filename);
-  FileOutputStream os(file);
-
-  os.write(rootHashValue.data(), rootHashValue.size());
-
-  os.close();
-
-  cout << config.color_success;
-  cout << "ID:         " << rootHashValue << endl;
-  cout << "Index file: " << file.path << endl;
-  cout << config.color_default;
-}
 
 RestoreReport Repository::restore()
 {
-#if defined(HAVE_DIALOG)
-  string treeSpec;
-
-  if (config.gui) {
-    open();
-
-    BackupsetSelector sel(*this, config);
-    treeSpec = sel.start();
-    if (treeSpec == "") return RestoreReport();
-  } else if (config.cliArgs.empty()) {
-    throw RestoreException("Don't know what to restore.");
-  } else {
-    treeSpec = config.cliArgs.at(0);
-    open();
-  }
-#else
   if (config.cliArgs.empty()) {
     throw RestoreException("Don't know what to restore.");
   }
 
-  string treeSpec = config.cliArgs.at(0);
+  string shabackupFilename = config.cliArgs.front();
+  config.cliArgs.pop_front();
 
   open();
-#endif
 
-  if (Digest::looksLikeDigest(treeSpec)) {
-    return restoreByTreeId(treeSpec, false);
-  } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-    string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-    File rootFile(config.indexDir, fname);
+  File shabackupFile(selectShabackupFile(shabackupFilename));
 
-    return restoreByRootFile(rootFile, false);
+  return restore(shabackupFile, config.cliArgs, false);
+}
+
+
+File Repository::selectShabackupFile(string filename)
+{
+  if (filename.rfind(".shabackup") == filename.size() - 10) {
+    string fname = filename.substr(filename.rfind(File::separator) + 1);
+    return File(config.indexDir, fname);
   } else {
-    throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
+    throw RestoreException(string("Don't know how to restore `").append(filename).append("'."));
   }
 }
+
 
 RestoreReport Repository::testRestore()
 {
@@ -589,12 +537,15 @@ RestoreReport Repository::testRestore()
   if (config.all) {
     RestoreReport report;
    
-    vector<File> indexFiles = config.indexDir.listFiles("*.sroot");
+    vector<File> directoryFiles = config.indexDir.listFiles("*.shabackup");
 
-    for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    for (vector<File>::iterator it = directoryFiles.begin(); it < directoryFiles.end(); it++) {
       File file(*it);
       if (config.verbose) cerr << config.color_low << "* " << file.path << config.color_default << endl;
-      RestoreReport r = restoreByRootFile(file, true);
+
+      File shabackupFile(selectShabackupFile(file.path));
+  
+      RestoreReport r = restore(shabackupFile, list<string>(), true);
       
       report.numErrors += r.numErrors;
 
@@ -604,43 +555,28 @@ RestoreReport Repository::testRestore()
     }
 
     if (config.showTotals) {
-      fprintf(stderr, "\nTotal Errors:     %12d\n", report.numErrors);
+      fprintf(stderr, "\nTotal Errors:         %12d\n", report.numErrors);
     }
 
     return report;
   } else {
-    string treeSpec = config.cliArgs.at(0);
+    string shabackupFilename = config.cliArgs.front();
+    config.cliArgs.pop_front();
 
-    if (Digest::looksLikeDigest(treeSpec)) {
-      return restoreByTreeId(treeSpec, true);
-    } else if (treeSpec.rfind(".sroot") == treeSpec.size() - 6) {
-      string fname = treeSpec.substr(treeSpec.rfind(File::separator) + 1);
-      File rootFile(config.indexDir, fname);
-
-      return restoreByRootFile(rootFile, true);
-    } else {
-      throw RestoreException(string("Don't know how to restore `").append(treeSpec).append("'."));
-    }
+    File shabackupFile(selectShabackupFile(shabackupFilename));
+    
+    return restore(shabackupFile, list<string>(), true);
   }
 }
 
-RestoreReport Repository::restoreByRootFile(File& rootFile, bool testRestore)
+RestoreReport Repository::restore(File shabackupFile, list<string> files, bool testRestore)
 {
-  FileInputStream in(rootFile);
-  string hashValue;
-  if (in.readLine(hashValue)) {
-    return restoreByTreeId(hashValue, testRestore);
-  } else {
-    throw RestoreException(string("Root index file is empty: ").append(rootFile.path));
-  }
-}
-
-RestoreReport Repository::restoreByTreeId(string& treeId, bool testRestore)
-{
-  RestoreRun run(config, *this, testRestore);
+  RestoreRun run(config, *this, shabackupFile, testRestore);
   File destinationDir(".");
 
-  return run.start(treeId, destinationDir);
+  if (files.empty()) files.push_back(""); // Restore everything!
+
+  return run.start(files, destinationDir);
 }
 
 void Repository::exportFile(TreeFileEntry& entry, OutputStream& out)
@@ -774,7 +710,7 @@ void Repository::show()
 
   open();
 
-  string id = config.cliArgs.at(0);
+  string id = config.cliArgs.front();
   StandardOutputStream out(stdout);
   exportFile(id, out);
 }
@@ -953,4 +889,11 @@ ShabackInputStream Repository::createInputStream()
 ShabackOutputStream Repository::createOutputStream()
 {
   return ShabackOutputStream(config, compressionAlgorithm, encryptionAlgorithm);
+}
+
+
+void Repository::migrate()
+{
+  Migration migration(config, *this);
+  migration.run();
 }

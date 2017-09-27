@@ -64,13 +64,10 @@ void showUsage(string& op)
     printf("usage: shaback restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-S | --skip-existing]\n"
       "                      [-o | --cpio] [-q | --quiet] [-G | --gauge]\n");
-#if defined(HAVE_DIALOG)
-    printf("                      [-g | --gui]\n");
-#endif
-    printf("                      <rootfile> | <dir-id>\n\n");
+    printf("                      <shabackup-file> [directories | files]\n\n");
     printf("\tRestores directories and files from the repository.\n\n"
-      "\t<rootfile> is a filename from the repository's index/ directory.\n"
-      "\t<dir-id> is the ID of the directory file to be restored.\n\n"
+      "\t<shabackup-file> is a filename from the repository's index/ directory.\n"
+      "\t[directories | files] are the absolute paths of directories or files to be restored.\n\n"
       "\t-S, --skip-existing\n"
       "\t    Skip files already existing in destination directory.\n\n"
       "\t-t, --totals\n"
@@ -84,20 +81,14 @@ void showUsage(string& op)
       "\t    Suppress progress output.\n\n"
       "\t-G, --gauge\n"
       "\t    Produce output on stdout suitable for dialog --gauge.\n\n", CPIO_ODC_MAX_FILE_SIZE);
-#if defined(HAVE_DIALOG)
-    printf("\t-g, --gui\n"
-      "\t    Start dialog UI to select what to recover.\n\n");
-#endif
-    printf("\tFiles will always be restored into the CWD.\n");
-
+    printf("\tFiles will always be restored into the current working directory.\n");
   } else if (op == "test-restore") {
     printf("usage: shaback test-restore [<general_options>] [-p <pw> | --password=<pw>]\n"
       "                      [-t | --totals] [-Q | --quick]\n");
-    printf("                      <rootfile> | <dir-id> | [-a | --all]\n\n");
+    printf("                      <shabackup-file>  [-a | --all]\n\n");
     printf("\tPretends to restore files from the repository.\n"
       "\tChecks sizes and hash digests to ensure the backup set's integrity.\n\n"
-      "\t<rootfile> is a filename from the repository's index/ directory.\n"
-      "\t<dir-id> is the ID of the directory file to be restored.\n\n"
+      "\t<shabackup-file> is a filename from the repository's index/ directory.\n\n"
       "\t-a, --all\n"
       "\t    Check all backup sets from the repo's index/ directory.\n\n"
       "\t-t, --totals\n"
@@ -106,9 +97,7 @@ void showUsage(string& op)
       "\t    Just check existence of all files, don't recalculate hashes.\n\n");
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
-    printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n"
-      "\t-R, --no-read-cache\n"
-      "\t    For systems without large file support: Don't populate .shaback-read-cache.gdbm.\n\n");
+    printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
   } else if (op == "history") {
     printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-l | --list] [-k <num> | --keep=<num>]\n"
@@ -183,10 +172,10 @@ void showUsage(string& op)
     printf("   init          Create a new repository.\n");
     printf("   restore       Restore files from repository.\n");
     printf("   test-restore  Pretend to restore files, check hash digests and dump file listing.\n");
-    //    printf("   cleanup     Delete old index files\n");
     printf("   show          Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate       Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate       Decompress data from stdin to stdout using `Deflate' compression.\n");
+    printf("   migrate       Upgrade repository to version " SHABACK_REPO_VERSION ".\n");
     printf("   version       Print version information.\n");
     printf("\n");
     printf("General options are:\n");
@@ -204,7 +193,6 @@ void showUsage(string& op)
     printf("\t-h, --help\n"
       "\t     Show usage information.\n\n");
     printf("See `shaback <command> --help' for more information on a specific command.\n");
-    //  printf("Version: " + VERSION);
   }
 }
 
@@ -260,6 +248,8 @@ int main(int argc, char** argv)
           shaback.repository.gc();
         } else if (config.operation == "history") {
           shaback.repository.history();
+        } else if (config.operation == "migrate") {
+          shaback.repository.migrate();
         } else if (config.operation == "deflate") {
           return shaback.deflate();
         } else if (config.operation == "inflate") {

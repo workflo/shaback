@@ -27,11 +27,12 @@
 
 #include "RestoreRun.h"
 #include "ShabackInputStream.h"
+#include "DirectoryFileReader.h"
 
 using namespace std;
 
-RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, bool testRestore) :
-    repository(repository), config(config), testRestore(testRestore)
+RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, File shabackupFile, bool testRestore) :
+    repository(repository), config(config), testRestore(testRestore), shabackupFile(shabackupFile)
 {
   repository.lock();
 }
@@ -41,24 +42,52 @@ RestoreRun::~RestoreRun()
   repository.unlock();
 }
 
-RestoreReport RestoreRun::start(std::string& treeId, File& destinationDir)
+RestoreReport RestoreRun::start(list<string> _files, File& destinationDir)
 {
   time(&lastProgressTime);
 
-  // Open index file to read directory sizes:
-  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+  DirectoryFileReader dirFileReader(repository, shabackupFile);
+  dirFileReader.open();
 
-  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
-    TreeFileEntry entry(*it);
-    report.bytesToBeRestored += entry.size;
+  vector<string> files;
+  for (list<string>::iterator it = _files.begin(); it != _files.end(); it++) {
+    string file(*it);
+    while (file.size() > 1 && file.at(file.size() -1) == File::separatorChar) file.erase(file.size() -1);
+    files.push_back(file);
+
+    // Add filename + "/" to the list:
+    if (file.size() > 1) {
+      string file2(file);
+      file2.append(File::separator);
+      files.push_back(file2);
+    }
   }
 
-  if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
-    restoreAsCpioStream(treeId);
-  } else {
-    restore(treeId, destinationDir);
-  }
+  do {
+    TreeFileEntry entry(dirFileReader.next());
+    if (entry.isEof()) break;
 
+    for (vector<string>::iterator it = files.begin(); it < files.end(); it++) {
+      string file(*it);
+      if (entry.path == file || entry.path.substr(0, file.size()) == file) {
+        report.bytesToBeRestored += entry.size;
+      
+        if (config.restoreAsCpioStream || config.restoreAsShabackStream) {
+          restoreAsCpioStream(entry);
+        } else {
+          restore(entry, destinationDir);
+        }
+        break;
+      }
+    }
+  } while(true);
+
+  if (config.restoreAsShabackStream) {
+    fprintf(stdout, "ShAbAcKsTrEaM1_000000000000000000000000000000000001000000000000000130000000000000000TRAILER!!!%c", 0x0);
+  } else if (config.restoreAsCpioStream) {
+    fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
+  }
+  
   if (config.showTotals) {
     report.dump();
   }
@@ -66,185 +95,156 @@ RestoreReport RestoreRun::start(std::string& treeId, File& destinationDir)
   return report;
 }
 
-void RestoreRun::restore(string& treeId, File& destinationDir, int depth)
+void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
 {
-  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
+  switch (entry.type) {
+    case TREEFILEENTRY_DIRECTORY: {
+      if (testRestore) break;
 
-  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
-    TreeFileEntry entry(*it);
+      File dir(destinationDir, entry.path);
 
-    switch (entry.type) {
-      case TREEFILEENTRY_DIRECTORY: {
-        if (testRestore) {
-          restore(entry.id, destinationDir, depth + 1);
-        } else {
-          File dir(destinationDir, entry.path);
+      bool skip = (config.skipExisting && dir.isDir());
 
-          bool skip = (config.skipExisting && dir.isDir());
+      if (!skip) {
+        if (config.verbose && !config.gauge)
+          cerr << "[d] " << dir.path << endl;
 
-          if (!skip) {
-            if (config.verbose && !config.gauge)
-              cerr << "[d] " << dir.path << endl;
-
-            dir.mkdirs();
-          }
-          if (dir.isDir()) {
-            restore(entry.id, destinationDir, depth + 1);
-            if (!skip) {
-              restoreMetaData(dir, entry);
-            }
-          } else {
-            reportError(string("Cannot create destination directory: ").append(dir.path));
-          }
-        }
-        break;
+        dir.mkdirs();
+        restoreMetaData(dir, entry);
       }
-
-      case TREEFILEENTRY_FILE: {
-        if (testRestore) {
-          repository.testExportFile(*this, entry);
-        } else {
-          File file(destinationDir, entry.path);
-
-          if (config.skipExisting && file.isFile())
-            break;
-
-          if (config.verbose && !config.gauge) 
-            cerr << "[f] " << file.path << endl;
-
-          // Create base directory:
-          if (depth == 0) {
-            file.getParent().mkdirs();
-            if (!file.getParent().isDir()) {
-              reportError(string("Cannot create destination directory: ").append(file.getParent().path));
-            }
-          }
-          file.remove();
-
-          try {
-            FileOutputStream out(file);
-            repository.exportFile(entry, out);
-            out.close();
-            restoreMetaData(file, entry);
-            report.numFilesRestored++;
-            report.numBytesRestored += entry.size;
-
-            if (!config.quiet) progress(entry.path);
-          } catch (Exception &ex) {
-            reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
-          }
-        }
-        break;
+      if (!dir.isDir()) {
+        reportError(string("Cannot create destination directory: ").append(dir.path));
       }
+      break;
+    }
 
-      case TREEFILEENTRY_SYMLINK: {
-        if (testRestore) break;
-
+    case TREEFILEENTRY_FILE: {
+      if (testRestore) {
+        repository.testExportFile(*this, entry);
+      } else {
         File file(destinationDir, entry.path);
 
-        if (config.skipExisting && file.isSymlink())
-          break;
-
-        if (config.verbose && !config.gauge)
-          cout << "[s] " << file.path << endl;
-
-        if (depth == 0)
+        if (file.isFile()) {
+          if (config.skipExisting) {
+            break;
+          } else {
+            file.remove();
+          }
+        } else {
           file.getParent().mkdirs();
+        }
 
-        repository.exportSymlink(entry, file);
-        restoreMetaData(file, entry);
-        report.numFilesRestored++;
-        break;
+        if (config.verbose && !config.gauge) 
+          cerr << "[f] " << file.path << endl;
+
+        try {
+          FileOutputStream out(file);
+          repository.exportFile(entry, out);
+          out.close();
+          restoreMetaData(file, entry);
+          report.numFilesRestored++;
+          report.numBytesRestored += entry.size;
+
+          if (!config.quiet) progress(entry.path);
+        } catch (Exception &ex) {
+          reportError(string("Cannot restore file ").append(file.path).append(": ").append(ex.getMessage()));
+        }
       }
-
-      default:
-        throw IllegalStateException("Unexpected tree file entry type");
+      break;
     }
+
+    case TREEFILEENTRY_SYMLINK: {
+      if (testRestore) break;
+
+      File file(destinationDir, entry.path);
+
+      file.getParent().mkdirs();
+      
+      if (config.skipExisting && file.isSymlink()) break;
+
+      file.getParent().mkdirs();
+
+      if (config.verbose && !config.gauge)
+        cout << "[s] " << file.path << endl;
+
+      repository.exportSymlink(entry, file);
+      restoreMetaData(file, entry);
+      report.numFilesRestored++;
+      break;
+    }
+
+    default:
+      throw IllegalStateException("Unexpected tree file entry type");
   }
 }
 
-void RestoreRun::restoreAsCpioStream(string& treeId, int depth)
+void RestoreRun::restoreAsCpioStream(TreeFileEntry& entry)
 {
-  StandardOutputStream out(stdout);
-  vector<TreeFileEntry> treeList = repository.loadTreeFile(treeId);
-
-  for (vector<TreeFileEntry>::iterator it = treeList.begin(); it < treeList.end(); it++) {
-    TreeFileEntry entry(*it);
-
-    string path(entry.path);
-    if (path == "/") {
-      path = ".";
-    } else {
-      while (path.size() > 1 && path[0] == '/') {
-	      path.erase(0, 1);
-      }
-    }
-
-    switch (entry.type) {
-      case TREEFILEENTRY_DIRECTORY: {
-        if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++report.fileCount, entry.fileMode,
-              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
-              path.c_str(), 0x0);
-        } else {
-          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++report.fileCount, entry.fileMode,
-              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
-              path.c_str(), 0x0);
-        }
-        restoreAsCpioStream(entry.id, depth + 1);
-        break;
-      }
-
-      case TREEFILEENTRY_FILE: {
-        if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++report.fileCount, entry.fileMode,
-              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-              (unsigned int) entry.size, path.c_str(), 0x0);
-        } else {
-          // cpio has a file size limit of 8 GB :(
-          if (entry.size >= CPIO_ODC_MAX_FILE_SIZE) {
-            reportError(string("File too large for cpio: ").append(path));
-            break;
-          }
-
-          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++report.fileCount, entry.fileMode,
-              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-              (unsigned int) entry.size, path.c_str(), 0x0);
-        }
-        try {
-          repository.exportFile(entry, out);
-          report.numFilesRestored ++;
-          report.numBytesRestored += entry.size;
-        } catch (Exception &ex) {
-          reportError(string("Cannot restore file ").append(path).append(": ").append(ex.getMessage()));
-        }
-        break;
-      }
-
-      case TREEFILEENTRY_SYMLINK: {
-        if (config.restoreAsShabackStream) {
-          fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++report.fileCount, entry.fileMode,
-              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-              (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
-        } else {
-          fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++report.fileCount, entry.fileMode,
-              entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
-              (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
-        }
-        break;
-      }
-
-      default:
-        throw IllegalStateException("Unexpected tree file entry type");
+  string path(entry.path);
+  if (path == "/") {
+    path = ".";
+  } else {
+    while (path.size() > 1 && path[0] == '/') {
+      path.erase(0, 1);
     }
   }
 
-  if (depth == 0) {
-    if (config.restoreAsShabackStream) {
-      fprintf(stdout, "ShAbAcKsTrEaM1_000000000000000000000000000000000001000000000000000130000000000000000TRAILER!!!%c", 0x0);
-    } else {
-      fprintf(stdout, "0707070000000000000000000000000000000000010000000000000000000001300000000000TRAILER!!!%c", 0x0);
+  switch (entry.type) {
+    case TREEFILEENTRY_DIRECTORY: {
+      if (config.restoreAsShabackStream) {
+        fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++report.fileCount, entry.fileMode,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+            path.c_str(), 0x0);
+      } else {
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++report.fileCount, entry.fileMode,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1, 0,
+            path.c_str(), 0x0);
+      }
+      break;
     }
+
+    case TREEFILEENTRY_FILE: {
+      if (config.restoreAsShabackStream) {
+        fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c", ++report.fileCount, entry.fileMode,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            (unsigned int) entry.size, path.c_str(), 0x0);
+      } else {
+        // cpio has a file size limit of 8 GB :(
+        if (entry.size >= CPIO_ODC_MAX_FILE_SIZE) {
+          reportError(string("File too large for cpio: ").append(path));
+          break;
+        }
+
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c", ++report.fileCount, entry.fileMode,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            (unsigned int) entry.size, path.c_str(), 0x0);
+      }
+      try {
+        StandardOutputStream stdoutStream(stdout);
+        repository.exportFile(entry, stdoutStream);
+        report.numFilesRestored ++;
+        report.numBytesRestored += entry.size;
+      } catch (Exception &ex) {
+        reportError(string("Cannot restore file ").append(path).append(": ").append(ex.getMessage()));
+      }
+      break;
+    }
+
+    case TREEFILEENTRY_SYMLINK: {
+      if (config.restoreAsShabackStream) {
+        fprintf(stdout, "ShAbAcKsTrEaM1_%06o%06o%06o%06o%06o%06o%011o%06o%016o%s%c%s%c", ++report.fileCount, entry.fileMode,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
+      } else {
+        fprintf(stdout, "070707777777%06o%06o%06o%06o%06o%06o%011o%06o%011o%s%c%s%c", ++report.fileCount, entry.fileMode,
+            entry.uid & 0777777, entry.gid & 0777777, 1, 0, (unsigned int) entry.mtime, (unsigned int) path.size()+1,
+            (unsigned int) entry.symLinkDest.size() + 1, path.c_str(), 0x0, entry.symLinkDest.c_str(), 0x0);
+      }
+      break;
+    }
+
+    default:
+      throw IllegalStateException("Unexpected tree file entry type");
   }
 }
 

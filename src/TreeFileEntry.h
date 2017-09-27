@@ -26,11 +26,13 @@
 #define TREEFILEENTRY_FILE          'F'
 #define TREEFILEENTRY_DIRECTORY     'D'
 #define TREEFILEENTRY_SYMLINK       'S'
+#define TREEFILEENTRY_EOF           0
 
 class TreeFileEntry
 {
   public:
     TreeFileEntry(std::string& line, std::string& parentDir);
+    TreeFileEntry();
 
     /** One of \c TREEFILEENTRY_FILE, \c TREEFILEENTRY_DIRECTORY or \c TREEFILEENTRY_SYMLINK. */
     char type;
@@ -55,6 +57,8 @@ class TreeFileEntry
     /** Indicates whether this file is split into blocks. */
     bool isSplitFile;
     bool isDirectory();
+    bool isEof();
+    std::string toString();
 };
 
 #endif // SHABACK_TreeFileEntry_H

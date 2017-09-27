@@ -4,7 +4,7 @@
 
 > As the old admin says: "Backup is not the problem, recovery is."
 
-Shaback is a command line backup and (ncurses-based) recovery tool for Linux and other POSIX compatible systems. It tries to ease the pain on the day you need a good backup by simply providing a full recovery.
+Shaback is a command line backup and recovery tool for Linux and other POSIX compatible systems. It tries to ease the pain on the day you need a good backup by simply providing a full recovery.
 
 Shaback stores all its backup sets in a single repository using a hashing algorithm (SHA1) to "de-duplicate" partial file contents and even directory meta data. This repository can be either local (like an external disk) or a mounted file share (like NFS, CIFS or SSHFS). Caching of meta data ensures a decent backup performance even on remote repos.
 

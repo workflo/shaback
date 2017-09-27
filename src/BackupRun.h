@@ -43,9 +43,8 @@ class BackupRun
     int numErrors;
 
   protected:
-    std::string handleDirectory(File& dir, bool absolutePaths, intmax_t* totalDirSize, bool skipChildren = false);
-    std::string handleFile(File& dir, bool absolutePaths, intmax_t* totalDirSize);
-    std::string handleSymlink(File& dir, bool absolutePaths);
+    void handleDirectory(File& dir, bool skipChildren = false);
+    void handleFile(File& dir);
     void handleSymlink(File& dir);
 
     /**
@@ -54,8 +53,11 @@ class BackupRun
      */
     void deleteOldIndexFiles();
 
+    void openDirectoryFile();
+    
     Repository& repository;
     RuntimeConfig& config;
+    ShabackOutputStream directoryFileStream;
 };
 
 #endif // SHABACK_BackupRun_H
