@@ -313,6 +313,9 @@ string Repository::storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileS
       if (config.verbose) {
         cerr << "[C] " << srcFile.path << " changed while backing up: renaming " << destFile.path << " to " << newDestFile.path << endl;
       }
+      srcFile.removeXAttr("user.shaback.sha1");
+      srcFile.removeXAttr("user.shaback.mtime");
+      
       hashValue = newHashValue;
       destFile.move(newDestFile);
     }
