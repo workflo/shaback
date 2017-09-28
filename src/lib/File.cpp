@@ -361,6 +361,16 @@ std::string File::getXAttr(string key)
 #endif
 }
 
+bool File::removeXAttr(string key)
+{
+#ifdef WIN32
+  // Do nothing.
+  return false;
+#else
+  return removexattr(path.c_str(), key.c_str());
+#endif
+}
+
 File File::getParent()
 {
   int lastSlash = path.rfind("/");

@@ -70,6 +70,7 @@ class File
     bool setXAttr(std::string key, std::string value);
     bool setXAttr(std::string key, int value);
     std::string getXAttr(std::string key);
+    bool removeXAttr(std::string key);
     File getParent();
     bool remove();
 
