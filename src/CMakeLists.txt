@@ -25,7 +25,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
 
 add_executable(shaback
     BackupRun.cpp
-    Cache.cpp 
     DirectoryFileReader.cpp
     GarbageCollection.cpp
     History.cpp
