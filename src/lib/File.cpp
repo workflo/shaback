@@ -367,7 +367,11 @@ bool File::removeXAttr(string key)
   // Do nothing.
   return false;
 #else
+#ifdef XATTR_NOFOLLOW
+  return removexattr(path.c_str(), key.c_str(), XATTR_NOFOLLOW);
+#else
   return removexattr(path.c_str(), key.c_str());
+#endif
 #endif
 }
 
