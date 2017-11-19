@@ -108,7 +108,7 @@ void BackupRun::handleDirectory(File& dir, bool skipChildren)
   config.runEnterDirCallbacks(dir);
 
   char buf[100];
-  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
+  sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%i\t\n", dir.getPosixMode(), dir.getPosixUid(), dir.getPosixGid(),
       dir.getPosixMtime(), dir.getPosixCtime(), 0);
 
   directoryFileStream.write("D\t\t");
