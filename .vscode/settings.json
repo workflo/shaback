@@ -3,6 +3,8 @@
         "*.attributes": "java-properties",
         "*.tcc": "cpp",
         "ostream": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "stdexcept": "cpp",
+        "string": "cpp"
     }
 }
