@@ -408,14 +408,14 @@ void File::chmod(int mode)
 
 void File::chown(int uid, int gid)
 {
-  int ret = ::chown(path.c_str(), uid, uid);
+  int ret = ::chown(path.c_str(), uid, gid);
   if (ret != 0)
     throw Exception::errnoToException(path);
 }
 
 void File::lchown(int uid, int gid)
 {
-  int ret = ::lchown(path.c_str(), uid, uid);
+  int ret = ::lchown(path.c_str(), uid, gid);
   if (ret != 0)
     throw Exception::errnoToException(path);
 }
