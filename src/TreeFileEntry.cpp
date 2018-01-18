@@ -137,7 +137,7 @@ string TreeFileEntry::toString()
   
   switch (type) {
     case TREEFILEENTRY_DIRECTORY: {
-      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%jd\t\n", fileMode, uid, gid, mtime, ctime, 0);
+      sprintf(buf, "\t%03o\t%d\t%d\t%d\t%d\t%i\t\n", fileMode, uid, gid, mtime, ctime, 0);
 
       s.append("D\t\t").append(path).append(buf);
       break;
