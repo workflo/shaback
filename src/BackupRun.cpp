@@ -105,9 +105,9 @@ void BackupRun::openDirectoryFile()
 
 bool fileNameOk(File file)
 {
-  string path = file.path;
-  for ( std::string::iterator it=path.begin(); it!=path.end(); ++it) {
-    if (*it <= 13) return false;
+  const char* p = file.path.c_str();
+  for ( ; *p != 0; p++) {
+    if (*p == '\n' || *p == '\t' || *p == '\r') return false;
   }
   return true;
 }
