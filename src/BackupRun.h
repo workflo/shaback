@@ -35,6 +35,7 @@ class BackupRun
     int run();
     void showTotals();
     void reportError(Exception& ex);
+    void reportError(std::string message);
 
     intmax_t numBytesRead;
     intmax_t numBytesStored;

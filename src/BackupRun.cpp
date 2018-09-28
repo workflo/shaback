@@ -103,8 +103,22 @@ void BackupRun::openDirectoryFile()
 }
 
 
+bool fileNameOk(File file)
+{
+  string path = file.path;
+  for ( std::string::iterator it=path.begin(); it!=path.end(); ++it) {
+    if (*it <= 13) return false;
+  }
+  return true;
+}
+
 void BackupRun::handleDirectory(File& dir, bool skipChildren)
 {
+  if (!fileNameOk(dir.path)) {
+    reportError(string("Ignoring directory name with control characters: \"").append(dir.path).append("\""));
+    return;
+  }
+
   config.runEnterDirCallbacks(dir);
 
   char buf[100];
@@ -145,6 +159,10 @@ void BackupRun::handleDirectory(File& dir, bool skipChildren)
 
 void BackupRun::handleFile(File& file)
 {
+  if (!fileNameOk(file.path)) {
+    reportError(string("Ignoring filename with control characters: \"").append(file.path).append("\""));
+    return;
+  }
   intmax_t totalFileSize = 0;
   string hashValue = repository.storeFile(this, file, &totalFileSize);
 
@@ -164,6 +182,11 @@ void BackupRun::handleFile(File& file)
 
 void BackupRun::handleSymlink(File& file)
 {
+  if (!fileNameOk(file.path)) {
+    reportError(string("Ignoring filename with control characters: \"").append(file.path).append("\""));
+    return;
+  }
+
   string treeFileLine("S\t*\t");
   treeFileLine.append(file.path);
 
@@ -202,6 +225,12 @@ void BackupRun::reportError(Exception& ex)
 {
   numErrors++;
   cerr << config.color_error << "[E] " << ex.getMessage() << config.color_default << endl;
+}
+
+void BackupRun::reportError(string message)
+{
+  numErrors++;
+  cerr << config.color_error << "[E] " << message << config.color_default << endl;
 }
 
 void BackupRun::deleteOldIndexFiles()

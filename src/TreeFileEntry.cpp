@@ -51,7 +51,7 @@ TreeFileEntry::TreeFileEntry(string& line, string& parentDir)
   isSplitFile = (id.find_first_of(SPLITFILE_ID_INDICATOR) != string::npos);
 
   // Filename
-  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile("Invalid directory file: Missing filename");
+  if ((until = line.find('\t', from)) == string::npos) throw InvalidTreeFile(string("Invalid directory file: Missing filename in line \"").append(line).append("\""));
   filename = line.substr(from, until - from);
   from = until +1;
 
