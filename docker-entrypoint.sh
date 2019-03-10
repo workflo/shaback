@@ -13,6 +13,7 @@ init_opts=""
 
 echo "setRepository('${DATA_DIR}')" > ${CFG}
 echo "setOneFileSystem(true)" >> ${CFG}
+echo "setBackupName('${HOSTNAME}') >> ${CFG}
 if [ -n ${SHABACK_PASSWORD} ]; then
     echo "setCryptoPassword('${SHABACK_PASSWORD}')" >> ${CFG}
     init_opts="${init_opts} -p ${SHABACK_PASSWORD} -E AES"

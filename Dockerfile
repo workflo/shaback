@@ -21,8 +21,8 @@ RUN rm -rf /var/cache/apt
 
 COPY --from=build /usr/local/bin/shaback /usr/local/bin/shaback
 COPY --from=build /usr/local/etc/shaback /usr/local/etc/shaback/
-COPY docker-entry.sh /
+COPY docker-entrypoint.sh /
 
 VOLUME ["/backup"]
 
-CMD ["/docker-entry.sh"]
+CMD ["/docker-entrypoint.sh"]
