@@ -25,4 +25,6 @@ COPY docker-entrypoint.sh /
 
 VOLUME ["/backup"]
 
-CMD ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["--help"]
+

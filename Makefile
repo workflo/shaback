@@ -1,5 +1,5 @@
 docker-image:
-	docker build . -t flockerdub/shaback
+	docker build . -t flockerdub/shaback -t shaback
 
 push-docker-image:
 	docker push flockerdub/shaback:latest

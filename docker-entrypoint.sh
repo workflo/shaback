@@ -5,6 +5,7 @@ CFG=/etc/shaback.lua
 
 shaback version
 echo
+echo "ARGS: $@"
 
 SHABACK_REPO_FORMAT=${SHABACK_REPO_FORMAT:-3}
 
@@ -13,7 +14,7 @@ init_opts=""
 
 echo "setRepository('${DATA_DIR}')" > ${CFG}
 echo "setOneFileSystem(true)" >> ${CFG}
-echo "setBackupName('${HOSTNAME}') >> ${CFG}
+echo "setBackupName('${HOSTNAME}')" >> ${CFG}
 if [ -n ${SHABACK_PASSWORD} ]; then
     echo "setCryptoPassword('${SHABACK_PASSWORD}')" >> ${CFG}
     init_opts="${init_opts} -p ${SHABACK_PASSWORD} -E AES"
@@ -32,4 +33,4 @@ test -d repo.properties || \
 
 cat ${DATA_DIR}/repo.properties
 
-shaback backup -c ${CFG} ${SHABACK_OPTIONS}
+exec shaback -c ${CFG} ${SHABACK_OPTIONS} $@
