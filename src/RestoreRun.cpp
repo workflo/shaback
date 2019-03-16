@@ -31,8 +31,10 @@
 
 using namespace std;
 
-RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, File shabackupFile, bool testRestore) :
-    repository(repository), config(config), testRestore(testRestore), shabackupFile(shabackupFile)
+RestoreRun::RestoreRun(RuntimeConfig& config, Repository& repository, File shabackupFile,
+  bool testRestore, bool listFiles) :
+    repository(repository), config(config), testRestore(testRestore), 
+    shabackupFile(shabackupFile), listFiles(listFiles)
 {
   repository.lock();
 }
@@ -99,7 +101,7 @@ void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
 {
   switch (entry.type) {
     case TREEFILEENTRY_DIRECTORY: {
-      if (testRestore) break;
+      if (testRestore || listFiles) break;
 
       File dir(destinationDir, entry.path);
 
@@ -121,6 +123,8 @@ void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
     case TREEFILEENTRY_FILE: {
       if (testRestore) {
         repository.testExportFile(*this, entry);
+      } else if (listFiles) {
+        cout << repository.hashValueToFile(entry.id).path << endl;
       } else {
         File file(destinationDir, entry.path);
 
@@ -154,7 +158,7 @@ void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
     }
 
     case TREEFILEENTRY_SYMLINK: {
-      if (testRestore) break;
+      if (testRestore || listFiles) break;
 
       File file(destinationDir, entry.path);
 

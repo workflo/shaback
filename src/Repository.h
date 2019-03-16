@@ -57,6 +57,11 @@ class Repository
      */
     RestoreReport testRestore();
 
+    /**
+     * Lists all files needed from the repo to restore a certain backup set.
+     */
+    RestoreReport listFiles();
+
     void migrate();
 
     /**
@@ -136,6 +141,8 @@ class Repository
     ShabackOutputStream createOutputStream();
 
     RestoreReport restore(File shabackupFile, std::list<std::string> files, bool testRestore);
+
+    RestoreReport listFiles(File shabackupFile, std::list<std::string> files);
 
     /**
      * Maps the given name of an encryption algorithm to its respective

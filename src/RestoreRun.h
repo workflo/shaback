@@ -28,7 +28,8 @@
 class RestoreRun
 {
   public:
-    RestoreRun(RuntimeConfig& config, Repository& Repository, File shabackupFile, bool testRestore);
+    RestoreRun(RuntimeConfig& config, Repository& Repository, File shabackupFile,
+      bool testRestore, bool listFiles);
     ~RestoreRun();
 
     void restore(TreeFileEntry& entry, File& destinationDir);
@@ -47,6 +48,7 @@ class RestoreRun
     void progress(std::string &path);
     time_t lastProgressTime;
     bool testRestore;
+    bool listFiles;
     File shabackupFile;
 };
 

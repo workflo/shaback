@@ -1,6 +1,6 @@
 project(shaback)
 set (SHABACK_VERSION_MAJOR 1)
-set (SHABACK_VERSION_MINOR 30)
+set (SHABACK_VERSION_MINOR 31)
 set (CMAKE_MODULE_PATH CMakeModules)
 set (CMAKE_VERBOSE_MAKEFILE true)
 
@@ -21,7 +21,7 @@ include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX ("unordered_set" HAVE_UNORDERED_SET)
 
 ADD_SUBDIRECTORY(lib)
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR} ${ZSTD_INCLUDE_DIR})
 
 add_executable(shaback
     BackupRun.cpp

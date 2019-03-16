@@ -574,7 +574,7 @@ RestoreReport Repository::testRestore()
 
 RestoreReport Repository::restore(File shabackupFile, list<string> files, bool testRestore)
 {
-  RestoreRun run(config, *this, shabackupFile, testRestore);
+  RestoreRun run(config, *this, shabackupFile, testRestore, false);
   File destinationDir(".");
 
   if (files.empty()) files.push_back(""); // Restore everything!
@@ -899,4 +899,32 @@ void Repository::migrate()
 {
   Migration migration(config, *this);
   migration.run();
+}
+
+
+RestoreReport Repository::listFiles()
+{
+  if (config.cliArgs.empty()) {
+    throw RestoreException("Don't know what to restore.");
+  }
+
+  string shabackupFilename = config.cliArgs.front();
+  config.cliArgs.pop_front();
+
+  open();
+
+  File shabackupFile(selectShabackupFile(shabackupFilename));
+
+  return listFiles(shabackupFile, config.cliArgs);
+}
+
+
+RestoreReport Repository::listFiles(File shabackupFile, list<string> files)
+{
+  RestoreRun run(config, *this, shabackupFile, false, true);
+  File destinationDir(".");
+
+  if (files.empty()) files.push_back(""); // Restore everything!
+
+  return run.start(files, destinationDir);
 }

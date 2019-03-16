@@ -172,6 +172,7 @@ void showUsage(string& op)
     printf("   init          Create a new repository.\n");
     printf("   restore       Restore files from repository.\n");
     printf("   test-restore  Pretend to restore files, check hash digests and dump file listing.\n");
+    printf("   list-files    Lists all files needed from the repo to restore a certain backup set.\n");
     printf("   show          Decompress and decrypt a certain object from the repository.\n");
     printf("   deflate       Compress data from stdin to stdout using `Deflate' compression.\n");
     printf("   inflate       Decompress data from stdin to stdout using `Deflate' compression.\n");
@@ -241,6 +242,9 @@ int main(int argc, char** argv)
           return report.hasErrors() ? 1 : 0;
         } else if (config.operation == "test-restore") {
           RestoreReport report(shaback.repository.testRestore());
+          return report.hasErrors() ? 1 : 0;
+        } else if (config.operation == "list-files") {
+          RestoreReport report(shaback.repository.listFiles());
           return report.hasErrors() ? 1 : 0;
         } else if (config.operation == "show") {
           shaback.repository.show();
