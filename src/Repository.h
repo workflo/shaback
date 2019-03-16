@@ -101,6 +101,7 @@ class Repository
     void history();
 
     File hashValueToFile(std::string hashValue);
+    std::string hashValueToFilename(std::string hashValue);
     bool contains(std::string& hashValue);
     std::string storeFile(BackupRun* run, File& srcFile, intmax_t* totalFileSize);
     void importCacheFile();
@@ -143,6 +144,8 @@ class Repository
     RestoreReport restore(File shabackupFile, std::list<std::string> files, bool testRestore);
 
     RestoreReport listFiles(File shabackupFile, std::list<std::string> files);
+
+    void printFileListForEntry(TreeFileEntry& entry);
 
     /**
      * Maps the given name of an encryption algorithm to its respective

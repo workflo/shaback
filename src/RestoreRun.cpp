@@ -124,7 +124,7 @@ void RestoreRun::restore(TreeFileEntry& entry, File& destinationDir)
       if (testRestore) {
         repository.testExportFile(*this, entry);
       } else if (listFiles) {
-        cout << repository.hashValueToFile(entry.id).path << endl;
+        repository.printFileListForEntry(entry);
       } else {
         File file(destinationDir, entry.path);
 

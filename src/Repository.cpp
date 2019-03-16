@@ -212,6 +212,25 @@ int Repository::backup()
   return rc;
 }
 
+std::string Repository::hashValueToFilename(string hashValue)
+{
+  string path(config.filesDir.fname);
+
+  switch (repoFormat) {
+    case REPOFORMAT_3:
+      path.append("/").append(hashValue.substr(0, 3));
+      path.append("/").append(hashValue.substr(3));
+      break;
+    default:
+      path.append("/").append(hashValue.substr(0, 2));
+      path.append("/").append(hashValue.substr(2, 2));
+      path.append("/").append(hashValue.substr(4));
+      break;
+  }
+
+  return path;
+}
+
 File Repository::hashValueToFile(string hashValue)
 {
   string path(config.filesDir.path);
@@ -927,4 +946,17 @@ RestoreReport Repository::listFiles(File shabackupFile, list<string> files)
   if (files.empty()) files.push_back(""); // Restore everything!
 
   return run.start(files, destinationDir);
+}
+
+void Repository::printFileListForEntry(TreeFileEntry& entry) 
+{
+  cout << hashValueToFilename(entry.id) << endl;
+
+  if (entry.isSplitFile) {
+    SplitFileIndexReader reader(*this, entry.id);
+    string hashValue;
+    while (reader.next(hashValue)) {
+      cout << hashValueToFilename(hashValue) << endl;
+    }
+  }
 }
