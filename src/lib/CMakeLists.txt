@@ -15,6 +15,9 @@ CHECK_FUNCTION_EXISTS (lstat64           HAVE_LSTAT64)
 IF (OPENSSL_INCLUDE_DIR)
     include_directories(AFTER ${OPENSSL_INCLUDE_DIR})
 ENDIF (OPENSSL_INCLUDE_DIR)
+IF (ZSTD_INCLUDE_DIR)
+    include_directories(AFTER ${ZSTD_INCLUDE_DIR})
+ENDIF (ZSTD_INCLUDE_DIR)
 
 set(shaback_lib_SRCS
     AesInputStream.cpp

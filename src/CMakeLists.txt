@@ -21,7 +21,10 @@ include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX ("unordered_set" HAVE_UNORDERED_SET)
 
 ADD_SUBDIRECTORY(lib)
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR} ${ZSTD_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LUA_INCLUDE_DIR})
+IF (ZSTD_INCLUDE_DIR)
+    include_directories(AFTER ${ZSTD_INCLUDE_DIR})
+ENDIF (ZSTD_INCLUDE_DIR)
 
 add_executable(shaback
     BackupRun.cpp
