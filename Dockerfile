@@ -16,6 +16,7 @@ FROM debian:9.3
 
 RUN apt-get update
 RUN apt-get install -y liblua5.1 openssl
+RUN apt-get install -y cron
 RUN apt-get clean
 RUN rm -rf /var/cache/apt
 
