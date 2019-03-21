@@ -11,7 +11,8 @@ SHABACK_REPO_FORMAT=${SHABACK_REPO_FORMAT:-3}
 init_opts=""
 
 echo "setRepository('${DATA_DIR}')" > ${CFG}
-echo "setOneFileSystem(true)" >> ${CFG}
+echo "setOneFileSystem(false)" >> ${CFG}
+echo "addDir('/src')" >> ${CFG}
 echo "setBackupName('${HOSTNAME}')" >> ${CFG}
 if [ -n "${SHABACK_PASSWORD}" ]; then
     echo "setCryptoPassword('${SHABACK_PASSWORD}')" >> ${CFG}
@@ -35,5 +36,5 @@ if [ -n "${SHABACK_CRONTAB}" ]; then
     exec cron -f
 else
     echo "Running shaback $@"
-    exec shaback -c ${CFG} ${SHABACK_OPTIONS} $@
+    exec shaback ${SHABACK_OPTIONS} $@
 fi
