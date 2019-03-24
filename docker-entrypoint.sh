@@ -21,8 +21,6 @@ fi
 
 echo ${SHABACK_LUA} >> ${CFG}
 
-cat ${CFG}
-
 cd ${DATA_DIR}
 test -f repo.properties || \
     shaback init \
