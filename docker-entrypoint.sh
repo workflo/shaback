@@ -4,7 +4,6 @@ DATA_DIR=/backup
 CFG=/root/.shaback.lua
 
 shaback version
-echo
 
 SHABACK_REPO_FORMAT=${SHABACK_REPO_FORMAT:-3}
 
@@ -29,6 +28,7 @@ test -f repo.properties || \
         ${SHABACK_INIT_OPTIONS}
 
 if [ -n "${SHABACK_CRONTAB}" ]; then
+    rm -f ${DATA_DIR}/locks/*
     echo "Starting cron"
     crontab <<< $SHABACK_CRONTAB
     exec cron -f
