@@ -21,6 +21,8 @@ fi
 echo ${SHABACK_LUA} >> ${CFG}
 
 cd ${DATA_DIR}
+umask 0022
+
 test -f repo.properties || \
     shaback init \
         --repo-format=${SHABACK_REPO_FORMAT} \
