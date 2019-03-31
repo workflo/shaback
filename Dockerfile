@@ -17,8 +17,9 @@ FROM debian:9.8
 RUN apt-get update
 RUN apt-get install -y openssl
 RUN apt-get install -y cron
-RUN apt-get install -y s3fs sshfs rsync
+RUN apt-get install -y rsync
 RUN apt-get install -y liblua5.1 openssl
+RUN apt-get install -y awscli
 
 RUN apt-get clean && rm -rf /var/cache/apt
 

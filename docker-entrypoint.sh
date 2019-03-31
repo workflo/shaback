@@ -20,6 +20,14 @@ fi
 
 echo ${SHABACK_LUA} >> ${CFG}
 
+if [ -n "${AWS_ACCESS_KEY_ID}" ]; then
+    aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+    aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+    if [ -n "${AWS_DEFAULT_REGION}" ]; then
+        aws configure set aws_default_region ${AWS_DEFAULT_REGION}
+    fi
+fi
+
 cd ${DATA_DIR}
 umask 0022
 
