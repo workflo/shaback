@@ -15,7 +15,7 @@ echo "addDir('/src')" >> ${CFG}
 echo "setBackupName('${HOSTNAME}')" >> ${CFG}
 if [ -n "${SHABACK_PASSWORD}" ]; then
     echo "setCryptoPassword('${SHABACK_PASSWORD}')" >> ${CFG}
-    init_opts="${init_opts} -p ${SHABACK_PASSWORD} -E AES"
+    init_opts="${init_opts} -p ${SHABACK_PASSWORD} -E Blowfish"
 fi
 
 echo ${SHABACK_LUA} >> ${CFG}
