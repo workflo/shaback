@@ -184,7 +184,7 @@ void showUsage(string& op)
         "\t    Additionally load specified config file.\n\n");
     printf("\t-i <error>, --ignore-error=<error>\n"
         "\t    Ignore errors of specified type. One of:\n"
-        "\t    `chown', `chmod', `utime'.\n\n");
+        "\t    `chown', `chmod', `utime', 'invalid-filename'.\n\n");
     printf("\t-r <dir>, --repository=<dir>\n"
       "\t    Override repository specified in config files.\n\n");
     printf("\t-v, --verbose\n"

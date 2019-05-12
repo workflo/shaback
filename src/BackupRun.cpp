@@ -115,7 +115,9 @@ bool fileNameOk(File file)
 void BackupRun::handleDirectory(File& dir, bool skipChildren)
 {
   if (!fileNameOk(dir.path)) {
-    reportError(string("Ignoring directory name with control characters: \"").append(dir.path).append("\""));
+    if (!config.ignoreErrors.count("invalid-filename")) {
+      reportError(string("Ignoring directory name with control characters: \"").append(dir.path).append("\""));
+    }
     return;
   }
 
@@ -160,7 +162,9 @@ void BackupRun::handleDirectory(File& dir, bool skipChildren)
 void BackupRun::handleFile(File& file)
 {
   if (!fileNameOk(file.path)) {
-    reportError(string("Ignoring filename with control characters: \"").append(file.path).append("\""));
+    if (!config.ignoreErrors.count("invalid-filename")) {
+      reportError(string("Ignoring filename with control characters: \"").append(file.path).append("\""));
+    }
     return;
   }
   intmax_t totalFileSize = 0;
@@ -183,7 +187,9 @@ void BackupRun::handleFile(File& file)
 void BackupRun::handleSymlink(File& file)
 {
   if (!fileNameOk(file.path)) {
-    reportError(string("Ignoring filename with control characters: \"").append(file.path).append("\""));
+    if (!config.ignoreErrors.count("invalid-filename")) {
+      reportError(string("Ignoring filename with control characters: \"").append(file.path).append("\""));
+    }
     return;
   }
 
