@@ -11,7 +11,6 @@ find_package(Lzma QUIET)
 find_package(ZStd QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lua51 REQUIRED)
-find_package(GDBM REQUIRED)
 
 include(CheckTypeSize)
 check_type_size("long" SIZEOF_LONG)
