@@ -78,7 +78,7 @@ class RuntimeConfig
     std::string operation;
     std::string repository;
 
-    FileSystem fileSystem;
+    FileSystem *fileSystem;
 
     /** The temporary write cache file. */
     File writeCacheFile;

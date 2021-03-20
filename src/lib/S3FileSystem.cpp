@@ -19,3 +19,23 @@
 #include "S3FileSystem.h"
 
 using namespace std;
+
+S3FileSystem::S3FileSystem(std::string url) {
+
+}
+
+File S3FileSystem::file(std::string path) {
+    return File(path);
+}
+
+File S3FileSystem::file(File parent, std::string filename) {
+    return File(parent, filename);
+}
+
+File S3FileSystem::home() {
+    return File::home();
+}
+
+File S3FileSystem::tmpdir() {
+    return File::tmpdir();
+}

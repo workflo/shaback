@@ -528,21 +528,21 @@ void RuntimeConfig::finalize()
   char pid[20];
   sprintf(pid, "%u", getpid());
 
-  // if (repository.find_first_of("s3://") == 0) {
-  //   fileSystem = S3FileSystem(repository);
-  // } else {
-    fileSystem = LocalFileSystem();
-  // }
+  if (repository.find_first_of("s3://") == 0) {
+    fileSystem = new S3FileSystem(repository);
+  } else {
+    fileSystem = new LocalFileSystem();
+  }
 
-  repoDir = fileSystem.file(repository);
-  filesDir = fileSystem.file(repoDir, "files");
-  indexDir = fileSystem.file(repoDir, "index");
-  locksDir = fileSystem.file(repoDir, "locks");
-  cacheDir = fileSystem.file(repoDir, "cache");
-  repoPropertiesFile = fileSystem.file(repoDir, "repo.properties");
-  passwordCheckFile = fileSystem.file(repoDir, "password");
-  lockFile = fileSystem.file(locksDir, string(backupName).append("-").append(pid).append(".lock"));
-  exclusiveLockFile = fileSystem.file(locksDir, "lock");
+  repoDir = fileSystem->file(repository);
+  filesDir = fileSystem->file(repoDir, "files");
+  indexDir = fileSystem->file(repoDir, "index");
+  locksDir = fileSystem->file(repoDir, "locks");
+  cacheDir = fileSystem->file(repoDir, "cache");
+  repoPropertiesFile = fileSystem->file(repoDir, "repo.properties");
+  passwordCheckFile = fileSystem->file(repoDir, "password");
+  lockFile = fileSystem->file(locksDir, string(backupName).append("-").append(pid).append(".lock"));
+  exclusiveLockFile = fileSystem->file(locksDir, "lock");
 }
 
 bool RuntimeConfig::excludeFile(File& file)

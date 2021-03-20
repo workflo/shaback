@@ -25,9 +25,9 @@ class S3FileSystem : public FileSystem
 {
   public:
     S3FileSystem(std::string url);
-    ~S3FileSystem();
 
-    File file(std::string name);
+    File file(std::string path);
+    File file(File parent, std::string filename);
 
     /**
      * Returns a new File instance representing the user's
