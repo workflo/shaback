@@ -25,24 +25,15 @@
 #include <stdio.h>
 #include "File.h"
 
-#ifdef WIN32
-# include <windows.h>
-# include <direct.h>
-#endif
 #include "config.h"
-
-#ifdef PATH_MAX
-# define MAX_PATH_LEN PATH_MAX
-#else
-# define MAX_PATH_LEN FILENAME_MAX
-#endif
 
 class FileSystem
 {
   public:
     virtual ~FileSystem();
 
-    virtual File file(std::string name);
+    virtual File file(std::string path);
+    virtual File file(File parent, std::string filename);
 
     /**
      * Returns a new File instance representing the user's

@@ -38,6 +38,9 @@ extern "C" {
 #include "Repository.h"
 #include "BackupRun.h"
 
+#include "lib/LocalFileSystem.h"
+#include "lib/S3FileSystem.h"
+
 #define LUA_RUNTIMECONFIG "__RuntimeConfig__"
 
 using namespace std;
@@ -525,15 +528,21 @@ void RuntimeConfig::finalize()
   char pid[20];
   sprintf(pid, "%u", getpid());
 
-  repoDir = File(repository);
-  filesDir = File(repoDir, "files");
-  indexDir = File(repoDir, "index");
-  locksDir = File(repoDir, "locks");
-  cacheDir = File(repoDir, "cache");
-  repoPropertiesFile = File(repoDir, "repo.properties");
-  passwordCheckFile = File(repoDir, "password");
-  lockFile = File(locksDir, string(backupName).append("-").append(pid).append(".lock"));
-  exclusiveLockFile = File(locksDir, "lock");
+  // if (repository.find_first_of("s3://") == 0) {
+  //   fileSystem = S3FileSystem(repository);
+  // } else {
+    fileSystem = LocalFileSystem();
+  // }
+
+  repoDir = fileSystem.file(repository);
+  filesDir = fileSystem.file(repoDir, "files");
+  indexDir = fileSystem.file(repoDir, "index");
+  locksDir = fileSystem.file(repoDir, "locks");
+  cacheDir = fileSystem.file(repoDir, "cache");
+  repoPropertiesFile = fileSystem.file(repoDir, "repo.properties");
+  passwordCheckFile = fileSystem.file(repoDir, "password");
+  lockFile = fileSystem.file(locksDir, string(backupName).append("-").append(pid).append(".lock"));
+  exclusiveLockFile = fileSystem.file(locksDir, "lock");
 }
 
 bool RuntimeConfig::excludeFile(File& file)

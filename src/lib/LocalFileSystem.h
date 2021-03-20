@@ -24,21 +24,6 @@
 class LocalFileSystem : public FileSystem
 {
   public:
-    ~LocalFileSystem();
-
-    File file(std::string name);
-
-    /**
-     * Returns a new File instance representing the user's
-     * home directory.
-     */
-    File home();
-
-    /**
-     * Returns a new File instance representing the user's
-     * TMP directory.
-     */
-    File tmpdir();
 };
 
 #endif // SHABACK_LocalFileSystem_H

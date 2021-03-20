@@ -24,6 +24,7 @@
 class S3FileSystem : public FileSystem
 {
   public:
+    S3FileSystem(std::string url);
     ~S3FileSystem();
 
     File file(std::string name);

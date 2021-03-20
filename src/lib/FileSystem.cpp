@@ -19,3 +19,21 @@
 #include "FileSystem.h"
 
 using namespace std;
+
+FileSystem::~FileSystem() {}
+
+File FileSystem::file(std::string path) {
+    return File(path);
+}
+
+File FileSystem::file(File parent, std::string filename) {
+    return File(parent, filename);
+}
+
+File FileSystem::home() {
+    return File::home();
+}
+
+File FileSystem::tmpdir() {
+    return File::tmpdir();
+}

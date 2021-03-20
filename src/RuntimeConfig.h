@@ -24,6 +24,7 @@
 #include <list>
 #include <set>
 #include "lib/File.h"
+#include "lib/FileSystem.h"
 
 extern "C" {
 # include <lua.h>
@@ -76,6 +77,8 @@ class RuntimeConfig
 
     std::string operation;
     std::string repository;
+
+    FileSystem fileSystem;
 
     /** The temporary write cache file. */
     File writeCacheFile;
