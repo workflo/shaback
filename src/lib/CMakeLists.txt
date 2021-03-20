@@ -34,10 +34,12 @@ set(shaback_lib_SRCS
     Digest.cpp
     Exception.cpp
     File.cpp
+    FileSystem.cpp
     FileOutputStream.cpp
     FileInputStream.cpp
     KeyDerivation.cpp
     InputStream.cpp
+    LocalFileSystem.cpp
     LzmaInputStream.cpp
     LzmaOutputStream.cpp
     OutputStream.cpp
@@ -46,6 +48,7 @@ set(shaback_lib_SRCS
     Sha256.cpp
     StandardOutputStream.cpp
     StandardInputStream.cpp
+    S3FileSystem.cpp
     ZStdOutputStream.cpp
     ZStdInputStream.cpp
 )
