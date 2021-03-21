@@ -86,6 +86,11 @@ IOException::IOException(string msg) :
 {
 }
 
+InvalidUrlException::InvalidUrlException(string msg) :
+  IOException(msg)
+{
+}
+
 FileNotFoundException::FileNotFoundException(string filename) :
   IOException(string("File not found: ").append(filename)), filename(filename)
 {

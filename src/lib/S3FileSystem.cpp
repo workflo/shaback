@@ -17,25 +17,40 @@
  */
 
 #include "S3FileSystem.h"
+#include "S3File.h"
+#include <iostream>
+#include "Exception.h"
 
 using namespace std;
 
-S3FileSystem::S3FileSystem(std::string url) {
+S3FileSystem::S3FileSystem(string url) {
+  if (url.find_first_of("s3://") == 0) {
+    bucket = url.substr(5, string::npos);
 
+    auto slashPos = bucket.find_first_of('/');
+    if (slashPos != string::npos) {
+      rootDir = bucket.substr(slashPos, string::npos);
+      bucket = bucket.substr(0, slashPos);
+
+      while (rootDir.back() == '/') {
+        rootDir.pop_back();
+      }
+    } else {
+      rootDir = '/';
+    }
+
+    cout << "S3FileSystem::S3FileSystem bucket=" << bucket << "; rootDir=" << rootDir << "\n";
+  } else {
+    throw InvalidUrlException(string("Invalid S3 URL: ").append(url));
+  }
 }
 
 File S3FileSystem::file(std::string path) {
-    return File(path);
+  cout << "   S3File::file(" << path << ")\n";
+  return S3File(this, path);
 }
 
 File S3FileSystem::file(File parent, std::string filename) {
-    return File(parent, filename);
-}
-
-File S3FileSystem::home() {
-    return File::home();
-}
-
-File S3FileSystem::tmpdir() {
-    return File::tmpdir();
+  cout << "   S3File::file(" << parent.path << "/" << filename << ")\n";
+  return S3File(this, parent, filename);
 }

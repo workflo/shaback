@@ -27,11 +27,3 @@ File LocalFileSystem::file(std::string path) {
 File LocalFileSystem::file(File parent, std::string filename) {
     return File(parent, filename);
 }
-
-File LocalFileSystem::home() {
-    return File::home();
-}
-
-File LocalFileSystem::tmpdir() {
-    return File::tmpdir();
-}

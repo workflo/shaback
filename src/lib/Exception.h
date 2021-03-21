@@ -45,6 +45,12 @@ class IOException: public Exception
     IOException(std::string msg);
 };
 
+class InvalidUrlException: public IOException
+{
+  public:
+    InvalidUrlException(std::string msg);
+};
+
 class FileNotFoundException: public IOException
 {
   public:

@@ -32,18 +32,6 @@ class FileSystem
   public:
     virtual File file(std::string path) = 0;
     virtual File file(File parent, std::string filename) = 0;
-
-    /**
-     * Returns a new File instance representing the user's
-     * home directory.
-     */
-    virtual File home() = 0;
-
-    /**
-     * Returns a new File instance representing the user's
-     * TMP directory.
-     */
-    virtual File tmpdir() = 0;
 };
 
 #endif // SHABACK_FileSystem_H

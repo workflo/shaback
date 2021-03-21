@@ -42,7 +42,7 @@ class File
     File();
     File(std::string path);
     File(File parent, std::string filename);
-    ~File();
+    virtual ~File();
 
     /**
      * Returns a new File instance representing the user's
@@ -56,23 +56,23 @@ class File
      */
     static File tmpdir();
 
-    void refresh();
-    bool isFile();
-    bool isDir();
-    bool isSymlink();
-    bool exists();
-    bool mkdir();
-    bool mkdirs();
-    std::string readlink();
-    std::vector<File> listFiles(std::string pattern);
-    std::string listFilesToString(std::string pattern, std::string delimiter);
-    bool move(File& destination);
+    virtual void refresh();
+    virtual bool isFile();
+    virtual bool isDir();
+    virtual bool isSymlink();
+    virtual bool exists();
+    virtual bool mkdir();
+    virtual bool mkdirs();
+    virtual std::string readlink();
+    virtual std::vector<File> listFiles(std::string pattern);
+    virtual std::string listFilesToString(std::string pattern, std::string delimiter);
+    virtual bool move(File& destination);
     bool setXAttr(std::string key, std::string value);
     bool setXAttr(std::string key, int value);
     std::string getXAttr(std::string key);
     bool removeXAttr(std::string key);
-    File getParent();
-    bool remove();
+    virtual File getParent();
+    virtual bool remove();
 
     void chmod(int mode);
     void chown(int uid, int gid);

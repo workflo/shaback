@@ -530,6 +530,7 @@ void RuntimeConfig::finalize()
 
   if (repository.find_first_of("s3://") == 0) {
     fileSystem = new S3FileSystem(repository);
+    repository = '/';
   } else {
     fileSystem = new LocalFileSystem();
   }

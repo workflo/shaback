@@ -48,6 +48,7 @@ set(shaback_lib_SRCS
     Sha256.cpp
     StandardOutputStream.cpp
     StandardInputStream.cpp
+    S3File.cpp
     S3FileSystem.cpp
     ZStdOutputStream.cpp
     ZStdInputStream.cpp

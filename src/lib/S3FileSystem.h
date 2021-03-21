@@ -29,17 +29,9 @@ class S3FileSystem : public FileSystem
     File file(std::string path);
     File file(File parent, std::string filename);
 
-    /**
-     * Returns a new File instance representing the user's
-     * home directory.
-     */
-    File home();
-
-    /**
-     * Returns a new File instance representing the user's
-     * TMP directory.
-     */
-    File tmpdir();
+  protected:
+    std::string bucket;
+    std::string rootDir;
 };
 
 #endif // SHABACK_S3FileSystem_H
