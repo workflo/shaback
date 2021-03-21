@@ -23,6 +23,11 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+// #include <aws/s3/S3Client.h>
+// #include <aws/s3/model/PutObjectRequest.h>
+// #include <aws/s3/model/GetObjectRequest.h>
+// #include <aws/core/Aws.h>
+
 #include "S3File.h"
 #include "Exception.h"
 #include "FileInputStream.h"

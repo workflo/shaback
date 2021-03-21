@@ -11,4 +11,5 @@ install_manifest.txt
 CPackSourceConfig.cmake
 lib/config.h
 visichunk
+aws-sdk-cpp/
 
