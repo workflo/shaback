@@ -8,6 +8,7 @@
 #cmakedefine HAVE_FSTAT64
 #cmakedefine HAVE_LSTAT64
 #cmakedefine HAVE_UNORDERED_SET
+#cmakedefine HAVE_AWS_SDK_CPP_S3
 
 #define SHABACK_lib_config_H
 

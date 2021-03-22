@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 set (CMAKE_MODULE_PATH CMakeModules)
 INCLUDE (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
@@ -7,7 +7,7 @@ find_package(BZip2 REQUIRED)
 find_package(ZStd QUIET)
 find_package(OpenSSL QUIET)
 find_package(Lzma QUIET)
-# find_package(aws-sdk-cpp)
+#find_package(AWSSDK REQUIRED COMPONENTS s3)
 
 CHECK_FUNCTION_EXISTS (fstat64           HAVE_FSTAT64)
 CHECK_FUNCTION_EXISTS (stat64            HAVE_STAT64)
