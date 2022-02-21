@@ -38,6 +38,7 @@
 #include "shaback.h"
 #include "BackupRun.h"
 #include "GarbageCollection.h"
+#include "Prune.h"
 #include "History.h"
 #include "Migration.h"
 #include "Repository.h"
@@ -744,6 +745,13 @@ void Repository::gc()
   gc.run();
 }
 
+void Repository::prune()
+{
+  open();
+  Prune prune(config, *this);
+  prune.run();
+}
+
 void Repository::history()
 {
   History history(config, *this);
@@ -959,4 +967,127 @@ void Repository::printFileListForEntry(TreeFileEntry& entry)
       cout << hashValueToFilename(hashValue) << endl;
     }
   }
+}
+
+
+int Repository::deleteOldIndexFiles(string backupName, bool dryRun)
+{
+  string pattern(backupName);
+  pattern.append("_????" "-??" "-??_??????.shabackup");
+
+  vector<File> indexFiles = config.indexDir.listFiles(pattern);
+
+  if (indexFiles.size() <= 2) return 0; // Don't delete latest two backups
+
+  sort(indexFiles.begin(), indexFiles.end(), filePathComparator);
+  reverse(indexFiles.begin(), indexFiles.end());
+  vector<Date> dates;
+  vector<Date> toDelete;
+
+  for (vector<File>::iterator it = indexFiles.begin(); it < indexFiles.end(); it++) {
+    File file(*it);
+    Date d(file.fname.substr(backupName.size() + 1));
+    dates.push_back(d);
+  }
+
+  int idx = 0;
+  Date now;
+
+  Date upper(now);
+  upper.addDays(-config.keepOldBackupsBoundaries[0]);
+  upper.setTimeOfDay(0, 0, 0);
+
+//  cout << "   upper: " << upper.toFilename() << endl;
+
+  // Keep daily backups:
+  Date dailyLimit(upper);
+  dailyLimit.addDays(-config.keepOldBackupsBoundaries[1]);
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-1);
+    if (lower.compareTo(dailyLimit) <= 0)
+      break;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    bool found = false;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        toDelete.push_back(d);
+        found = true;
+      }
+    }
+    upper = lower;
+
+    // Keep last one from this range:
+    if (found) toDelete.pop_back();
+  }
+
+  // Keep weekly backups:
+  Date weeklyLimit(upper);
+  weeklyLimit.addDays(-config.keepOldBackupsBoundaries[2]);
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-7);
+    if (lower.compareTo(weeklyLimit) <= 0)
+      break;
+    bool found = false;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        toDelete.push_back(d);
+        found = true;
+      }
+    }
+    upper = lower;
+
+    // Keep last one from this range:
+    if (found) toDelete.pop_back();
+  }
+
+  // Keep monthly backups:
+  Date monthlyLimit(dates.back());
+  while (true) {
+    Date lower(upper);
+    lower.addDays(-30);
+    bool found = false;
+//    cout << "   deleting " << lower.toFilename() << " .. " << upper.toFilename() << endl;
+    for (vector<Date>::iterator it = dates.begin(); it < dates.end(); it++) {
+      Date d(*it);
+      if (d.compareTo(lower) >= 0 && d.compareTo(upper) < 0) {
+        toDelete.push_back(d);
+        found = true;
+      }
+    }
+    upper = lower;
+
+    // Keep last one from this range:
+    if (found) toDelete.pop_back();
+
+    if (lower.compareTo(monthlyLimit) <= 0)
+      break;
+  }
+
+  // Actually delete files:
+  int deleted = 0;
+  for (vector<Date>::iterator it = toDelete.begin(); it < toDelete.end(); it++) {
+    Date d(*it);
+    string fname(backupName);
+    fname.append("_").append(d.toFilename()).append(".shabackup");
+    File file(config.indexDir, fname);
+    if (!dryRun) {
+      if (config.verbose) {
+        cout << config.color_deleted << "Deleting old index file " << file.path.c_str() << config.color_default << endl;
+      }
+      file.remove();
+    } else {
+      if (config.verbose) {
+        cout << config.color_deleted << "Would delete index file " << file.path.c_str() << config.color_default << endl;
+      }
+
+    }
+    deleted ++;
+  }
+
+  return deleted;
 }

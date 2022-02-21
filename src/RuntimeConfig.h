@@ -61,6 +61,7 @@ class RuntimeConfig
     bool actionDetails;
     int backupsToKeep;
     int number;
+    bool dryRun;
 
     std::string color_error;
     std::string color_success;

@@ -94,6 +94,17 @@ class Repository
     void gc();
 
     /**
+     * Removes old index files. Keeps all index files from within the past week,
+     * one file per week for the last month and one file per month for older files.
+     */
+    int deleteOldIndexFiles(std::string backupName, bool dryRun = false);
+
+    /**
+     * 'prune' command. Deletes old index files.
+     */
+    void prune();
+
+    /**
      * Perform operations on the backup history.
      * --list: List available backup sets
      * --keep: Delete excessive backup sets

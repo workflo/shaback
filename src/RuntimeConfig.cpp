@@ -131,9 +131,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
         {"details", no_argument, 0, 'D'},
         {"keep", required_argument, 0, 'k'},
         {"1", no_argument, 0, '1'},
+        {"dry-run", no_argument, 0, 'R'},
         { 0, 0, 0, 0 } };
 
-    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D1", long_options, &option_index);
+    int c = getopt_long(argc, argv, "c:dvtr:fp:n:hE:C:F:i:WLSoOqGgaQlk:D1R", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -241,6 +242,10 @@ void RuntimeConfig::parseCommandlineArgs(int argc, char** argv)
 
       case '1':
         number = 1;
+        break;
+
+      case 'R':
+        dryRun = true;
         break;
 
       default:

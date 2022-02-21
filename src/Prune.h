@@ -16,43 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ShabackConfig.h"
-#if !defined(SHABACK_BackupRun_H)
-#define SHABACK_BackupRun_H
+#ifndef SHABACK_Prune_H
+#define SHABACK_Prune_H
 
 #include <string>
-#include <stdint.h>
+#include <set>
 #include "Repository.h"
 #include "lib/File.h"
 #include "lib/Exception.h"
 
-class BackupRun
+class Prune
 {
   public:
-    BackupRun(RuntimeConfig& config, Repository& Repository);
-    ~BackupRun();
+    Prune(RuntimeConfig& config, Repository& Repository);
+    ~Prune();
 
-    int run();
-    void showTotals();
-    void reportError(Exception& ex);
-    void reportError(std::string message);
-
-    intmax_t numBytesRead;
-    intmax_t numBytesStored;
-    int numFilesRead;
-    int numFilesStored;
-    int numErrors;
+    void run();
+    // void showTotals();
 
   protected:
-    void handleDirectory(File& dir, bool skipChildren = false);
-    void handleFile(File& dir);
-    void handleSymlink(File& dir);
 
-    void openDirectoryFile();
-    
     Repository& repository;
     RuntimeConfig& config;
-    ShabackOutputStream directoryFileStream;
+    int numErrors;
+    int filesDeleted;
 };
 
-#endif // SHABACK_BackupRun_H
+#endif // SHABACK_Prune_H

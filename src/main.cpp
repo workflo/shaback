@@ -98,6 +98,20 @@ void showUsage(string& op)
   } else if (op == "gc") {
     printf("usage: shaback gc [<general_options>] [-p <pw> | --password=<pw>]\n\n");
     printf("\tPerforms a garbage collection to delete unused files from the repository.\n\n");
+  } else if (op == "prune") {
+    printf("usage: shaback prune [<general_options>] [-n <name> | --name <name>]\n"
+      "                      [-a | --all]\n"
+      "                      [-R | --dry-run]\n\n"
+      "\tDeletes old index files for a certain or all backup sets according\n"
+      "\tto the deletion rules defined by setKeepOldBackupsBoundaries().\n\n"
+      "Options:\n"
+      "\t-n <name>, --name=<name>\n"
+      "\t    Specifies the backup set's name. The name will be reflected as the index\n"
+      "\t    file's name prefix.\n"
+      "\t-a, --all\n"
+      "\t    Prune all backup sets, not just the named one.\n"
+      "\t-R, --dry-run\n"
+      "\t    Do not actually delete anything, just print out what would be deleted.\n\n");
   } else if (op == "history") {
     printf("usage: shaback history [<general_options>] [-n <name> | --name <name>]\n"
       "                      [-l | --list] [-k <num> | --keep=<num>]\n"
@@ -168,6 +182,7 @@ void showUsage(string& op)
     printf("Valid commands are:\n");
     printf("   backup        Backup a set of files or directories.\n");
     printf("   gc            Garbage collection: Delete unused files from archive.\n");
+    printf("   prune         Remove index files according to deletion rules.\n");
     printf("   history       View / maintain backup history.\n");
     printf("   init          Create a new repository.\n");
     printf("   restore       Restore files from repository.\n");
@@ -250,6 +265,8 @@ int main(int argc, char** argv)
           shaback.repository.show();
         } else if (config.operation == "gc") {
           shaback.repository.gc();
+        } else if (config.operation == "prune") {
+          shaback.repository.prune();
         } else if (config.operation == "history") {
           shaback.repository.history();
         } else if (config.operation == "migrate") {
