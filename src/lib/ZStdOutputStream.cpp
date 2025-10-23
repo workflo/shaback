@@ -64,7 +64,7 @@ void ZStdOutputStream::write(int b)
 
 void ZStdOutputStream::write(const char* b, int len)
 {
-  ZSTD_inBuffer input = { b, len, 0 };
+  ZSTD_inBuffer input = { b, static_cast<size_t>(len), 0 };
   
   while (input.pos < input.size) {
     outBuffer.pos = 0;

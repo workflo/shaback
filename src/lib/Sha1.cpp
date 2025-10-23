@@ -16,6 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Suppress OpenSSL 3.0 deprecation warnings for SHA1_* functions
+// These functions are deprecated but we maintain compatibility with older OpenSSL versions
+// and provide a fallback implementation when OpenSSL is not available
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include <iostream>
 #include <stdlib.h>
 #include "Sha1.h"
@@ -74,6 +82,9 @@ void Sha1::finalize()
   hexStr = hexChars;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 
 
