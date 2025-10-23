@@ -71,7 +71,7 @@ int ZStdInputStream::read(char* b, int len)
     inBuffer.size = read;
   }
 
-  ZSTD_outBuffer output = { b, len, 0 };
+  ZSTD_outBuffer output = { b, static_cast<size_t>(len), 0 };
 
   while (inBuffer.pos < inBuffer.size && output.pos < output.size) {
     size_t ret = ZSTD_decompressStream(zipStream, &output, &inBuffer);

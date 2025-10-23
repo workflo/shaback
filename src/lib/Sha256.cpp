@@ -16,6 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Suppress OpenSSL 3.0 deprecation warnings for SHA256_* functions
+// These functions are deprecated but we maintain compatibility with older OpenSSL versions
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include <iostream>
 #include <stdlib.h>
 #include "Sha256.h"
@@ -81,4 +88,9 @@ void Sha256::finalize()
 
   hexStr = hexChars;
 }
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
 #endif

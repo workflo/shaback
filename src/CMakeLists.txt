@@ -1,10 +1,11 @@
-project(shaback)
+cmake_minimum_required(VERSION 3.5...3.28)
+
+project(shaback VERSION 1.33 LANGUAGES C CXX)
+
 set (SHABACK_VERSION_MAJOR 1)
 set (SHABACK_VERSION_MINOR 33)
 set (CMAKE_MODULE_PATH CMakeModules)
 set (CMAKE_VERBOSE_MAKEFILE true)
-
-cmake_minimum_required(VERSION 2.8)
 find_package(ZLIB QUIET)
 find_package(BZip2 REQUIRED)
 find_package(Lzma QUIET)
