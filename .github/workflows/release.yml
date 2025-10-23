@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake \
+          g++ \
+          libssl-dev \
+          libz-dev \
+          liblua5.1-dev \
+          libbz2-dev \
+          liblzma-dev \
+          libgdbm-dev \
+          libzstd-dev
+
+    - name: Build binary
+      working-directory: ${{ github.workspace }}/src
+      run: |
+        cmake . -DCMAKE_BUILD_TYPE=Release
+        make -j$(nproc)
+
+    - name: Create tarball
+      run: |
+        tar -czf shaback-${{ github.ref_name }}-linux-x86_64.tar.gz -C src shaback
+        tar -czf shaback-${{ github.ref_name }}-source.tar.gz \
+          --exclude='.git' \
+          --exclude='*.o' \
+          --exclude='CMakeCache.txt' \
+          --exclude='CMakeFiles' \
+          .
+
+    - name: Generate checksums
+      run: |
+        sha256sum shaback-*.tar.gz > SHA256SUMS
+
+    - name: Extract release notes
+      id: extract_notes
+      run: |
+        echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+        echo "## Shaback ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "### Changes" >> $GITHUB_OUTPUT
+        echo "See commit history for detailed changes." >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "### Installation" >> $GITHUB_OUTPUT
+        echo "\`\`\`bash" >> $GITHUB_OUTPUT
+        echo "# Download and extract" >> $GITHUB_OUTPUT
+        echo "tar -xzf shaback-${{ github.ref_name }}-linux-x86_64.tar.gz" >> $GITHUB_OUTPUT
+        echo "sudo cp shaback /usr/local/bin/" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "# Or use Docker" >> $GITHUB_OUTPUT
+        echo "docker pull flockerdub/shaback:${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        echo "\`\`\`" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: ${{ steps.extract_notes.outputs.RELEASE_NOTES }}
+        files: |
+          shaback-*.tar.gz
+          SHA256SUMS
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

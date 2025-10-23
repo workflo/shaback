@@ -1,5 +1,10 @@
 # Welcome to shaback
 
+![CI](https://github.com/workflo/shaback/workflows/CI/badge.svg)
+![Docker Build](https://github.com/workflo/shaback/workflows/Docker%20Build/badge.svg)
+[![Docker Hub](https://img.shields.io/docker/pulls/flockerdub/shaback.svg)](https://hub.docker.com/r/flockerdub/shaback)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+
 ## Incremental full backups with global de-duplication.
 
 > As the old admin says: "Backup is not the problem, recovery is."
